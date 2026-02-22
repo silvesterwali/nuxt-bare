@@ -6,7 +6,10 @@ export default defineProtectedHandler({ roles: ["admin"] }, async (event) => {
 
   // Prevent admin from deactivating themselves
   if (id === session!.user!.id) {
-    throw createError({ statusCode: 400, statusMessage: "Cannot toggle your own account status" });
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Cannot toggle your own account status",
+    });
   }
 
   const updatedUser = await toggleUserActive(id);

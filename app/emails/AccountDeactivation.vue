@@ -10,7 +10,10 @@ defineProps<{
     <EHead />
     <EBody style="background-color: #ffffff; font-family: Arial, sans-serif">
       <EContainer style="margin: 0 auto; padding: 20px; max-width: 600px">
-        <EHeading as="h2" style="color: #ef4444; margin-bottom: 20px; text-align: center">
+        <EHeading
+          as="h2"
+          style="color: #ef4444; margin-bottom: 20px; text-align: center"
+        >
           Account Deactivated
         </EHeading>
         <EText

@@ -20,7 +20,8 @@ export default defineEventHandler(async (event) => {
   } catch (error) {
     throw createError({
       statusCode: 400,
-      statusMessage: error instanceof Error ? error.message : "Invalid user data",
+      statusMessage:
+        error instanceof Error ? error.message : "Invalid user data",
     });
   }
 });

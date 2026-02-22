@@ -71,7 +71,9 @@ export async function processImage(
   }
 
   // Convert to WebP for better compression
-  const processedBuffer = await image.webp({ quality: config.quality || 85 }).toBuffer();
+  const processedBuffer = await image
+    .webp({ quality: config.quality || 85 })
+    .toBuffer();
 
   const finalMetadata = await sharp(processedBuffer).metadata();
 
@@ -82,7 +84,10 @@ export async function processImage(
   };
 }
 
-export async function saveFile(buffer: Buffer, filename: string): Promise<string> {
+export async function saveFile(
+  buffer: Buffer,
+  filename: string,
+): Promise<string> {
   const filePath = getMediaPath(filename);
 
   return new Promise((resolve, reject) => {
@@ -117,7 +122,10 @@ export async function createMediaRecord(data: {
     .returning();
 
   if (result.length === 0) {
-    throw createError({ statusCode: 500, statusMessage: "Failed to create media record" });
+    throw createError({
+      statusCode: 500,
+      statusMessage: "Failed to create media record",
+    });
   }
 
   return result[0];

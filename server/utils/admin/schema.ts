@@ -13,11 +13,15 @@ export const adminUserQuerySchema = z.object({
   role: z.enum(["admin", "user"]).optional(),
   isActive: z
     .string()
-    .transform((val) => (val === "true" ? true : val === "false" ? false : undefined))
+    .transform((val) =>
+      val === "true" ? true : val === "false" ? false : undefined,
+    )
     .optional(),
   emailVerified: z
     .string()
-    .transform((val) => (val === "true" ? true : val === "false" ? false : undefined))
+    .transform((val) =>
+      val === "true" ? true : val === "false" ? false : undefined,
+    )
     .optional(),
   page: z.coerce.number().int().positive().optional(),
   limit: z.coerce.number().int().positive().optional(),

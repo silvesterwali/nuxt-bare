@@ -10,12 +10,19 @@ export function validatePaginationParams(query: Record<string, any>): {
   const defaultLimit = PAGINATION_CONFIG.defaultPerPage || 20;
   const maxLimit = PAGINATION_CONFIG.maxPerPage || 100;
 
-  const limit = Math.min(maxLimit, Math.max(1, parseInt(query.limit as string) || defaultLimit));
+  const limit = Math.min(
+    maxLimit,
+    Math.max(1, parseInt(query.limit as string) || defaultLimit),
+  );
 
   return { page, limit };
 }
 
-export function calculatePagination(totalCount: number, page: number, limit: number) {
+export function calculatePagination(
+  totalCount: number,
+  page: number,
+  limit: number,
+) {
   const totalPages = Math.ceil(totalCount / limit);
   const hasNextPage = page < totalPages;
   const hasPreviousPage = page > 1;
@@ -62,11 +69,16 @@ export async function getPaginatedResults<T>(
   const offset = (page - 1) * limit;
 
   // Execute both queries in parallel
-  const [data, countResult] = await Promise.all([query.limit(limit).offset(offset), countQuery]);
+  const [data, countResult] = await Promise.all([
+    query.limit(limit).offset(offset),
+    countQuery,
+  ]);
 
   // Extract count value from the result
   const totalCount =
-    Array.isArray(countResult) && countResult.length > 0 ? countResult[0].count : 0;
+    Array.isArray(countResult) && countResult.length > 0
+      ? countResult[0].count
+      : 0;
 
   return { data, totalCount };
 }

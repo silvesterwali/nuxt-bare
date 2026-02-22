@@ -9,7 +9,13 @@
  */
 
 import { execSync } from "node:child_process";
-import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -50,7 +56,10 @@ const VERSION_MAP: Record<string, string> = {
   "editor-toolbar": "v4.3+",
 };
 
-function parseYamlFrontmatter(content: string): { frontmatter: Record<string, any>; body: string } {
+function parseYamlFrontmatter(content: string): {
+  frontmatter: Record<string, any>;
+  body: string;
+} {
   const match = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
   if (!match) return { frontmatter: {}, body: content };
 
@@ -76,7 +85,11 @@ function parseYamlFrontmatter(content: string): { frontmatter: Record<string, an
   return { frontmatter, body: match[2] };
 }
 
-function generateComponentFile(name: string, meta: ComponentMeta, body: string): string {
+function generateComponentFile(
+  name: string,
+  meta: ComponentMeta,
+  body: string,
+): string {
   const lines: string[] = [];
   const displayName = name
     .split("-")
@@ -99,7 +112,9 @@ function generateComponentFile(name: string, meta: ComponentMeta, body: string):
     lines.push("## Key Props");
     lines.push("");
     const uniqueProps = [
-      ...new Set(propMentions.map((m) => m.match(/`(\w+)`/)?.[1]).filter(Boolean)),
+      ...new Set(
+        propMentions.map((m) => m.match(/`(\w+)`/)?.[1]).filter(Boolean),
+      ),
     ];
     for (const prop of uniqueProps.slice(0, 10)) {
       // Find the description after the prop mention
@@ -167,12 +182,20 @@ async function main() {
   rmSync(TMP_DIR, { recursive: true, force: true });
   console.log("Cloning nuxt/ui (sparse checkout)...");
   try {
-    execSync(`git clone --depth 1 --filter=blob:none --sparse ${REPO_URL} ${TMP_DIR}`, {
+    execSync(
+      `git clone --depth 1 --filter=blob:none --sparse ${REPO_URL} ${TMP_DIR}`,
+      {
+        stdio: "inherit",
+      },
+    );
+    execSync(`git sparse-checkout set ${DOCS_PATH}`, {
+      cwd: TMP_DIR,
       stdio: "inherit",
     });
-    execSync(`git sparse-checkout set ${DOCS_PATH}`, { cwd: TMP_DIR, stdio: "inherit" });
   } catch {
-    console.error(`\nFailed to clone ${REPO_URL}. Check network/GitHub status.`);
+    console.error(
+      `\nFailed to clone ${REPO_URL}. Check network/GitHub status.`,
+    );
     process.exit(1);
   }
 
@@ -182,7 +205,9 @@ async function main() {
 
   console.log("Generating Nuxt UI component docs...");
 
-  const files = readdirSync(NUXT_UI_DOCS).filter((f) => f.endsWith(".md") && f !== "0.index.md");
+  const files = readdirSync(NUXT_UI_DOCS).filter(
+    (f) => f.endsWith(".md") && f !== "0.index.md",
+  );
   const components: ComponentMeta[] = [];
 
   for (const file of files) {
@@ -213,7 +238,9 @@ async function main() {
     "> Auto-generated from Nuxt UI docs. Run `npx tsx skills/nuxt-ui/scripts/generate-components.ts` to update.",
   );
   index.push("");
-  index.push("> **For headless primitives (API, accessibility):** see `reka-ui` skill");
+  index.push(
+    "> **For headless primitives (API, accessibility):** see `reka-ui` skill",
+  );
   index.push("");
 
   // Group by category
@@ -245,17 +272,25 @@ async function main() {
     return { maxComp, maxDesc };
   }
 
-  for (const [cat, comps] of Object.entries(byCategory).sort((a, b) => a[0].localeCompare(b[0]))) {
+  for (const [cat, comps] of Object.entries(byCategory).sort((a, b) =>
+    a[0].localeCompare(b[0]),
+  )) {
     index.push(`## ${cat}`);
     index.push("");
     const hasVersionCol = cat === "Other";
     const { maxComp, maxDesc } = getMaxLengths(comps, hasVersionCol);
 
     if (hasVersionCol) {
-      index.push(`| ${"Component".padEnd(maxComp)} | ${"Description".padEnd(maxDesc)} | Version |`);
-      index.push(`| ${"-".repeat(maxComp)} | ${"-".repeat(maxDesc)} | ------- |`);
+      index.push(
+        `| ${"Component".padEnd(maxComp)} | ${"Description".padEnd(maxDesc)} | Version |`,
+      );
+      index.push(
+        `| ${"-".repeat(maxComp)} | ${"-".repeat(maxDesc)} | ------- |`,
+      );
     } else {
-      index.push(`| ${"Component".padEnd(maxComp)} | ${"Description".padEnd(maxDesc)} |`);
+      index.push(
+        `| ${"Component".padEnd(maxComp)} | ${"Description".padEnd(maxDesc)} |`,
+      );
       index.push(`| ${"-".repeat(maxComp)} | ${"-".repeat(maxDesc)} |`);
     }
 
@@ -266,12 +301,16 @@ async function main() {
         .join("");
       const link = `[${displayName}](components/${comp.name}.md)`;
       if (hasVersionCol) {
-        const desc = comp.version ? `${comp.description} (${comp.version})` : comp.description;
+        const desc = comp.version
+          ? `${comp.description} (${comp.version})`
+          : comp.description;
         index.push(
           `| ${link.padEnd(maxComp)} | ${desc.padEnd(maxDesc)} | ${(comp.version || "").padEnd(7)} |`,
         );
       } else {
-        const desc = comp.version ? `${comp.description} (${comp.version})` : comp.description;
+        const desc = comp.version
+          ? `${comp.description} (${comp.version})`
+          : comp.description;
         index.push(`| ${link.padEnd(maxComp)} | ${desc.padEnd(maxDesc)} |`);
       }
     }

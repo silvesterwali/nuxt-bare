@@ -45,7 +45,10 @@ export const authService = {
     });
 
     // Create token for verification
-    const verificationToken = await tokenRepository.create(newUser.id, "email_verification");
+    const verificationToken = await tokenRepository.create(
+      newUser.id,
+      "email_verification",
+    );
 
     // TODO: Send verification email (Domain Event could be dispatched here)
 
@@ -61,7 +64,10 @@ export const authService = {
       });
     }
 
-    const isValid = await passwordService.verify(credentials.password, user.password);
+    const isValid = await passwordService.verify(
+      credentials.password,
+      user.password,
+    );
     if (!isValid) {
       throw createError({
         statusCode: 401,
@@ -94,7 +100,10 @@ export const authService = {
   },
 
   async resetPassword(tokenString: string, newPassword: string) {
-    const tokenRecord = await tokenRepository.findByToken(tokenString, "password_reset");
+    const tokenRecord = await tokenRepository.findByToken(
+      tokenString,
+      "password_reset",
+    );
 
     if (!tokenRecord) {
       throw createError({
@@ -116,7 +125,10 @@ export const authService = {
   },
 
   async verifyEmail(tokenString: string) {
-    const tokenRecord = await tokenRepository.findByToken(tokenString, "email_verification");
+    const tokenRecord = await tokenRepository.findByToken(
+      tokenString,
+      "email_verification",
+    );
 
     if (!tokenRecord) {
       throw createError({

@@ -19,7 +19,11 @@ async function verifyEmail() {
       method: "POST",
       body: { token },
     });
-    toast.add({ title: "Success", description: "Email verified successfully", color: "success" });
+    toast.add({
+      title: "Success",
+      description: "Email verified successfully",
+      color: "success",
+    });
     setTimeout(() => {
       router.push("/login");
     }, 2000);
@@ -49,16 +53,28 @@ onMounted(() => {
       </div>
 
       <div v-else-if="error" class="text-center py-8">
-        <UIcon name="i-lucide-x-circle" class="w-12 h-12 text-red-500 mx-auto mb-4" />
-        <h2 class="text-xl font-semibold text-red-600 mb-2">Verification Failed</h2>
+        <UIcon
+          name="i-lucide-x-circle"
+          class="w-12 h-12 text-red-500 mx-auto mb-4"
+        />
+        <h2 class="text-xl font-semibold text-red-600 mb-2">
+          Verification Failed
+        </h2>
         <p class="text-gray-600 dark:text-gray-400 mb-6">{{ error }}</p>
         <UButton to="/login" color="gray" block>Back to Login</UButton>
       </div>
 
       <div v-else class="text-center py-8">
-        <UIcon name="i-lucide-check-circle" class="w-12 h-12 text-green-500 mx-auto mb-4" />
-        <h2 class="text-xl font-semibold text-green-600 mb-2">Email Verified!</h2>
-        <p class="text-gray-600 dark:text-gray-400 mb-6">Redirecting you to login...</p>
+        <UIcon
+          name="i-lucide-check-circle"
+          class="w-12 h-12 text-green-500 mx-auto mb-4"
+        />
+        <h2 class="text-xl font-semibold text-green-600 mb-2">
+          Email Verified!
+        </h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">
+          Redirecting you to login...
+        </p>
         <UButton to="/login" color="primary" block>Go to Login</UButton>
       </div>
     </UCard>

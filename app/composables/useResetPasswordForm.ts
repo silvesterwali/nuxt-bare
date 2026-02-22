@@ -26,7 +26,11 @@ export const useResetPasswordForm = () => {
 
   async function onSubmit(event: FormSubmitEvent<Schema>) {
     if (!token.value) {
-      toast.add({ title: "Error", description: "Invalid or missing token", color: "error" });
+      toast.add({
+        title: "Error",
+        description: "Invalid or missing token",
+        color: "error",
+      });
       return;
     }
 

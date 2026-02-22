@@ -16,7 +16,10 @@ export default defineEventHandler(async (event) => {
   // Require authentication
   const session = await getUserSession(event);
   if (!session?.user?.id) {
-    throw createError({ statusCode: 401, statusMessage: "Authentication required" });
+    throw createError({
+      statusCode: 401,
+      statusMessage: "Authentication required",
+    });
   }
 
   const body = await useValidatedBody(event, updateProfileSchema);

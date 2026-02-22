@@ -11,7 +11,10 @@ defineProps<{
     <EHead />
     <EBody style="background-color: #ffffff; font-family: Arial, sans-serif">
       <EContainer style="margin: 0 auto; padding: 20px; max-width: 600px">
-        <EHeading as="h2" style="color: #333; margin-bottom: 20px; text-align: center">
+        <EHeading
+          as="h2"
+          style="color: #333; margin-bottom: 20px; text-align: center"
+        >
           Welcome to {{ appName }}, {{ firstName }}!
         </EHeading>
         <EText

@@ -13,7 +13,11 @@ export const userRepository = {
   },
 
   async findById(id: number) {
-    const users = await db.select().from(schema.users).where(eq(schema.users.id, id)).limit(1);
+    const users = await db
+      .select()
+      .from(schema.users)
+      .where(eq(schema.users.id, id))
+      .limit(1);
 
     // Add logic to fetch profile? Or leave it to separate call?
     // Let's implement separate call for profile to be clean.
@@ -57,13 +61,21 @@ export const userRepository = {
         },
       })
       .from(schema.users)
-      .leftJoin(schema.userProfiles, eq(schema.users.id, schema.userProfiles.userId))
+      .leftJoin(
+        schema.userProfiles,
+        eq(schema.users.id, schema.userProfiles.userId),
+      )
       .where(eq(schema.users.id, id))
       .limit(1);
     return users[0] || null;
   },
 
-  async create(data: { name: string; email: string; password?: string; role?: UserRole }) {
+  async create(data: {
+    name: string;
+    email: string;
+    password?: string;
+    role?: UserRole;
+  }) {
     const result = await db
       .insert(schema.users)
       .values({
@@ -89,7 +101,9 @@ export const userRepository = {
   },
 
   async count() {
-    const result = await db.select({ count: sql<number>`count(*)` }).from(schema.users);
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(schema.users);
     return result[0]?.count;
   },
 
@@ -104,7 +118,10 @@ export const userRepository = {
     return result[0];
   },
 
-  async updateProfile(userId: number, data: Partial<typeof schema.userProfiles.$inferInsert>) {
+  async updateProfile(
+    userId: number,
+    data: Partial<typeof schema.userProfiles.$inferInsert>,
+  ) {
     const result = await db
       .update(schema.userProfiles)
       .set({ ...data, updatedAt: new Date() })

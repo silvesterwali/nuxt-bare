@@ -10,7 +10,10 @@ export default defineEventHandler(async (event) => {
   const clientIP = getClientIP(event);
 
   // Rate limiting
-  await checkRateLimit(`password-reset:${clientIP}`, RATE_LIMITS.PASSWORD_RESET);
+  await checkRateLimit(
+    `password-reset:${clientIP}`,
+    RATE_LIMITS.PASSWORD_RESET,
+  );
 
   const body = await useValidatedBody(event, resetRequestSchema); // Note: Missing semicolon in original
 

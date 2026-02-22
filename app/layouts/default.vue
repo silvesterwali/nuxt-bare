@@ -37,7 +37,8 @@ const isDark = computed({
     return useColorMode().value === "dark";
   },
   set() {
-    useColorMode().preference = useColorMode().value === "dark" ? "light" : "dark";
+    useColorMode().preference =
+      useColorMode().value === "dark" ? "light" : "dark";
   },
 });
 </script>
@@ -47,7 +48,9 @@ const isDark = computed({
     <header
       class="border-b border-gray-200 dark:border-gray-800 bg-white/75 dark:bg-gray-900/75 backdrop-blur sticky top-0 z-50"
     >
-      <div class="container mx-auto px-4 h-16 flex items-center justify-between">
+      <div
+        class="container mx-auto px-4 h-16 flex items-center justify-between"
+      >
         <div class="flex items-center gap-8">
           <NuxtLink to="/" class="flex items-center gap-2">
             <AppLogo class="h-6 w-auto text-primary-500" />
@@ -78,7 +81,11 @@ const isDark = computed({
               :items="[
                 { label: user.email, slot: 'account', disabled: true },
                 { label: 'Profile', to: '/profile', icon: 'i-lucide-user' },
-                { label: 'Settings', to: '/profile', icon: 'i-lucide-settings' },
+                {
+                  label: 'Settings',
+                  to: '/profile',
+                  icon: 'i-lucide-settings',
+                },
                 { separator: true },
                 { label: 'Logout', icon: 'i-lucide-log-out', onSelect: logout },
               ]"
@@ -93,13 +100,20 @@ const isDark = computed({
               <template #account-item="{ item }">
                 <div class="text-left">
                   <p>Signed in as</p>
-                  <p class="truncate font-medium text-gray-900 dark:text-white">{{ item.label }}</p>
+                  <p class="truncate font-medium text-gray-900 dark:text-white">
+                    {{ item.label }}
+                  </p>
                 </div>
               </template>
             </UDropdownMenu>
           </template>
           <template v-else>
-            <UButton to="/login" label="Sign In" variant="ghost" color="neutral" />
+            <UButton
+              to="/login"
+              label="Sign In"
+              variant="ghost"
+              color="neutral"
+            />
             <UButton to="/register" label="Sign Up" color="primary" />
           </template>
         </div>

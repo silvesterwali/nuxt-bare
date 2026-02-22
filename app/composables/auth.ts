@@ -12,7 +12,11 @@ export const useAuth = () => {
         body: payload,
       });
       await refreshSession();
-      toast.add({ title: "Success", description: "Logged in successfully", color: "success" });
+      toast.add({
+        title: "Success",
+        description: "Logged in successfully",
+        color: "success",
+      });
       router.push("/profile");
     } catch (err: any) {
       const msg = err.data?.message || "Login failed";
@@ -52,7 +56,11 @@ export const useAuth = () => {
         method: "POST",
         body: payload,
       });
-      toast.add({ title: "Success", description: "Password reset successfully", color: "success" });
+      toast.add({
+        title: "Success",
+        description: "Password reset successfully",
+        color: "success",
+      });
       router.push("/login");
     } catch (err: any) {
       const msg = err.data?.message || "Failed to reset password";
@@ -71,7 +79,11 @@ export const useAuth = () => {
         body: payload,
       });
       await refreshSession();
-      toast.add({ title: "Success", description: "Profile updated", color: "success" });
+      toast.add({
+        title: "Success",
+        description: "Profile updated",
+        color: "success",
+      });
     } catch (err: any) {
       const msg = err.data?.message || "Failed to update profile";
       toast.add({ title: "Error", description: msg, color: "error" });
@@ -89,7 +101,11 @@ export const useAuth = () => {
         method: "PUT",
         body: payload,
       });
-      toast.add({ title: "Success", description: "Password changed", color: "success" });
+      toast.add({
+        title: "Success",
+        description: "Password changed",
+        color: "success",
+      });
     } catch (err: any) {
       const msg = err.data?.message || "Failed to change password";
       toast.add({ title: "Error", description: msg, color: "error" });

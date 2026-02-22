@@ -98,7 +98,10 @@ const { data, error } = await useAsyncData("user", () => {
 ```vue
 <script setup lang="ts">
 const { data } = await useAsyncData("cart", async () => {
-  const [coupons, offers] = await Promise.all([$fetch("/api/coupons"), $fetch("/api/offers")]);
+  const [coupons, offers] = await Promise.all([
+    $fetch("/api/coupons"),
+    $fetch("/api/offers"),
+  ]);
   return { coupons, offers };
 });
 </script>

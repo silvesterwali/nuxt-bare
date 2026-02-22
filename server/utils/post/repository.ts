@@ -25,7 +25,12 @@ export const postRepository = {
     return posts;
   },
 
-  async create(data: { title: string; content: string; userId: number; published?: boolean }) {
+  async create(data: {
+    title: string;
+    content: string;
+    userId: number;
+    published?: boolean;
+  }) {
     const result = await db
       .insert(schema.posts)
       .values({

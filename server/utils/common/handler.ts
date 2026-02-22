@@ -22,7 +22,10 @@ export function defineProtectedHandler<T extends EventHandlerRequest, D>(
   arg1: EventHandler<T, D> | ProtectedHandlerOptions,
   arg2?: EventHandler<T, D>,
 ): EventHandler<T, D> {
-  const handler = (typeof arg1 === "function" ? arg1 : arg2) as EventHandler<T, D>;
+  const handler = (typeof arg1 === "function" ? arg1 : arg2) as EventHandler<
+    T,
+    D
+  >;
   const options = (
     typeof arg1 === "object" && arg1 !== null ? arg1 : {}
   ) as ProtectedHandlerOptions;
@@ -31,13 +34,19 @@ export function defineProtectedHandler<T extends EventHandlerRequest, D>(
     // Require authentication
     const session = await getUserSession(event);
     if (!session?.user?.id) {
-      throw createError({ statusCode: 401, statusMessage: "Authentication required" });
+      throw createError({
+        statusCode: 401,
+        statusMessage: "Authentication required",
+      });
     }
 
     // Check roles
     if (options.roles?.length) {
       if (!options.roles.includes(session.user.role)) {
-        throw createError({ statusCode: 403, statusMessage: "Insufficient permissions" });
+        throw createError({
+          statusCode: 403,
+          statusMessage: "Insufficient permissions",
+        });
       }
     }
     return handler(event);

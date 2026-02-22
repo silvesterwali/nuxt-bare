@@ -10,7 +10,10 @@ const BodySchema = z.object({
 
 export default defineEventHandler(async (event) => {
   try {
-    const { title, content, userId, published } = await useValidatedBody(event, BodySchema);
+    const { title, content, userId, published } = await useValidatedBody(
+      event,
+      BodySchema,
+    );
 
     // Using PostRepository
     const newPost = await postRepository.create({
@@ -24,7 +27,8 @@ export default defineEventHandler(async (event) => {
   } catch (error) {
     throw createError({
       statusCode: 400,
-      statusMessage: error instanceof Error ? error.message : "Invalid post data",
+      statusMessage:
+        error instanceof Error ? error.message : "Invalid post data",
     });
   }
 });

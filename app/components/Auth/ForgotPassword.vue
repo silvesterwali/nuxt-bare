@@ -21,7 +21,11 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   try {
     await requestPasswordReset(event.data);
     success.value = true;
-    toast.add({ title: "Success", description: "Reset link sent to your email", color: "success" });
+    toast.add({
+      title: "Success",
+      description: "Reset link sent to your email",
+      color: "success",
+    });
   } catch (err: any) {
     // Handled in composable
   }
@@ -29,7 +33,9 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950">
+  <div
+    class="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950"
+  >
     <AuthForm
       title="Forgot Password"
       description="Enter your email address to reset your password."
@@ -37,14 +43,25 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       :schema="schema"
       :state="state"
       :loading="loading"
-      :submit-button="{ label: 'Send Reset Link', trailingIcon: 'i-lucide-send' }"
+      :submit-button="{
+        label: 'Send Reset Link',
+        trailingIcon: 'i-lucide-send',
+      }"
       @submit="onSubmit"
     >
       <template #fields>
         <template v-if="success">
           <div class="text-center space-y-4 mb-4">
-            <p class="text-green-600 font-medium">Reset link sent to your email!</p>
-            <UButton to="/login" label="Return to Login" block variant="outline" color="gray" />
+            <p class="text-green-600 font-medium">
+              Reset link sent to your email!
+            </p>
+            <UButton
+              to="/login"
+              label="Return to Login"
+              block
+              variant="outline"
+              color="gray"
+            />
           </div>
         </template>
         <template v-else>

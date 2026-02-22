@@ -38,7 +38,11 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   try {
     await updateProfile(event.data);
     await refresh();
-    toast.add({ title: "Success", description: "Profile updated successfully", color: "success" });
+    toast.add({
+      title: "Success",
+      description: "Profile updated successfully",
+      color: "success",
+    });
   } catch (err: any) {
     const errors = transformToIssue(err);
     if (errors.length) form.value?.setErrors(errors);
@@ -56,7 +60,13 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     </div>
 
     <UCard>
-      <UForm ref="form" :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
+      <UForm
+        ref="form"
+        :schema="schema"
+        :state="state"
+        class="space-y-4"
+        @submit="onSubmit"
+      >
         <div class="grid grid-cols-2 gap-4">
           <UFormField label="First Name" name="firstName">
             <UInput v-model="state.firstName" class="w-full" />

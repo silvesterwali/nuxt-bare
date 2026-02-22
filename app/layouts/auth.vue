@@ -4,7 +4,8 @@ const isDark = computed({
     return useColorMode().value === "dark";
   },
   set() {
-    useColorMode().preference = useColorMode().value === "dark" ? "light" : "dark";
+    useColorMode().preference =
+      useColorMode().value === "dark" ? "light" : "dark";
   },
 });
 </script>

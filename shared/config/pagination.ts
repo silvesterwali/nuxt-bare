@@ -6,9 +6,9 @@ export const PAGINATION_CONFIG = {
 
 export function validatePaginationParams(page?: number, perPage?: number) {
   const validatedPage = Math.max(1, page || 1);
-  const validatedPerPage = (PAGINATION_CONFIG.allowedPerPage as readonly number[]).includes(
-    perPage || PAGINATION_CONFIG.defaultPerPage,
-  )
+  const validatedPerPage = (
+    PAGINATION_CONFIG.allowedPerPage as readonly number[]
+  ).includes(perPage || PAGINATION_CONFIG.defaultPerPage)
     ? perPage || PAGINATION_CONFIG.defaultPerPage
     : PAGINATION_CONFIG.defaultPerPage;
 

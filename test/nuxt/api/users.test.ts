@@ -6,7 +6,10 @@ import {
   validatePaginationParams,
   createPaginationResponse,
 } from "../../../server/utils/common/pagination";
-import { listResponse, jsonResponse } from "../../../server/utils/common/response";
+import {
+  listResponse,
+  jsonResponse,
+} from "../../../server/utils/common/response";
 
 // Mock globals used in API handlers
 vi.stubGlobal("defineEventHandler", defineEventHandler);
@@ -38,8 +41,10 @@ describe("API: /api/users", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     // Dynamic import to allow globals to be stubbed first
-    usersGetHandler = (await import("../../../server/api/users/index.get")).default;
-    usersPostHandler = (await import("../../../server/api/users/index.post")).default;
+    usersGetHandler = (await import("../../../server/api/users/index.get"))
+      .default;
+    usersPostHandler = (await import("../../../server/api/users/index.post"))
+      .default;
   });
 
   // Simple event factory
@@ -54,11 +59,15 @@ describe("API: /api/users", () => {
       node: {
         req: {
           method: options.method || "GET",
-          url: options.query ? `/?${new URLSearchParams(options.query).toString()}` : "/",
+          url: options.query
+            ? `/?${new URLSearchParams(options.query).toString()}`
+            : "/",
         },
       },
       // Basic h3 event properties needed
-      path: options.query ? `/?${new URLSearchParams(options.query).toString()}` : "/",
+      path: options.query
+        ? `/?${new URLSearchParams(options.query).toString()}`
+        : "/",
       method: options.method || "GET",
       // Custom property for our mocked useValidatedBody
       _body: options.body,

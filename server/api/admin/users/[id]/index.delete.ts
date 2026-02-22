@@ -6,7 +6,10 @@ export default defineProtectedHandler({ roles: ["admin"] }, async (event) => {
 
   // Prevent admin from deleting themselves
   if (id === session!.user!.id) {
-    throw createError({ statusCode: 400, statusMessage: "Cannot delete your own account" });
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Cannot delete your own account",
+    });
   }
 
   const deletedUser = await deleteUser(id);

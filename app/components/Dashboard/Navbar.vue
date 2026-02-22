@@ -11,7 +11,8 @@ const isDark = computed({
     return useColorMode().value === "dark";
   },
   set() {
-    useColorMode().preference = useColorMode().value === "dark" ? "light" : "dark";
+    useColorMode().preference =
+      useColorMode().value === "dark" ? "light" : "dark";
   },
 });
 </script>
@@ -28,7 +29,10 @@ const isDark = computed({
           :name="icon"
           class="w-5 h-5 flex-shrink-0 text-gray-500 dark:text-gray-400"
         />
-        <h1 v-if="title" class="truncate font-semibold text-gray-900 dark:text-white">
+        <h1
+          v-if="title"
+          class="truncate font-semibold text-gray-900 dark:text-white"
+        >
           {{ title }}
         </h1>
         <UBadge v-if="badge" :label="badge" variant="subtle" size="xs" />

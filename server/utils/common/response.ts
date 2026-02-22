@@ -3,7 +3,10 @@ import type { StandardSingleResponse, StandardListResponse } from "~/types/db";
 /**
  * Build a standardized single-object response
  */
-export function jsonResponse<T>(data: T, message = ""): StandardSingleResponse<T> {
+export function jsonResponse<T>(
+  data: T,
+  message = "",
+): StandardSingleResponse<T> {
   return { message, data };
 }
 

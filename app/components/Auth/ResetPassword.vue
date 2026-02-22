@@ -5,8 +5,13 @@ const { schema, state, onSubmit, loading, token } = useResetPasswordForm();
 </script>
 
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950">
-    <UCard v-if="!token" class="w-full max-w-sm mx-auto text-center p-6 text-red-500">
+  <div
+    class="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950"
+  >
+    <UCard
+      v-if="!token"
+      class="w-full max-w-sm mx-auto text-center p-6 text-red-500"
+    >
       Invalid or missing reset token.
     </UCard>
 
@@ -18,7 +23,10 @@ const { schema, state, onSubmit, loading, token } = useResetPasswordForm();
       :schema="schema"
       :state="state"
       :loading="loading"
-      :submit-button="{ label: 'Reset Password', trailingIcon: 'i-lucide-check' }"
+      :submit-button="{
+        label: 'Reset Password',
+        trailingIcon: 'i-lucide-check',
+      }"
       @submit="onSubmit"
     >
       <template #fields>

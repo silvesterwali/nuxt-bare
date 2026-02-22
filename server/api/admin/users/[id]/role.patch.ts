@@ -11,7 +11,10 @@ export default defineProtectedHandler({ roles: ["admin"] }, async (event) => {
 
   // Prevent admin from changing their own role
   if (id === session!.user!.id) {
-    throw createError({ statusCode: 400, statusMessage: "Cannot change your own role" });
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Cannot change your own role",
+    });
   }
 
   const body = await useValidatedBody(event, updateRoleSchema);

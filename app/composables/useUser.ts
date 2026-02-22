@@ -45,7 +45,11 @@ export const useUserCreateMutation = () => {
       }),
     onSuccess: () => {
       queryCache.invalidateQueries({ key: ["users"] });
-      toast.add({ title: "Success", description: "User created successfully", color: "success" });
+      toast.add({
+        title: "Success",
+        description: "User created successfully",
+        color: "success",
+      });
     },
     onError: (err: any) => {
       const msg = err.data?.message || "Failed to create user";
@@ -69,7 +73,11 @@ export const useUserUpdateMutation = () => {
       queryCache.invalidateQueries({ key: ["users"] });
       // also invalidate the specific user
       queryCache.invalidateQueries({ key: ["users", id] });
-      toast.add({ title: "Success", description: "User updated successfully", color: "success" });
+      toast.add({
+        title: "Success",
+        description: "User updated successfully",
+        color: "success",
+      });
     },
     onError: (err: any) => {
       const msg = err.data?.message || "Failed to update user";
@@ -90,7 +98,11 @@ export const useUserDeleteMutation = () => {
       }),
     onSuccess: () => {
       queryCache.invalidateQueries({ key: ["users"] });
-      toast.add({ title: "Success", description: "User deleted successfully", color: "success" });
+      toast.add({
+        title: "Success",
+        description: "User deleted successfully",
+        color: "success",
+      });
     },
     onError: (err: any) => {
       const msg = err.data?.message || "Failed to delete user";

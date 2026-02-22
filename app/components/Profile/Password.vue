@@ -37,7 +37,11 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     state.currentPassword = "";
     state.newPassword = "";
     state.confirmPassword = "";
-    toast.add({ title: "Success", description: "Password changed successfully", color: "success" });
+    toast.add({
+      title: "Success",
+      description: "Password changed successfully",
+      color: "success",
+    });
   } catch (err: any) {
     const errors = transformToIssue(err);
     if (errors.length) form.value?.setErrors(errors);
@@ -49,13 +53,25 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   <div class="p-4 max-w-2xl mx-auto">
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-bold">Change Password</h1>
-      <UButton to="/profile" variant="ghost" icon="i-lucide-arrow-left">Back to Profile</UButton>
+      <UButton to="/profile" variant="ghost" icon="i-lucide-arrow-left"
+        >Back to Profile</UButton
+      >
     </div>
 
     <UCard>
-      <UForm ref="form" :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
+      <UForm
+        ref="form"
+        :schema="schema"
+        :state="state"
+        class="space-y-4"
+        @submit="onSubmit"
+      >
         <UFormField label="Current Password" name="currentPassword">
-          <UInput v-model="state.currentPassword" type="password" class="w-full" />
+          <UInput
+            v-model="state.currentPassword"
+            type="password"
+            class="w-full"
+          />
         </UFormField>
 
         <UFormField label="New Password" name="newPassword">
@@ -63,11 +79,20 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         </UFormField>
 
         <UFormField label="Confirm New Password" name="confirmPassword">
-          <UInput v-model="state.confirmPassword" type="password" class="w-full" />
+          <UInput
+            v-model="state.confirmPassword"
+            type="password"
+            class="w-full"
+          />
         </UFormField>
 
         <div class="flex justify-end">
-          <UButton type="submit" label="Update Password" color="neutral" :loading="loading" />
+          <UButton
+            type="submit"
+            label="Update Password"
+            color="neutral"
+            :loading="loading"
+          />
         </div>
       </UForm>
     </UCard>

@@ -23,7 +23,11 @@ const authForm = useTemplateRef("authForm");
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   try {
     await login(event.data);
-    toast.add({ title: "Success", description: "Logged in successfully", color: "success" });
+    toast.add({
+      title: "Success",
+      description: "Logged in successfully",
+      color: "success",
+    });
     navigateTo("/");
   } catch (err: any) {
     const errors = transformToIssue(err);
@@ -33,7 +37,9 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950">
+  <div
+    class="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950"
+  >
     <AuthForm
       ref="authForm"
       title="Login"

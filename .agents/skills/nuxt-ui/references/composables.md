@@ -178,7 +178,11 @@ const { activeId } = useScrollspy({ ids: sections });
 
 <template>
   <nav>
-    <a v-for="id in sections" :href="`#${id}`" :class="{ 'font-bold': activeId === id }">
+    <a
+      v-for="id in sections"
+      :href="`#${id}`"
+      :class="{ 'font-bold': activeId === id }"
+    >
       {{ id }}
     </a>
   </nav>

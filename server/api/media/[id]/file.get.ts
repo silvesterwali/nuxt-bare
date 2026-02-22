@@ -20,7 +20,11 @@ export default defineEventHandler(async (event) => {
     // Set appropriate headers
     setHeader(event, "Content-Type", media.mimeType);
     setHeader(event, "Content-Length", media.size);
-    setHeader(event, "Content-Disposition", `inline; filename="${media.originalName}"`);
+    setHeader(
+      event,
+      "Content-Disposition",
+      `inline; filename="${media.originalName}"`,
+    );
 
     // Cache headers for public media
     if (media.privacy === "public") {

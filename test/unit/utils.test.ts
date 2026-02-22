@@ -9,7 +9,10 @@ import { passwordService } from "../../server/utils/auth/password";
 
 // Mock nuxt-auth-utils functions
 vi.stubGlobal("hashPassword", async (p: string) => `mock-hash:${p}`);
-vi.stubGlobal("verifyPassword", async (h: string, p: string) => h === `mock-hash:${p}`);
+vi.stubGlobal(
+  "verifyPassword",
+  async (h: string, p: string) => h === `mock-hash:${p}`,
+);
 
 describe("pagination utilities", () => {
   it("should validate default params", () => {

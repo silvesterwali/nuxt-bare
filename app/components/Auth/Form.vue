@@ -7,7 +7,12 @@ const props = defineProps<{
   icon?: string;
   align?: "center" | "left" | "right";
   loading?: boolean;
-  providers?: { label: string; icon: string; click: () => void; color?: string }[];
+  providers?: {
+    label: string;
+    icon: string;
+    click: () => void;
+    color?: string;
+  }[];
   submitButton?: { label?: string; trailingIcon?: string; block?: boolean };
   schema?: T;
   state?: any;
@@ -40,11 +45,18 @@ function onSubmit(event: FormSubmitEvent<any>) {
 <template>
   <UCard class="w-full max-w-sm mx-auto">
     <div v-if="icon || title || description" class="text-center mb-6">
-      <UIcon v-if="icon" :name="icon" class="w-8 h-8 mx-auto mb-4 text-primary-500" />
+      <UIcon
+        v-if="icon"
+        :name="icon"
+        class="w-8 h-8 mx-auto mb-4 text-primary-500"
+      />
       <h1 v-if="title" class="text-2xl font-bold text-gray-900 dark:text-white">
         {{ title }}
       </h1>
-      <p v-if="description" class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+      <p
+        v-if="description"
+        class="mt-2 text-sm text-gray-500 dark:text-gray-400"
+      >
         {{ description }}
       </p>
     </div>
@@ -62,7 +74,10 @@ function onSubmit(event: FormSubmitEvent<any>) {
       />
     </div>
 
-    <div v-if="providers?.length && (fields?.length || $slots.default)" class="relative my-6">
+    <div
+      v-if="providers?.length && (fields?.length || $slots.default)"
+      class="relative my-6"
+    >
       <div class="absolute inset-0 flex items-center">
         <div class="w-full border-t border-gray-300 dark:border-gray-700"></div>
       </div>
@@ -112,7 +127,10 @@ function onSubmit(event: FormSubmitEvent<any>) {
       />
     </UForm>
 
-    <div v-if="$slots.footer" class="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+    <div
+      v-if="$slots.footer"
+      class="mt-4 text-center text-sm text-gray-500 dark:text-gray-400"
+    >
       <slot name="footer" />
     </div>
   </UCard>

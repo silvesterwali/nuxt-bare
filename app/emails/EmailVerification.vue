@@ -10,7 +10,10 @@ defineProps<{
     <EHead />
     <EBody style="background-color: #ffffff; font-family: Arial, sans-serif">
       <EContainer style="margin: 0 auto; padding: 20px; max-width: 600px">
-        <EHeading as="h2" style="color: #333; margin-bottom: 20px; text-align: center">
+        <EHeading
+          as="h2"
+          style="color: #333; margin-bottom: 20px; text-align: center"
+        >
           Verify your email address
         </EHeading>
         <EText
@@ -22,7 +25,8 @@ defineProps<{
             text-align: center;
           "
         >
-          Thanks for signing up for {{ appName }}! We're excited to have you as an early user.
+          Thanks for signing up for {{ appName }}! We're excited to have you as
+          an early user.
         </EText>
         <ESection style="text-align: center; margin: 30px 0">
           <EButton
@@ -41,8 +45,16 @@ defineProps<{
             Verify Email
           </EButton>
         </ESection>
-        <EText style="color: #999; font-size: 12px; margin-top: 20px; text-align: center">
-          If you didn't sign up for {{ appName }}, you can safely ignore this email.
+        <EText
+          style="
+            color: #999;
+            font-size: 12px;
+            margin-top: 20px;
+            text-align: center;
+          "
+        >
+          If you didn't sign up for {{ appName }}, you can safely ignore this
+          email.
         </EText>
       </EContainer>
     </EBody>

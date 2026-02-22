@@ -18,7 +18,9 @@ export async function setupTestDb() {
   }
   try {
     console.log("Running migrations...");
-    execSync("pnpm drizzle-kit push --config=drizzle.config.ts --force", { stdio: "inherit" });
+    execSync("pnpm drizzle-kit push --config=drizzle.config.ts --force", {
+      stdio: "inherit",
+    });
     console.log("Migrations done.");
   } catch (e) {
     console.error("Migration failed", e);

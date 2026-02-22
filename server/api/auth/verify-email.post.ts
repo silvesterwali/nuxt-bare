@@ -24,5 +24,8 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  return jsonResponse(undefined, "Email verified successfully! Welcome to the platform.");
+  return jsonResponse(
+    undefined,
+    "Email verified successfully! Welcome to the platform.",
+  );
 });

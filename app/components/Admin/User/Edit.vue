@@ -8,7 +8,8 @@ const route = useRoute();
 const userId = computed(() => route.params.id as string);
 
 const { data: user, isLoading: isFetching } = useUserQuery(userId);
-const { mutateAsync: updateUser, isLoading: isUpdating } = useUserUpdateMutation();
+const { mutateAsync: updateUser, isLoading: isUpdating } =
+  useUserUpdateMutation();
 
 // Reuse schema but password optional for edit
 const schema = z.object({
@@ -61,12 +62,21 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   <div class="p-4 max-w-2xl mx-auto">
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-bold">Edit User</h1>
-      <UButton to="/admin/users" variant="ghost" icon="i-lucide-arrow-left">Back to List</UButton>
+      <UButton to="/admin/users" variant="ghost" icon="i-lucide-arrow-left"
+        >Back to List</UButton
+      >
     </div>
 
     <UCard>
       <div v-if="isFetching && !user">Loading...</div>
-      <UForm ref="form" v-else :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
+      <UForm
+        ref="form"
+        v-else
+        :schema="schema"
+        :state="state"
+        class="space-y-4"
+        @submit="onSubmit"
+      >
         <UFormField label="Email" name="email">
           <UInput v-model="state.email" disabled class="w-full" />
         </UFormField>

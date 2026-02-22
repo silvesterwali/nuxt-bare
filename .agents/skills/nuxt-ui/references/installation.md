@@ -106,7 +106,15 @@ export default defineNuxtConfig({
     fonts: true, // Enable @nuxt/fonts
     colorMode: true, // Enable @nuxtjs/color-mode
     theme: {
-      colors: ["primary", "secondary", "success", "info", "warning", "error", "neutral"],
+      colors: [
+        "primary",
+        "secondary",
+        "success",
+        "info",
+        "warning",
+        "error",
+        "neutral",
+      ],
       transitions: true, // transition-colors on components
       defaultVariants: {
         color: "primary",
@@ -132,7 +140,15 @@ ui({
   colorMode: true,
   inertia: true, // Inertia.js support
   theme: {
-    colors: ["primary", "secondary", "success", "info", "warning", "error", "neutral"],
+    colors: [
+      "primary",
+      "secondary",
+      "success",
+      "info",
+      "warning",
+      "error",
+      "neutral",
+    ],
     transitions: true,
     defaultVariants: { color: "primary", size: "md" },
     prefix: "",

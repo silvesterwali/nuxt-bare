@@ -4,7 +4,10 @@ export interface RateLimitConfig {
   keyPrefix?: string;
 }
 
-export async function checkRateLimit(key: string, config: RateLimitConfig): Promise<void> {
+export async function checkRateLimit(
+  key: string,
+  config: RateLimitConfig,
+): Promise<void> {
   const storage = useStorage("rate-limits");
   const { limit, windowMs, keyPrefix = "rate-limit" } = config;
 

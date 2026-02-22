@@ -53,7 +53,10 @@ async function seed() {
     });
 
     // Insert users
-    const sampleUsers = await db.insert(schema.users).values(usersData).returning();
+    const sampleUsers = await db
+      .insert(schema.users)
+      .values(usersData)
+      .returning();
 
     console.log(`✅ Inserted ${sampleUsers.length} users`);
 

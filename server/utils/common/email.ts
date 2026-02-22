@@ -91,7 +91,10 @@ export async function sendWelcomeEmail(email: string, firstName: string) {
   });
 }
 
-export async function sendAccountDeactivationEmail(email: string, firstName: string) {
+export async function sendAccountDeactivationEmail(
+  email: string,
+  firstName: string,
+) {
   // Render the email template using nuxt-email-renderer
   // @ts-ignore: $render is auto-imported by nuxt-email-renderer
   const html = await renderEmailComponent("AccountDeactivation", {

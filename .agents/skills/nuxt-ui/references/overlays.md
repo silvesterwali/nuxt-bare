@@ -53,16 +53,28 @@ toast.add({
 
 ```ts
 // Success
-toast.add({ title: "Saved", color: "success", icon: "i-heroicons-check-circle" });
+toast.add({
+  title: "Saved",
+  color: "success",
+  icon: "i-heroicons-check-circle",
+});
 
 // Error
 toast.add({ title: "Error", color: "error", icon: "i-heroicons-x-circle" });
 
 // Warning
-toast.add({ title: "Warning", color: "warning", icon: "i-heroicons-exclamation-triangle" });
+toast.add({
+  title: "Warning",
+  color: "warning",
+  icon: "i-heroicons-exclamation-triangle",
+});
 
 // Info
-toast.add({ title: "Info", color: "info", icon: "i-heroicons-information-circle" });
+toast.add({
+  title: "Info",
+  color: "info",
+  icon: "i-heroicons-information-circle",
+});
 
 // Remove toast
 toast.remove("toast-id");
@@ -319,7 +331,12 @@ const groups = [
 </script>
 
 <template>
-  <UCommandPalette v-model:open="isOpen" :groups="groups" placeholder="Search..." size="md" />
+  <UCommandPalette
+    v-model:open="isOpen"
+    :groups="groups"
+    placeholder="Search..."
+    size="md"
+  />
 </template>
 ```
 

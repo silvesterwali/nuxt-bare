@@ -8,7 +8,9 @@ export const users = sqliteTable("users", {
   email: text("email").notNull().unique(),
   password: text("password"), // null for OAuth users
   role: text("role").notNull().default("user"), // user, admin, moderator
-  emailVerified: integer("email_verified", { mode: "boolean" }).notNull().default(false),
+  emailVerified: integer("email_verified", { mode: "boolean" })
+    .notNull()
+    .default(false),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
@@ -137,12 +139,15 @@ export const userTokensRelations = relations(userTokens, ({ one }) => ({
   }),
 }));
 
-export const emailVerificationsRelations = relations(emailVerifications, ({ one }) => ({
-  user: one(users, {
-    fields: [emailVerifications.userId],
-    references: [users.id],
+export const emailVerificationsRelations = relations(
+  emailVerifications,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [emailVerifications.userId],
+      references: [users.id],
+    }),
   }),
-}));
+);
 
 export const postsRelations = relations(posts, ({ one }) => ({
   author: one(users, {

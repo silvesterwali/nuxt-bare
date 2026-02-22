@@ -75,7 +75,10 @@ export async function getUsers(
       },
     })
     .from(schema.users)
-    .leftJoin(schema.userProfiles, eq(schema.users.id, schema.userProfiles.userId))
+    .leftJoin(
+      schema.userProfiles,
+      eq(schema.users.id, schema.userProfiles.userId),
+    )
     .where(whereClause)
     .orderBy(desc(schema.users.createdAt));
 
@@ -83,12 +86,18 @@ export async function getUsers(
   const countQuery = db
     .select({ count: count() })
     .from(schema.users)
-    .leftJoin(schema.userProfiles, eq(schema.users.id, schema.userProfiles.userId))
+    .leftJoin(
+      schema.userProfiles,
+      eq(schema.users.id, schema.userProfiles.userId),
+    )
     .where(whereClause);
 
   // Execute queries
   const offset = (page - 1) * limit;
-  const [users, countResult] = await Promise.all([query.limit(limit).offset(offset), countQuery]);
+  const [users, countResult] = await Promise.all([
+    query.limit(limit).offset(offset),
+    countQuery,
+  ]);
 
   const totalCount = countResult[0]?.count || 0;
 
@@ -120,7 +129,10 @@ export async function getUserById(id: number): Promise<UserWithProfile | null> {
       },
     })
     .from(schema.users)
-    .leftJoin(schema.userProfiles, eq(schema.users.id, schema.userProfiles.userId))
+    .leftJoin(
+      schema.userProfiles,
+      eq(schema.users.id, schema.userProfiles.userId),
+    )
     .where(eq(schema.users.id, id))
     .limit(1);
 
@@ -199,7 +211,10 @@ export async function deleteUser(id: number) {
 
   // Prevent deletion of admin users (optional safety check)
   if (user.role === "admin") {
-    throw createError({ statusCode: 400, statusMessage: "Cannot delete admin users" });
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Cannot delete admin users",
+    });
   }
 
   // Delete user (cascade will handle profile and other related records)
@@ -210,12 +225,22 @@ export async function deleteUser(id: number) {
 
 export async function getUserStats() {
   // Get total counts
-  const [totalUsers, activeUsers, verifiedUsers, adminUsers] = await Promise.all([
-    db.select({ count: count() }).from(schema.users),
-    db.select({ count: count() }).from(schema.users).where(eq(schema.users.isActive, true)),
-    db.select({ count: count() }).from(schema.users).where(eq(schema.users.emailVerified, true)),
-    db.select({ count: count() }).from(schema.users).where(eq(schema.users.role, "admin")),
-  ]);
+  const [totalUsers, activeUsers, verifiedUsers, adminUsers] =
+    await Promise.all([
+      db.select({ count: count() }).from(schema.users),
+      db
+        .select({ count: count() })
+        .from(schema.users)
+        .where(eq(schema.users.isActive, true)),
+      db
+        .select({ count: count() })
+        .from(schema.users)
+        .where(eq(schema.users.emailVerified, true)),
+      db
+        .select({ count: count() })
+        .from(schema.users)
+        .where(eq(schema.users.role, "admin")),
+    ]);
 
   // Get recent registrations (last 30 days)
   const thirtyDaysAgo = new Date();

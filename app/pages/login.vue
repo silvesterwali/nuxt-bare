@@ -8,7 +8,8 @@ useHead({
   meta: [
     {
       name: "description",
-      content: "Login to your account to access exclusive features and personalized content.",
+      content:
+        "Login to your account to access exclusive features and personalized content.",
     },
   ],
 });

@@ -21,7 +21,8 @@ export type MediaUsage = typeof schema.mediaUsage.$inferSelect;
 export type NewMediaUsage = typeof schema.mediaUsage.$inferInsert;
 
 export type EmailVerification = typeof schema.emailVerifications.$inferSelect;
-export type NewEmailVerification = typeof schema.emailVerifications.$inferInsert;
+export type NewEmailVerification =
+  typeof schema.emailVerifications.$inferInsert;
 
 export type PasswordReset = typeof schema.passwordResets.$inferSelect;
 export type NewPasswordReset = typeof schema.passwordResets.$inferInsert;

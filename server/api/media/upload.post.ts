@@ -5,20 +5,30 @@ export default defineEventHandler(async (event) => {
   // Require authentication
   const session = await getUserSession(event);
   if (!session?.user?.id) {
-    throw createError({ statusCode: 401, statusMessage: "Authentication required" });
+    throw createError({
+      statusCode: 401,
+      statusMessage: "Authentication required",
+    });
   }
 
   // Parse multipart form data
   const form = await readMultipartFormData(event);
   if (!form) {
-    throw createError({ statusCode: 400, statusMessage: "No form data provided" });
+    throw createError({
+      statusCode: 400,
+      statusMessage: "No form data provided",
+    });
   }
 
   // Find the file and metadata
   const fileData = form.find((item) => item.name === "file");
   const typeData = form.find((item) => item.name === "type")?.data?.toString();
-  const privacyData = form.find((item) => item.name === "privacy")?.data?.toString();
-  const descriptionData = form.find((item) => item.name === "description")?.data?.toString();
+  const privacyData = form
+    .find((item) => item.name === "privacy")
+    ?.data?.toString();
+  const descriptionData = form
+    .find((item) => item.name === "description")
+    ?.data?.toString();
 
   if (!fileData || !fileData.filename || !fileData.data) {
     throw createError({ statusCode: 400, statusMessage: "File is required" });
@@ -27,7 +37,11 @@ export default defineEventHandler(async (event) => {
   // Validate metadata
   const metadata = await useValidatedBody(event, uploadSchema, {
     // pass object manually
-    body: { type: typeData, privacy: privacyData, description: descriptionData },
+    body: {
+      type: typeData,
+      privacy: privacyData,
+      description: descriptionData,
+    },
   });
 
   // Create File object from form data

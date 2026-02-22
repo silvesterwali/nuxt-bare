@@ -33,7 +33,12 @@ const country = ref("");
 
 <template>
   <!-- Text input -->
-  <UInput v-model="email" type="email" placeholder="Email" icon="i-heroicons-envelope" />
+  <UInput
+    v-model="email"
+    type="email"
+    placeholder="Email"
+    icon="i-heroicons-envelope"
+  />
 
   <!-- With validation state -->
   <UInput v-model="email" :color="emailError ? 'error' : undefined" />
@@ -42,7 +47,11 @@ const country = ref("");
   <UTextarea v-model="bio" placeholder="Bio" :rows="3" autoresize />
 
   <!-- Select -->
-  <USelect v-model="country" :options="['USA', 'Canada', 'Mexico']" placeholder="Country" />
+  <USelect
+    v-model="country"
+    :options="['USA', 'Canada', 'Mexico']"
+    placeholder="Country"
+  />
 </template>
 ```
 
@@ -58,7 +67,13 @@ const options = [
 </script>
 
 <template>
-  <USelectMenu v-model="selected" :options="options" searchable clear placeholder="Select user">
+  <USelectMenu
+    v-model="selected"
+    :options="options"
+    searchable
+    clear
+    placeholder="Select user"
+  >
     <template #option="{ option }">
       <UAvatar v-bind="option.avatar" size="xs" />
       <span>{{ option.label }}</span>

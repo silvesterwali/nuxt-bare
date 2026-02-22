@@ -41,7 +41,9 @@ const userItems = [
 </script>
 
 <template>
-  <div class="fixed inset-0 flex overflow-hidden bg-gray-50 dark:bg-gray-950 font-sans">
+  <div
+    class="fixed inset-0 flex overflow-hidden bg-gray-50 dark:bg-gray-950 font-sans"
+  >
     <DashboardSidebar v-model:open="isOpen" title="Admin">
       <template #header>
         <AppLogo class="h-6 w-auto text-primary-500" />
@@ -53,7 +55,11 @@ const userItems = [
       </DashboardGroup>
 
       <template #footer>
-        <UDropdownMenu :items="userItems" :content="{ side: 'top', align: 'start' }" class="w-full">
+        <UDropdownMenu
+          :items="userItems"
+          :content="{ side: 'top', align: 'start' }"
+          class="w-full"
+        >
           <UButton color="neutral" variant="ghost" class="w-full justify-start">
             <template #leading>
               <UAvatar :alt="user?.name" size="2xs" />
