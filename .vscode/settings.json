@@ -1,0 +1,13 @@
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit"
+  },
+  "files.associations": {
+    "*.vue": "vue",
+    "*.ts": "typescript",
+    "*.js": "javascript"
+  },
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "vue.server.hybridMode": true
+}

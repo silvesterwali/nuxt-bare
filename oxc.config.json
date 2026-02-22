@@ -1,0 +1,22 @@
+{
+  "rules": {
+    "no-unused-vars": "error",
+    "no-console": "warn",
+    "prefer-const": "error",
+    "no-var": "error"
+  },
+  "env": {
+    "node": true,
+    "browser": true,
+    "es2022": true
+  },
+  "globals": {
+    "defineNuxtConfig": "readonly",
+    "defineEventHandler": "readonly",
+    "createError": "readonly",
+    "readBody": "readonly",
+    "setUserSession": "readonly",
+    "getUserSession": "readonly",
+    "clearUserSession": "readonly"
+  }
+}

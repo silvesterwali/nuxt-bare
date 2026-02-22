@@ -1,0 +1,11 @@
+# OXC linter and formatter ignore file
+node_modules/
+.nuxt/
+.output/
+dist/
+coverage/
+*.min.js
+*.d.ts
+database.db
+database.db-shm
+database.db-wal
