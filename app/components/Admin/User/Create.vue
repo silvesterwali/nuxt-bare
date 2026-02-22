@@ -25,7 +25,13 @@ const state = reactive({
 type Schema = z.output<typeof schema>;
 
 const roles = ["admin", "user", "moderator"];
-const form = useTemplateRef("form");
+import type { Ref, ComponentPublicInstance } from "vue";
+
+type UFormInstance = ComponentPublicInstance<{
+  clear(): void;
+  setErrors(errs: any[]): void;
+}>;
+const form: Ref<UFormInstance | null> = ref(null);
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   try {

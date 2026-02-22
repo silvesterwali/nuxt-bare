@@ -1,8 +1,9 @@
 <script setup lang="ts">
 const columns = [
-  { accessorKey: "id", header: "ID", id: "id" },
   { accessorKey: "email", header: "Email", id: "email" },
+  { accessorKey: "name", header: "Name", id: "name" },
   { accessorKey: "role", header: "Role", id: "role" },
+  { accessorKey: "createdAt", header: "Created At", id: "createdAt" },
   { id: "actions", header: "Actions" },
 ];
 

@@ -7,6 +7,11 @@ const toast = useToast();
 const isLoading = ref(true);
 const error = ref<string | null>(null);
 
+definePageMeta({
+  layout: "auth",
+  middleware: "guest",
+});
+
 async function verifyEmail() {
   if (!token) {
     error.value = "Missing verification token";
@@ -61,7 +66,7 @@ onMounted(() => {
           Verification Failed
         </h2>
         <p class="text-gray-600 dark:text-gray-400 mb-6">{{ error }}</p>
-        <UButton to="/login" color="gray" block>Back to Login</UButton>
+        <UButton to="/login" color="neutral" block>Back to Login</UButton>
       </div>
 
       <div v-else class="text-center py-8">

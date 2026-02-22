@@ -29,7 +29,7 @@ const isDark = computed({
       </NuxtLink>
     </div>
 
-    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-[480px]">
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-120">
       <div
         class="bg-white dark:bg-gray-900 py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-200 dark:border-gray-800"
       >

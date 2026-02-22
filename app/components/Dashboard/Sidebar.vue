@@ -37,11 +37,7 @@ const isOpen = defineModel<boolean>("open", { default: false });
     </aside>
 
     <!-- Mobile Sidebar -->
-    <USlideover
-      v-model:open="isOpen"
-      side="left"
-      :ui="{ width: 'max-w-[16rem]' }"
-    >
+    <USlideover v-model:open="isOpen" side="left" class="max-w-[80vw]">
       <template #header>
         <div class="flex items-center justify-between">
           <NuxtLink

@@ -6,5 +6,8 @@
     { "path": "./.nuxt/tsconfig.server.json" },
     { "path": "./.nuxt/tsconfig.shared.json" },
     { "path": "./.nuxt/tsconfig.node.json" }
-  ]
+  ],
+  "vueCompilerOptions": {
+    "globalTypesPath": "./node_modules/vue/dist/vue.d.ts"
+  }
 }

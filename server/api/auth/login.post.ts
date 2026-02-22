@@ -16,6 +16,7 @@ export default defineEventHandler(async (event) => {
     user: {
       id: user.id,
       email: user.email,
+      name: user.name,
       role: user.role as "admin" | "user" | "moderator",
       emailVerified: user.emailVerified,
     },
@@ -25,6 +26,7 @@ export default defineEventHandler(async (event) => {
     {
       id: user.id,
       email: user.email,
+      name: user.name,
       role: user.role as "admin" | "user" | "moderator",
       emailVerified: user.emailVerified,
     },

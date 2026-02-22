@@ -25,10 +25,20 @@ const state = reactive({
 
 type Schema = typeof state;
 
-const form = useTemplateRef("form");
+import type { Ref, ComponentPublicInstance } from "vue";
+
+type UFormInstance = ComponentPublicInstance<{
+  clear(): void;
+  setErrors(errs: any[]): void;
+}>;
+const form: Ref<UFormInstance | null> = ref(null);
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-  form.value?.clear();
+  // clear previous validation errors if the form API is available
+  if (form.value && typeof form.value.clear === "function") {
+    form.value.clear();
+  }
+
   try {
     await changePassword({
       currentPassword: event.data.currentPassword,

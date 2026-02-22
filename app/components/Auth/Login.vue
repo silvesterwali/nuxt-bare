@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { z } from "zod";
-import type { FormSubmitEvent } from "@nuxt/ui";
+import type { FormSubmitEvent, AuthFormField } from "@nuxt/ui";
 
 const { login, loading } = useAuth();
 const { transformToIssue } = useValidateHelper();
@@ -11,14 +11,31 @@ const schema = z.object({
   password: z.string().min(8, "Must be at least 8 characters"),
 });
 
-const state = reactive({
-  email: "",
-  password: "",
-});
-
-type Schema = typeof state;
+type Schema = z.output<typeof schema>;
 
 const authForm = useTemplateRef("authForm");
+
+const fields: AuthFormField[] = [
+  {
+    name: "email",
+    type: "text", // use text to avoid browser email validation quirks
+    label: "Email Address",
+    placeholder: "name@example.com",
+    required: true,
+  },
+  {
+    name: "password",
+    type: "password",
+    label: "Password",
+    placeholder: "Enter your password",
+    required: true,
+  },
+  {
+    name: "remember",
+    type: "checkbox",
+    label: "Remember me",
+  },
+];
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   try {
@@ -31,58 +48,31 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     navigateTo("/");
   } catch (err: any) {
     const errors = transformToIssue(err);
-    if (errors && errors.length) authForm.value?.form?.setErrors(errors);
+    if (errors && errors.length) authForm.value?.formRef?.setErrors(errors);
   }
 }
 </script>
 
 <template>
-  <div
-    class="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950"
+  <UAuthForm
+    ref="authForm"
+    title="Login"
+    description="Welcome back"
+    icon="i-lucide-lock"
+    :schema="schema"
+    :fields="fields"
+    :loading="loading"
+    :submit="{ label: 'Login', block: true }"
+    @submit="onSubmit"
   >
-    <AuthForm
-      ref="authForm"
-      title="Login"
-      description="Welcome back! Please login to your account."
-      icon="i-lucide-lock"
-      :schema="schema"
-      :state="state"
-      :loading="loading"
-      :submit-button="{ label: 'Login', trailingIcon: 'i-lucide-arrow-right' }"
-      @submit="onSubmit"
-    >
-      <template #fields>
-        <UFormField label="Email" name="email" required>
-          <UInput
-            v-model="state.email"
-            placeholder="you@example.com"
-            icon="i-lucide-mail"
-            class="w-full"
-            autofocus
-          />
-        </UFormField>
-
-        <UFormField label="Password" name="password" required>
-          <UInput
-            v-model="state.password"
-            type="password"
-            placeholder="********"
-            icon="i-lucide-key"
-            class="w-full"
-          />
-        </UFormField>
-      </template>
-
-      <template #footer>
-        <div class="text-sm">
-          <NuxtLink
-            to="/forgot-password"
-            class="font-medium text-primary hover:text-primary-600 dark:hover:text-primary-400"
-          >
-            Forgot password?
-          </NuxtLink>
-        </div>
-      </template>
-    </AuthForm>
-  </div>
+    <!-- password hint slot shows forgot link under inputs -->
+    <template #password-hint>
+      <NuxtLink
+        to="/forgot-password"
+        class="text-sm font-medium text-primary hover:underline"
+      >
+        Forgot password?
+      </NuxtLink>
+    </template>
+  </UAuthForm>
 </template>

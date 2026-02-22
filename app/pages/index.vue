@@ -1,7 +1,11 @@
 <template>
-  <div>
-    <h1>Welcome to Nuxt 3</h1>
-  </div>
+  <UContainer>
+    <UPageHero
+      title="Welcome to Nuxt 3 with Nuxt UI"
+      description="A Nuxt/Vue-integrated UI library providing a rich set of fully-styled, accessible and highly customizable components for building modern web applications."
+      headline="New release"
+    />
+  </UContainer>
 </template>
 
 <script setup lang="ts">

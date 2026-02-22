@@ -114,19 +114,26 @@ const isDark = computed({
               variant="ghost"
               color="neutral"
             />
-            <UButton to="/register" label="Sign Up" color="primary" />
           </template>
         </div>
       </div>
     </header>
 
-    <main class="flex-grow">
+    <main class="grow">
       <slot />
     </main>
 
     <footer class="border-t border-gray-200 dark:border-gray-800 py-6">
       <div class="container mx-auto px-4 text-center text-sm text-gray-500">
         &copy; {{ new Date().getFullYear() }} Nuxt Bare. All rights reserved.
+      </div>
+      <div class="container mx-auto px-4 text-center text-sm text-gray-500">
+        build with ❤️ by
+        <a
+          href="https://silvertewali.my.id"
+          class="text-primary-500 hover:underline"
+          >Silvester Wali</a
+        >
       </div>
     </footer>
   </div>
