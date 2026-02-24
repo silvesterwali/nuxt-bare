@@ -17,6 +17,7 @@ const isDark = computed({
 });
 
 const { locale, locales, setLocale } = useI18n();
+const router = useRouter();
 
 const localeItems = computed(() => {
   const uniqueLocales = locales.value.filter(
@@ -25,7 +26,11 @@ const localeItems = computed(() => {
   );
   return uniqueLocales.map((l: any) => ({
     label: l.code === "en" ? "English" : l.code === "id" ? "Indonesia" : l.code,
-    onSelect: () => setLocale(l.code),
+    onSelect: async () => {
+      await setLocale(l.code);
+      // Reload the page to apply language changes throughout
+      await router.go(0);
+    },
     icon: locale.value === l.code ? "i-lucide-check" : undefined,
   }));
 });

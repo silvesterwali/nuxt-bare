@@ -8,5 +8,9 @@
     "*.ts": "typescript",
     "*.js": "javascript"
   },
-  "typescript.preferences.includePackageJsonAutoImports": "on"
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "i18n-ally.localesPaths": [
+    "i18n",
+    "i18n/locales"
+  ]
 }

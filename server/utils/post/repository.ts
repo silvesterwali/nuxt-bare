@@ -1,16 +1,16 @@
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import { db, schema } from "../../db";
 
 export const postRepository = {
   async findAll() {
-    // Basic implementation: fetch all posts with author info
-    // In a real app, this would support pagination
     const posts = await db
       .select({
         id: schema.posts.id,
+        slug: schema.posts.slug,
         title: schema.posts.title,
+        shortDescription: schema.posts.shortDescription,
         content: schema.posts.content,
-        published: schema.posts.published,
+        status: schema.posts.status,
         createdAt: schema.posts.createdAt,
         author: {
           id: schema.users.id,
@@ -24,20 +24,31 @@ export const postRepository = {
 
     return posts;
   },
+  
+  async findById(id: number) {
+    const post = await db.query.posts.findFirst({
+        where: eq(schema.posts.id, id)
+    })
+    return post;
+  },
 
   async create(data: {
-    title: string;
-    content: string;
+    slug: Record<string, string>;
+    title: Record<string, string>;
+    shortDescription?: Record<string, string>;
+    content: Record<string, string>;
     userId: number;
-    published?: boolean;
+    status?: "draft" | "published" | "archived";
   }) {
     const result = await db
       .insert(schema.posts)
       .values({
+        slug: data.slug,
         title: data.title,
+        shortDescription: data.shortDescription,
         content: data.content,
         userId: data.userId,
-        published: data.published ? 1 : 0,
+        status: data.status || "draft",
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -45,4 +56,31 @@ export const postRepository = {
 
     return result[0];
   },
+  
+  async update(id: number, data: {
+    slug?: Record<string, string>;
+    title?: Record<string, string>;
+    shortDescription?: Record<string, string>;
+    content?: Record<string, string>;
+    status?: "draft" | "published" | "archived";
+  }) {
+    const result = await db
+        .update(schema.posts)
+        .set({
+            ...data,
+            updatedAt: new Date()
+        })
+        .where(eq(schema.posts.id, id))
+        .returning();
+        
+    return result[0];
+  },
+  
+  async destroy(id: number) {
+     const result = await db
+        .delete(schema.posts)
+        .where(eq(schema.posts.id, id))
+        .returning();
+     return result[0];
+  }
 };

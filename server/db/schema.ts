@@ -99,15 +99,17 @@ export const mediaUsage = sqliteTable("media_usage", {
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 });
 
-// Posts table (updated to use media)
+// Posts table (updated to use JSON for multi-language)
 export const posts = sqliteTable("posts", {
   id: integer("id").primaryKey(),
   userId: integer("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  title: text("title").notNull(),
-  content: text("content").notNull(),
-  published: integer("published").notNull().default(0),
+  slug: text("slug", { mode: "json" }).$type<Record<string, string>>().notNull(),
+  title: text("title", { mode: "json" }).$type<Record<string, string>>().notNull(),
+  shortDescription: text("short_description", { mode: "json" }).$type<Record<string, string>>(),
+  content: text("content", { mode: "json" }).$type<Record<string, string>>().notNull(),
+  status: text("status", { enum: ["draft", "published", "archived"] }).notNull().default("draft"),
   featuredImageId: integer("featured_image_id").references(() => media.id, {
     onDelete: "set null",
   }),

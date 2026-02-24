@@ -14,11 +14,13 @@ interface User {
  * @returns A wrapped event handler that enforces authentication and authorization.
  */
 export const defineAuthHandler = <T>(
-  handler: (event: H3Event, context: { user: User }) => T | Promise<T>,
+  handler: (event: H3Event, context: { user: User, language: string }) => T | Promise<T>,
   permissions?: string[],
 ) => {
   return defineEventHandler(async (event) => {
     const { user } = await getUserSession(event);
+
+    const language = getRequestHeader(event, "accept-language")?.split(",")[0] || "en";
 
     if (!user) {
       throw createError({
@@ -34,6 +36,6 @@ export const defineAuthHandler = <T>(
       });
     }
 
-    return handler(event, { user });
+    return handler(event, { user,language });
   });
 };
