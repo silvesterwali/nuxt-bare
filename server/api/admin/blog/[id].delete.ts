@@ -14,5 +14,5 @@ export default defineAuthHandler(
 
     return jsonResponse({ success: true }, "Post deleted successfully");
   },
-  ["admin"]
+  ["admin"],
 );

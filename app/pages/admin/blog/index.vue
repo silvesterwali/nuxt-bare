@@ -40,15 +40,13 @@ const columns = [
       <div>
         <h2 class="text-2xl font-bold tracking-tight">Blog Posts</h2>
         <p class="text-gray-500 dark:text-gray-400">
-          Manage your localized content. Currently editing in <span class="font-semibold uppercase">{{ locale }}</span> language.
+          Manage your localized content. Currently editing in
+          <span class="font-semibold uppercase">{{ locale }}</span> language.
         </p>
       </div>
 
       <NuxtLink to="/admin/blog/create">
-        <UButton
-          icon="i-lucide-plus"
-          label="New Post"
-        />
+        <UButton icon="i-lucide-plus" label="New Post" />
       </NuxtLink>
     </div>
 
@@ -60,10 +58,18 @@ const columns = [
       >
         <template #status-cell="{ row }">
           <UBadge
-            :color="(row.original as any)?.status === 'published' ? 'success' : 'neutral'"
+            :color="
+              (row.original as any)?.status === 'published'
+                ? 'success'
+                : 'neutral'
+            "
             variant="subtle"
           >
-            {{ (row.original as any)?.status === 'published' ? 'Published' : 'Draft' }}
+            {{
+              (row.original as any)?.status === "published"
+                ? "Published"
+                : "Draft"
+            }}
           </UBadge>
         </template>
         <template #language-cell="{ row }">
@@ -97,4 +103,3 @@ const columns = [
     </UCard>
   </div>
 </template>
-

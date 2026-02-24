@@ -61,9 +61,10 @@ export default defineAuthHandler(
     } catch (error) {
       throw createError({
         statusCode: 400,
-        statusMessage: error instanceof Error ? error.message : "Invalid post update data",
+        statusMessage:
+          error instanceof Error ? error.message : "Invalid post update data",
       });
     }
   },
-  ["admin"]
+  ["admin"],
 );

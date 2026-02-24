@@ -5,7 +5,7 @@ import { defineVitestProject } from "@nuxt/test-utils/config";
 export default defineConfig({
   test: {
     globals: true,
-    globalSetup: ['test/setup.ts'],
+    globalSetup: ["test/setup.ts"],
     testTimeout: 20000,
     hookTimeout: 20000,
     teardownTimeout: 10000,

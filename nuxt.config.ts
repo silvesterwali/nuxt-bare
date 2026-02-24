@@ -68,7 +68,7 @@ export default defineNuxtConfig({
     },
   },
   i18n: {
-    vueI18n: "./i18n/i18n.config.ts",
+    vueI18n: "./i18n.config.ts",
     // list of supported locales; each can include a code, ISO, and file path
     locales: [
       { code: "en", iso: "en-US", file: "en.json" },

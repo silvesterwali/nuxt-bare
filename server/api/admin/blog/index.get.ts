@@ -13,16 +13,26 @@ export default defineAuthHandler(
       // Flatten translations to the requested language and add language info
       const localized = posts
         .map((p: any) => {
-          const slug = p.slug?.[language] || p.slug?.en || Object.values(p.slug || {})[0] || "";
+          const slug =
+            p.slug?.[language] ||
+            p.slug?.en ||
+            Object.values(p.slug || {})[0] ||
+            "";
           const title =
-            p.title?.[language] || p.title?.en || Object.values(p.title || {})[0] || "";
+            p.title?.[language] ||
+            p.title?.en ||
+            Object.values(p.title || {})[0] ||
+            "";
           const shortDescription =
             p.shortDescription?.[language] ||
             p.shortDescription?.en ||
             Object.values(p.shortDescription || {})[0] ||
             "";
           const content =
-            p.content?.[language] || p.content?.en || Object.values(p.content || {})[0] || "";
+            p.content?.[language] ||
+            p.content?.en ||
+            Object.values(p.content || {})[0] ||
+            "";
 
           return {
             ...p,
@@ -36,10 +46,7 @@ export default defineAuthHandler(
         // Act as tenant: only show posts that actually have data for this language
         .filter((p: any) => {
           // Require at least a slug or title for the requested language
-          return (
-            (p.slug && p.slug !== "") ||
-            (p.title && p.title !== "")
-          );
+          return (p.slug && p.slug !== "") || (p.title && p.title !== "");
         });
 
       return listResponse(localized, localized.length);
@@ -50,5 +57,5 @@ export default defineAuthHandler(
       });
     }
   },
-  ["admin"]
+  ["admin"],
 );

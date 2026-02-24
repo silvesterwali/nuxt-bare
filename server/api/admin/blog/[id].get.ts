@@ -13,5 +13,5 @@ export default defineAuthHandler(
     // Return full post with multi-language data for editing
     return jsonResponse(post, "Post retrieved");
   },
-  ["admin"]
+  ["admin"],
 );

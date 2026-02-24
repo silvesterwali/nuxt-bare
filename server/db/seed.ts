@@ -84,7 +84,10 @@ async function seed() {
     const postsData = Array.from({ length: 20 }).map(() => ({
       slug: { en: faker.lorem.slug(), id: faker.lorem.slug() },
       title: { en: faker.lorem.sentence(), id: faker.lorem.sentence() },
-      shortDescription: { en: faker.lorem.sentences(2), id: faker.lorem.sentences(2) },
+      shortDescription: {
+        en: faker.lorem.sentences(2),
+        id: faker.lorem.sentences(2),
+      },
       content: { en: faker.lorem.paragraphs(), id: faker.lorem.paragraphs() },
       userId: faker.helpers.arrayElement(sampleUsers).id,
       status: faker.helpers.arrayElement(["draft", "published", "archived"]),

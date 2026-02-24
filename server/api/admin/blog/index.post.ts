@@ -10,16 +10,17 @@ const BodySchema = z.object({
   title: z.union([TranslationSchema, z.string()]),
   shortDescription: z.union([TranslationSchema, z.string()]).optional(),
   content: z.union([TranslationSchema, z.string()]),
-  status: z.enum(["draft", "published", "archived"]).optional().default("draft"),
+  status: z
+    .enum(["draft", "published", "archived"])
+    .optional()
+    .default("draft"),
 });
 
 export default defineAuthHandler(
   async (event, { user, language }) => {
     try {
-      const { slug, title, shortDescription, content, status } = await useValidatedBody(
-        event,
-        BodySchema,
-      );
+      const { slug, title, shortDescription, content, status } =
+        await useValidatedBody(event, BodySchema);
 
       function normalize(val: any): Record<string, string> {
         if (typeof val === "string") {
@@ -41,9 +42,10 @@ export default defineAuthHandler(
     } catch (error) {
       throw createError({
         statusCode: 400,
-        statusMessage: error instanceof Error ? error.message : "Invalid post data",
+        statusMessage:
+          error instanceof Error ? error.message : "Invalid post data",
       });
     }
   },
-  ["admin"]
+  ["admin"],
 );
