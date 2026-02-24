@@ -15,6 +15,20 @@ const isDark = computed({
       useColorMode().value === "dark" ? "light" : "dark";
   },
 });
+
+const { locale, locales, setLocale } = useI18n();
+
+const localeItems = computed(() => {
+  const uniqueLocales = locales.value.filter(
+    (l: any, index: number, self: any[]) =>
+      index === self.findIndex((t: any) => t.code === l.code),
+  );
+  return uniqueLocales.map((l: any) => ({
+    label: l.code === "en" ? "English" : l.code === "id" ? "Indonesia" : l.code,
+    onSelect: () => setLocale(l.code),
+    icon: locale.value === l.code ? "i-lucide-check" : undefined,
+  }));
+});
 </script>
 
 <template>
@@ -42,6 +56,10 @@ const isDark = computed({
     <!-- Center/Right slot -->
     <div class="flex-1 flex items-center justify-end gap-1.5 min-w-0">
       <slot name="right" />
+
+      <UDropdownMenu :items="localeItems">
+        <UButton icon="i-lucide-languages" color="neutral" variant="ghost" />
+      </UDropdownMenu>
 
       <UButton
         :icon="isDark ? 'i-lucide-moon' : 'i-lucide-sun'"

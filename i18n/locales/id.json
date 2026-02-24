@@ -1,0 +1,11 @@
+{
+  "hello": "Halo",
+  "welcome": "Selamat datang di Nuxt",
+  "goodbye": "Selamat tinggal",
+  "login": "Masuk",
+  "logout": "Keluar",
+  "profile": "Profil",
+  "settings": "Pengaturan",
+  "submit": "Kirim",
+  "cancel": "Batal"
+}

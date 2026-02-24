@@ -16,6 +16,12 @@ const links: NavigationMenuItem[][] = [
       onSelect: () => (open.value = false),
     },
     {
+      label: "Blog",
+      to: "/admin/blog",
+      icon: "i-lucide-file-text",
+      onSelect: () => (open.value = false),
+    },
+    {
       label: "Users",
       to: "/admin/users",
       icon: "i-lucide-users",

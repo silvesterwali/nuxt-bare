@@ -1,7 +1,7 @@
 <template>
   <UContainer>
     <UPageHero
-      title="Welcome to Nuxt 3 with Nuxt UI"
+      :title="$t('welcome')"
       description="A Nuxt/Vue-integrated UI library providing a rich set of fully-styled, accessible and highly customizable components for building modern web applications."
       headline="New release"
     />

@@ -1,6 +1,19 @@
 <script setup lang="ts">
 const { user, clear } = useUserSession();
 const router = useRouter();
+const { locale, locales, setLocale } = useI18n();
+
+const localeItems = computed(() => {
+  const uniqueLocales = locales.value.filter(
+    (l: any, index: number, self: any[]) =>
+      index === self.findIndex((t: any) => t.code === l.code),
+  );
+  return uniqueLocales.map((l: any) => ({
+    label: l.code === "en" ? "English" : l.code === "id" ? "Indonesia" : l.code,
+    onSelect: () => setLocale(l.code),
+    icon: locale.value === l.code ? "i-lucide-check" : undefined,
+  }));
+});
 
 const items = computed(() => {
   const defaultItems = [
@@ -69,6 +82,14 @@ const isDark = computed({
         </div>
 
         <div class="flex items-center gap-2">
+          <UDropdownMenu :items="localeItems">
+            <UButton
+              icon="i-lucide-languages"
+              color="neutral"
+              variant="ghost"
+            />
+          </UDropdownMenu>
+
           <UButton
             :icon="isDark ? 'i-lucide-moon' : 'i-lucide-sun'"
             color="neutral"

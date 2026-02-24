@@ -1,0 +1,11 @@
+{
+  "hello": "Hello",
+  "welcome": "Welcome to Nuxt",
+  "goodbye": "Goodbye",
+  "login": "Log in",
+  "logout": "Log out",
+  "profile": "Profile",
+  "settings": "Settings",
+  "submit": "Submit",
+  "cancel": "Cancel"
+}

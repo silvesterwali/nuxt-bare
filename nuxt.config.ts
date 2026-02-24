@@ -16,6 +16,7 @@ export default defineNuxtConfig({
     "nuxt-authorization",
     "nuxt-email-renderer",
     "@vueuse/nuxt",
+    "@nuxtjs/i18n",
   ],
 
   devtools: {
@@ -65,5 +66,17 @@ export default defineNuxtConfig({
     public: {
       appName: process.env.NUXT_APP_NAME || "Nuxt App",
     },
+  },
+  i18n: {
+    vueI18n: "./i18n/i18n.config.ts",
+    // list of supported locales; each can include a code, ISO, and file path
+    locales: [
+      { code: "en", iso: "en-US", file: "en.json" },
+      { code: "id", iso: "id-ID", file: "id.json" },
+    ],
+    defaultLocale: "en",
+    strategy: "no_prefix", // simplest strategy, no prefix on routes
+    // where translation files live
+    langDir: "locales/",
   },
 });
