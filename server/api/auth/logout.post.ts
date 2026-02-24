@@ -1,4 +1,4 @@
-export default defineEventHandler(async (event) => {
+export default defineAuthHandler(async (event) => {
   // Clear user session
   await clearUserSession(event);
 
