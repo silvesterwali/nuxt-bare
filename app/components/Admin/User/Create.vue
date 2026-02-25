@@ -48,7 +48,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-  <div class="p-4 max-w-2xl mx-auto">
+  <div class="max-w-2xl mx-auto">
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-bold">Create User</h1>
       <UButton to="/admin/users" variant="ghost" icon="i-lucide-arrow-left"
