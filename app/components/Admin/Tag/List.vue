@@ -152,7 +152,9 @@ const columns: TableColumn<BlogTag>[] = [
 
     <UCard>
       <UTable :data="paginated" :columns="columns" :loading="pending" />
-      <div class="flex justify-end p-3 border-t border-gray-200 dark:border-gray-700">
+      <div
+        class="flex justify-end p-3 border-t border-gray-200 dark:border-gray-700"
+      >
         <UPagination
           v-model:page="page"
           :total="(tags || []).length"

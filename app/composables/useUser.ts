@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryCache } from "@pinia/colada";
-import type { User, UserWithProfile } from "@/types/db";
-import type { ResponsePagination } from "@/types/response";
+import type { UserWithProfile } from "@/types/db";
+import type { ResponsePagination, APIResponseSuccess } from "@/types/response";
 import type { UserListParams } from "@/types/user";
 
 export const useUsersQuery = (params: Ref<UserListParams>) => {
@@ -23,7 +23,10 @@ export const useUsersQuery = (params: Ref<UserListParams>) => {
 export const useUserQuery = (id: Ref<number | string>) => {
   return useQuery({
     key: () => ["users", id.value],
-    query: () => $fetch<UserWithProfile>(`/api/admin/users/${id.value}`),
+    query: () =>
+      $fetch<APIResponseSuccess<UserWithProfile>>(
+        `/api/admin/users/${id.value}`,
+      ),
   });
 };
 

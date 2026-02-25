@@ -3,39 +3,15 @@ import { z } from "zod";
 import type { FormSubmitEvent } from "@nuxt/ui";
 
 const { transformToIssue } = useValidateHelper();
-const toast = useToast();
 
 const route = useRoute();
 const userId = computed(() => route.params.id as string);
 
-const { data: user, isLoading: isFetching } = useUserQuery(userId);
+// `useUserQuery` returns a standardized response shape { message, data }
+// so we rename the value to avoid confusion and unwrap the `data` field later.
+const { data: userResp, isLoading: isFetching } = useUserQuery(userId);
 const { mutateAsync: updateUser, isLoading: isUpdating } =
   useUserUpdateMutation();
-
-const passLoading = ref(false);
-const passForm = ref<{ setErrors(errs: any[]): void } | null>(null);
-
-async function onPassSubmit(event: FormSubmitEvent<any>) {
-  try {
-    passLoading.value = true;
-    await $fetch(`/api/admin/users/${userId.value}/password`, {
-      method: "PATCH",
-      body: event.data,
-    });
-    toast.add({
-      title: "Success",
-      description: "Password reset",
-      color: "success",
-    });
-    passState.newPassword = "";
-    passState.confirmPassword = "";
-  } catch (err: any) {
-    const errors = transformToIssue(err);
-    if (errors.length) passForm.value?.setErrors(errors as any);
-  } finally {
-    passLoading.value = false;
-  }
-}
 
 // Reuse schema but password optional for edit
 const schema = z.object({
@@ -53,20 +29,6 @@ const state = reactive({
 });
 
 // admin password reset schema
-const passSchema = z
-  .object({
-    newPassword: z.string().min(8),
-    confirmPassword: z.string().min(8),
-  })
-  .refine((d) => d.newPassword === d.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
-
-const passState = reactive({
-  newPassword: "",
-  confirmPassword: "",
-});
 
 type Schema = z.output<typeof schema>;
 
@@ -79,12 +41,14 @@ type UFormInstance = ComponentPublicInstance<{
 }>;
 const form: Ref<UFormInstance | null> = ref(null);
 
+// populate form state once the query returns data
 watchEffect(() => {
-  if (user.value) {
-    state.email = user.value.email;
-    state.firstName = user.value.profile?.firstName || "";
-    state.lastName = user.value.profile?.lastName || "";
-    state.role = user.value.role as any;
+  const u = userResp.value?.data;
+  if (u) {
+    state.email = u.email;
+    state.firstName = u.profile?.firstName || "";
+    state.lastName = u.profile?.lastName || "";
+    state.role = u.role as any;
   }
 });
 
@@ -107,7 +71,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-  <div class="p-4 max-w-4xl mx-auto">
+  <div class="max-w-3xl mx-auto">
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-bold">Edit User</h1>
       <UButton to="/admin/users" variant="ghost" icon="i-lucide-arrow-left"
@@ -115,10 +79,10 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       >
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div>
       <!-- user details card -->
-      <UCard class="shadow-lg rounded-lg">
-        <div v-if="isFetching && !user">Loading...</div>
+      <UCard>
+        <div v-if="isFetching">Loading...</div>
         <UForm
           ref="form"
           v-else
@@ -141,48 +105,11 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
           </div>
 
           <UFormField label="Role" name="role">
-            <USelect v-model="state.role" :options="roles" class="w-full" />
+            <USelect v-model="state.role" :items="roles" class="w-full" />
           </UFormField>
 
           <div class="flex justify-end">
             <UButton type="submit" label="Update User" :loading="isUpdating" />
-          </div>
-        </UForm>
-      </UCard>
-
-      <!-- password reset card for admin -->
-      <UCard>
-        <h2 class="text-xl font-semibold mb-4">Reset Password</h2>
-        <UForm
-          ref="passForm"
-          :schema="passSchema"
-          :state="passState"
-          class="space-y-4"
-          @submit="onPassSubmit"
-        >
-          <UFormField label="New Password" name="newPassword">
-            <UInput
-              v-model="passState.newPassword"
-              type="password"
-              class="w-full"
-            />
-          </UFormField>
-
-          <UFormField label="Confirm Password" name="confirmPassword">
-            <UInput
-              v-model="passState.confirmPassword"
-              type="password"
-              class="w-full"
-            />
-          </UFormField>
-
-          <div class="flex justify-end">
-            <UButton
-              type="submit"
-              label="Reset Password"
-              color="neutral"
-              :loading="passLoading"
-            />
           </div>
         </UForm>
       </UCard>
