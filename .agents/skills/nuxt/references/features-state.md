@@ -151,7 +151,7 @@ export function useLocale() {
   return useState("locale", () => useDefaultLocale().value);
 }
 
-export function useDefaultLocale(fallback = "en-US") {
+export function useDefaultLocale(fallback = "en") {
   const locale = ref(fallback);
 
   if (import.meta.server) {

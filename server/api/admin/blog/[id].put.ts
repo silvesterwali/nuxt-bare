@@ -1,26 +1,12 @@
-import { z } from "zod";
-import { useValidatedBody } from "h3-zod";
-
-const TranslationSchema = z.record(z.string(), z.string());
-
-// Update schema accepts either translation record or string per locale
-const BodySchema = z.object({
-  slug: z.union([TranslationSchema, z.string()]).optional(),
-  title: z.union([TranslationSchema, z.string()]).optional(),
-  shortDescription: z.union([TranslationSchema, z.string()]).optional(),
-  content: z.union([TranslationSchema, z.string()]).optional(),
-  status: z.enum(["draft", "published", "archived"]).optional(),
-});
+import { useValidatedBody, useValidatedParams } from "h3-zod";
 
 export default defineAuthHandler(
-  async (event, { user, language }) => {
-    const id = Number(getRouterParam(event, "id"));
-    if (!id || isNaN(id)) {
-      throw createError({ statusCode: 400, statusMessage: "Invalid ID" });
-    }
+  async (event, { language }) => {
+    const { id } = await useValidatedParams(event, paramsIdSchema);
 
     try {
-      const data = await useValidatedBody(event, BodySchema);
+      const data = await useValidatedBody(event, UpdatePostBodySchema);
+      const { categoryIds, tagIds, ...postData } = data;
 
       // Check if post exists
       const existing = await postRepository.findById(id);
@@ -28,36 +14,51 @@ export default defineAuthHandler(
         throw createError({ statusCode: 404, statusMessage: "Post not found" });
       }
 
-      function normalize(val: any): Record<string, string> {
-        if (typeof val === "string") {
-          return { [language]: val };
-        }
-        return val || {};
-      }
-
       // Merge with existing translations rather than overwrite entire object
       const merged: any = {};
-      if (data.slug) {
-        merged.slug = { ...existing.slug, ...normalize(data.slug) };
-      }
-      if (data.title) {
-        merged.title = { ...existing.title, ...normalize(data.title) };
-      }
-      if (data.shortDescription) {
-        merged.shortDescription = {
-          ...existing.shortDescription,
-          ...normalize(data.shortDescription),
+      if (postData.slug) {
+        merged.slug = {
+          ...existing.slug,
+          ...normalize(postData.slug, language),
         };
       }
-      if (data.content) {
-        merged.content = { ...existing.content, ...normalize(data.content) };
+      if (postData.title) {
+        merged.title = {
+          ...existing.title,
+          ...normalize(postData.title, language),
+        };
       }
-      if (data.status) {
-        merged.status = data.status;
+      if (postData.shortDescription) {
+        merged.shortDescription = {
+          ...existing.shortDescription,
+          ...normalize(postData.shortDescription, language),
+        };
+      }
+      if (postData.content) {
+        merged.content = {
+          ...existing.content,
+          ...normalize(postData.content, language),
+        };
+      }
+      if (postData.status) {
+        merged.status = postData.status;
       }
 
       const updated = await postRepository.update(id, merged);
-      return jsonResponse(updated, "Post updated successfully");
+
+      // Update categories if provided
+      if (categoryIds !== undefined) {
+        await updatePostCategories(id, categoryIds);
+      }
+
+      // Update tags if provided
+      if (tagIds !== undefined) {
+        await updatePostTags(id, tagIds);
+      }
+
+      // Return post with categories and tags
+      const postWithRelations = await getPostById(id, language);
+      return jsonResponse(postWithRelations, "Post updated successfully");
     } catch (error) {
       throw createError({
         statusCode: 400,

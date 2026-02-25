@@ -4,10 +4,9 @@ import type { FormSubmitEvent } from "@nuxt/ui";
 
 const { mutateAsync: createUser, isLoading: pending } = useUserCreateMutation();
 const { transformToIssue } = useValidateHelper();
-const toast = useToast();
 
 const schema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   password: z.string().min(8),
   firstName: z.string().min(1),
   lastName: z.string().min(1),

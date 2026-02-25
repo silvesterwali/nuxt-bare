@@ -1,6 +1,6 @@
 import { useValidatedQuery } from "h3-zod";
 
-export default defineProtectedHandler({ roles: ["admin"] }, async (event) => {
+export default defineAuthHandler(async (event) => {
   const filters = await useValidatedQuery(event, adminUserQuerySchema);
 
   // Get users with filters and pagination

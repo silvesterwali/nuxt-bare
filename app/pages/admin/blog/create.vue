@@ -8,18 +8,26 @@ const router = useRouter();
 const loading = ref(false);
 const { locale } = useI18n();
 
+// form reference to set validation errors
+import type { Ref, ComponentPublicInstance } from "vue";
+const formRef: Ref<ComponentPublicInstance<{
+  setErrors(errs: any[]): void;
+}> | null> = ref(null);
+
+const { transformToIssue } = useValidateHelper();
+
 async function handleSubmit(formData: any) {
   loading.value = true;
   try {
     const body = {
-      slug: { [locale.value]: formData.slug },
-      title: { [locale.value]: formData.title },
-      shortDescription: { [locale.value]: formData.shortDescription },
-      content: { [locale.value]: formData.content },
+      slug: formData.slug,
+      title: formData.title,
+      shortDescription: formData.shortDescription,
+      content: formData.content,
       status: formData.status,
+      categoryIds: formData.categoryIds || [],
+      tagIds: formData.tagIds || [],
     };
-
-    console.log("Submitting blog post:", body);
 
     const result = await $fetch("/api/admin/blog", {
       method: "POST",
@@ -31,17 +39,13 @@ async function handleSubmit(formData: any) {
       description: "Your blog post has been created successfully.",
       color: "success",
     });
-    await router.push("/admin/blog");
+    await router.push(`/admin/blog/${result?.data?.id}/edit`);
   } catch (error: any) {
-    console.error("Blog creation error details:", {
-      message: error.message,
-      data: error.data,
-      statusCode: error.statusCode,
-      statusMessage: error.statusMessage,
-      error: error,
-    });
+    const errors = transformToIssue(error);
+    if (errors.length) {
+      formRef.value?.setErrors(errors as any);
+    }
 
-    // Extract error message from various possible locations
     const errorMessage =
       error.data?.message ||
       error.data?.statusMessage ||
@@ -82,7 +86,11 @@ async function handleSubmit(formData: any) {
 
     <!-- Form Card -->
     <UCard class="max-w-4xl">
-      <AdminBlogForm :is-loading="loading" @submit="handleSubmit" />
+      <AdminBlogForm
+        ref="formRef"
+        :is-loading="loading"
+        @submit="handleSubmit"
+      />
     </UCard>
   </div>
 </template>

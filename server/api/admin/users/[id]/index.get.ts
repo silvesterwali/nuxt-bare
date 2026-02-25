@@ -1,13 +1,16 @@
 import { useValidatedParams } from "h3-zod";
 
-export default defineProtectedHandler({ roles: ["admin"] }, async (event) => {
-  const { id } = await useValidatedParams(event, paramsIdSchema);
+export default defineAuthHandler(
+  async (event) => {
+    const { id } = await useValidatedParams(event, paramsIdSchema);
 
-  const user = await getUserById(id);
+    const userData = await getUserById(id);
 
-  if (!user) {
-    throw createError({ statusCode: 404, statusMessage: "User not found" });
-  }
+    if (!userData) {
+      throw createError({ statusCode: 404, statusMessage: "User not found" });
+    }
 
-  return jsonResponse(user);
-});
+    return jsonResponse(userData);
+  },
+  ["admin"],
+);

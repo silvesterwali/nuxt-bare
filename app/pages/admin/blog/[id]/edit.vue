@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
+import type { BlogCategory, BlogTag, BlogFormData } from "@/types/blog";
 
 definePageMeta({
   layout: "admin",
@@ -15,8 +16,15 @@ const postLoading = ref(true);
 const {
   data: post,
   error: fetchError,
-  pending,
-} = await useFetch(`/api/admin/blog/${postId.value}`);
+  isPending: pending,
+} = usePostQuery(postId);
+
+// form ref for validation errors
+import type { Ref, ComponentPublicInstance } from "vue";
+const formRef: Ref<ComponentPublicInstance<{
+  setErrors(errs: any[]): void;
+}> | null> = ref(null);
+const { transformToIssue } = useValidateHelper();
 
 watch(
   pending,
@@ -29,7 +37,6 @@ watch(
 watch(
   post,
   (newPost) => {
-    console.log("Post loaded:", newPost);
     postLoading.value = false;
   },
   { immediate: true },
@@ -37,43 +44,46 @@ watch(
 
 // Transform API response to form data for current locale
 const { locale } = useI18n();
-const formPost = computed(() => {
-  if (!post.value?.data) {
-    console.log("Post data not available:", post.value);
-    return null;
+const formPost = computed<
+  | (BlogFormData & {
+      id?: number;
+      categories?: BlogCategory[];
+      tags?: BlogTag[];
+    })
+  | undefined
+>(() => {
+  if (!post.value) {
+    return undefined;
   }
-  const p = post.value.data;
-  console.log("Post data:", { p, locale: locale.value });
+  const p = post.value as any;
   return {
     id: p.id,
-    slug: p.slug?.[locale.value] || p.slug?.en || "",
-    title: p.title?.[locale.value] || p.title?.en || "",
+    slug: (p.slug as any)?.[locale.value] || (p.slug as any)?.en || "",
+    title: (p.title as any)?.[locale.value] || (p.title as any)?.en || "",
     shortDescription:
-      p.shortDescription?.[locale.value] || p.shortDescription?.en || "",
-    content: p.content?.[locale.value] || p.content?.en || "",
+      (p.shortDescription as any)?.[locale.value] ||
+      (p.shortDescription as any)?.en ||
+      "",
+    content: (p.content as any)?.[locale.value] || (p.content as any)?.en || "",
     status: p.status || "draft",
+    categories: p.categories || [],
+    tags: p.tags || [],
   };
 });
 
 async function handleSubmit(formData: any) {
   loading.value = true;
   try {
-    // Merge with existing data to preserve other languages
+    // simple values; API will localize via normalize
     const updateData = {
-      slug: { ...post.value?.data?.slug, [locale.value]: formData.slug },
-      title: { ...post.value?.data?.title, [locale.value]: formData.title },
-      shortDescription: {
-        ...post.value?.data?.shortDescription,
-        [locale.value]: formData.shortDescription,
-      },
-      content: {
-        ...post.value?.data?.content,
-        [locale.value]: formData.content,
-      },
+      slug: formData.slug,
+      title: formData.title,
+      shortDescription: formData.shortDescription,
+      content: formData.content,
       status: formData.status,
+      categoryIds: formData.categoryIds || [],
+      tagIds: formData.tagIds || [],
     };
-
-    console.log("Updating blog post:", { postId: postId.value, updateData });
 
     const result = await $fetch(`/api/admin/blog/${postId.value}`, {
       method: "PUT",
@@ -94,7 +104,6 @@ async function handleSubmit(formData: any) {
       error: error,
     });
 
-    // Extract error message from various possible locations
     const errorMessage =
       error.data?.message ||
       error.data?.statusMessage ||
@@ -156,6 +165,7 @@ async function handleSubmit(formData: any) {
     <div v-else>
       <UCard class="max-w-4xl">
         <AdminBlogForm
+          ref="formRef"
           :post="formPost"
           :is-loading="loading"
           @submit="handleSubmit"

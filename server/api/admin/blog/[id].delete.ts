@@ -1,9 +1,8 @@
+import { useValidatedParams } from "h3-zod";
+
 export default defineAuthHandler(
-  async (event, { user }) => {
-    const id = Number(getRouterParam(event, "id"));
-    if (!id || isNaN(id)) {
-      throw createError({ statusCode: 400, statusMessage: "Invalid ID" });
-    }
+  async (event) => {
+    const { id } = await useValidatedParams(event, paramsIdSchema);
 
     const existing = await postRepository.findById(id);
     if (!existing) {

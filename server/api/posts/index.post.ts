@@ -1,18 +1,11 @@
-import { z } from "zod";
 import { useValidatedBody } from "h3-zod";
+import { PublicCreatePostBodySchema } from "../../utils/post/schema.ts";
 
-const BodySchema = z.object({
-  title: z.string().min(1).max(100),
-  content: z.string().min(1),
-  userId: z.number().int().positive(),
-  published: z.boolean().optional().default(false),
-});
-
-export default defineEventHandler(async (event) => {
+export default defineAuthHandler(async (event) => {
   try {
     const { title, content, userId, published } = await useValidatedBody(
       event,
-      BodySchema,
+      PublicCreatePostBodySchema,
     );
 
     // Using PostRepository
@@ -20,7 +13,7 @@ export default defineEventHandler(async (event) => {
       title,
       content,
       userId,
-      published,
+      status: published ? "published" : "draft",
     });
 
     return jsonResponse(newPost, "Post created");

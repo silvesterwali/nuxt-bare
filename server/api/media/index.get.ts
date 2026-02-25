@@ -1,12 +1,4 @@
-import { z } from "zod";
 import { useValidatedQuery } from "h3-zod";
-
-const querySchema = z.object({
-  type: z.enum(["image", "document"]).optional(),
-  privacy: z.enum(["private", "public"]).optional(),
-  page: z.string().optional(),
-  limit: z.string().optional(),
-});
 
 export default defineEventHandler(async (event) => {
   // Require authentication
@@ -19,7 +11,7 @@ export default defineEventHandler(async (event) => {
   }
   const { type, privacy, page, limit } = await useValidatedQuery(
     event,
-    querySchema,
+    MediaQuerySchema,
   );
 
   const { page: validPage, limit: validLimit } = validatePaginationParams({

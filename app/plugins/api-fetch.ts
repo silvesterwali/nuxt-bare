@@ -1,9 +1,8 @@
 export default defineNuxtPlugin(() => {
-  // Lazy-load useI18n to avoid initialization timing issues
   globalThis.$fetch = $fetch.create({
     onRequest({ options }) {
       try {
-        const { locale } = useI18n();
+        const { locale } = useNuxtApp().$i18n;
         options.headers = options.headers || {};
 
         // Ensure Headers object compatibility if it's already a Headers instance

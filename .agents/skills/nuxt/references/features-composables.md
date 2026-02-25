@@ -155,7 +155,7 @@ export function formatDate(date: Date) {
 }
 
 export function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("en", {
     style: "currency",
     currency: "USD",
   }).format(amount);

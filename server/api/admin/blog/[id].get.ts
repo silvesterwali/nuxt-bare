@@ -1,17 +1,21 @@
-export default defineAuthHandler(
-  async (event, { user, language }) => {
-    const id = Number(getRouterParam(event, "id"));
-    if (!id || isNaN(id)) {
-      throw createError({ statusCode: 400, statusMessage: "Invalid ID" });
-    }
+import { useValidatedParams } from "h3-zod";
 
+export default defineAuthHandler(
+  async (event) => {
+    const { id } = await useValidatedParams(event, paramsIdSchema);
+
+    // Get raw post data with translation objects for editing
     const post = await postRepository.findById(id);
     if (!post) {
       throw createError({ statusCode: 404, statusMessage: "Post not found" });
     }
 
-    // Return full post with multi-language data for editing
-    return jsonResponse(post, "Post retrieved");
+    // Add categories and tags
+    const categories = await getLocalizedCategories(id, "en");
+    const tags = await getLocalizedTags(id, "en");
+
+    // Return full post with multi-language translation objects for editing
+    return jsonResponse({ ...post, categories, tags }, "Post retrieved");
   },
   ["admin"],
 );

@@ -22,6 +22,18 @@ const links: NavigationMenuItem[][] = [
       onSelect: () => (open.value = false),
     },
     {
+      label: "Categories",
+      to: "/admin/categories",
+      icon: "i-lucide-folder",
+      onSelect: () => (open.value = false),
+    },
+    {
+      label: "Tags",
+      to: "/admin/tags",
+      icon: "i-lucide-tag",
+      onSelect: () => (open.value = false),
+    },
+    {
       label: "Users",
       to: "/admin/users",
       icon: "i-lucide-users",

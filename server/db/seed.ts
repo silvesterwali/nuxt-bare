@@ -21,8 +21,12 @@ async function seed() {
   console.log("🌱 Seeding database...");
 
   try {
-    // Clear existing data
+    // Clear existing data (order matters due to foreign keys)
+    await db.delete(schema.postTags);
+    await db.delete(schema.postCategories);
     await db.delete(schema.posts);
+    await db.delete(schema.categories);
+    await db.delete(schema.tags);
     await db.delete(schema.userProfiles);
     await db.delete(schema.users);
 
@@ -80,23 +84,93 @@ async function seed() {
     await db.insert(schema.userProfiles).values(profilesData);
     console.log(`✅ Inserted ${profilesData.length} profiles`);
 
-    // Insert sample posts
-    const postsData = Array.from({ length: 20 }).map(() => ({
-      slug: { en: faker.lorem.slug(), id: faker.lorem.slug() },
-      title: { en: faker.lorem.sentence(), id: faker.lorem.sentence() },
-      shortDescription: {
-        en: faker.lorem.sentences(2),
-        id: faker.lorem.sentences(2),
-      },
-      content: { en: faker.lorem.paragraphs(), id: faker.lorem.paragraphs() },
-      userId: faker.helpers.arrayElement(sampleUsers).id,
-      status: faker.helpers.arrayElement(["draft", "published", "archived"]),
-      createdAt: faker.date.past(),
+    // Insert sample categories
+    const categoriesData = Array.from({ length: 10 }).map(() => ({
+      name: { en: faker.lorem.word() },
+      slug: { en: faker.lorem.slug() },
+      description: { en: faker.lorem.sentence() },
+      color: faker.helpers.arrayElement([
+        "#3b82f6",
+        "#10b981",
+        "#f59e0b",
+        "#ef4444",
+        "#8b5cf6",
+      ]),
+      createdAt: new Date(),
       updatedAt: new Date(),
     }));
 
-    await db.insert(schema.posts).values(postsData);
-    console.log(`✅ Inserted ${postsData.length} posts`);
+    const insertedCats = await db
+      .insert(schema.categories)
+      .values(categoriesData)
+      .returning();
+    console.log(`✅ Inserted ${insertedCats.length} categories`);
+
+    // Insert sample tags
+    const tagsData = Array.from({ length: 15 }).map(() => ({
+      name: { en: faker.lorem.word() },
+      slug: { en: faker.lorem.slug() },
+      color: faker.helpers.arrayElement([
+        "#3b82f6",
+        "#10b981",
+        "#f59e0b",
+        "#ef4444",
+        "#8b5cf6",
+      ]),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }));
+
+    const insertedTags = await db
+      .insert(schema.tags)
+      .values(tagsData)
+      .returning();
+    console.log(`✅ Inserted ${insertedTags.length} tags`);
+
+    // Insert sample posts
+    const postsData = Array.from({ length: 20 }).map(() => {
+      const now = new Date();
+      return {
+        slug: { en: faker.lorem.slug() },
+        title: { en: faker.lorem.sentence() },
+        shortDescription: { en: faker.lorem.sentences(2) },
+        content: { en: faker.lorem.paragraphs() },
+        userId: faker.helpers.arrayElement(sampleUsers).id,
+        status: faker.helpers.arrayElement(["draft", "published", "archived"]),
+        createdAt: now,
+        updatedAt: now,
+      };
+    });
+
+    const insertedPosts = await db
+      .insert(schema.posts)
+      .values(postsData)
+      .returning();
+    console.log(`✅ Inserted ${insertedPosts.length} posts`);
+
+    // randomly associate categories/tags with posts
+    for (const post of insertedPosts) {
+      const catCount = faker.number.int({ min: 0, max: 3 });
+      for (let i = 0; i < catCount; i++) {
+        // pick random category from insertedCats
+        const category = faker.helpers.arrayElement(insertedCats as any[]);
+        await db
+          .insert(schema.postCategories)
+          .values({
+            postId: post.id,
+            categoryId: category.id,
+            createdAt: new Date(),
+          });
+      }
+      const tagCount = faker.number.int({ min: 0, max: 5 });
+      for (let i = 0; i < tagCount; i++) {
+        const tag = faker.helpers.arrayElement(insertedTags as any[]);
+        await db
+          .insert(schema.postTags)
+          .values({ postId: post.id, tagId: tag.id, createdAt: new Date() });
+      }
+    }
+    console.log(`✅ Associated categories/tags with posts`);
 
     console.log("🎉 Database seeded successfully!");
   } catch (error) {

@@ -1,5 +1,8 @@
-export default defineProtectedHandler({ roles: ["admin"] }, async (event) => {
-  const stats = await getUserStats();
+export default defineAuthHandler(
+  async (_event) => {
+    const stats = await getUserStats();
 
-  return stats;
-});
+    return stats;
+  },
+  ["admin"],
+);

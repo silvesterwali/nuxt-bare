@@ -23,12 +23,6 @@ const items: EditorToolbarItem[][] = [
       items: [
         {
           kind: "heading",
-          level: 1,
-          icon: "i-lucide-heading-1",
-          label: "Heading 1",
-        },
-        {
-          kind: "heading",
           level: 2,
           icon: "i-lucide-heading-2",
           label: "Heading 2",
@@ -38,6 +32,12 @@ const items: EditorToolbarItem[][] = [
           level: 3,
           icon: "i-lucide-heading-3",
           label: "Heading 3",
+        },
+        {
+          kind: "heading",
+          level: 4,
+          icon: "i-lucide-heading-4",
+          label: "Heading 4",
         },
       ],
     },
@@ -108,12 +108,6 @@ const items: EditorToolbarItem[][] = [
 
 <template>
   <div class="space-y-2">
-    <div
-      class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 font-medium"
-    >
-      Body
-    </div>
-
     <UEditor
       :model-value="modelValue"
       @update:model-value="$emit('update:modelValue', $event)"
@@ -123,7 +117,7 @@ const items: EditorToolbarItem[][] = [
         placeholder || 'Write your content here... Markdown supported'
       "
       :disabled="readonly"
-      class="w-full border rounded-lg overflow-hidden"
+      class="w-full border border-default rounded-lg overflow-hidden"
       :ui="{ base: 'prose prose-sm dark:prose-invert max-w-none p-4' }"
     >
       <UEditorToolbar

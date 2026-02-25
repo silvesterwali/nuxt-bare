@@ -1,14 +1,9 @@
-import { z } from "zod";
 import { useValidatedBody } from "h3-zod";
-
-const BodySchema = z.object({
-  name: z.string().min(1).max(100),
-  email: z.email(),
-});
+import { CreateUserBodySchema } from "../../utils/user/schema.ts";
 
 export default defineEventHandler(async (event) => {
   try {
-    const { name, email } = await useValidatedBody(event, BodySchema);
+    const { name, email } = await useValidatedBody(event, CreateUserBodySchema);
 
     // Using UserRepository from Domain Layer
     const newUser = await userRepository.create({

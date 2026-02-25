@@ -127,6 +127,61 @@ export const posts = sqliteTable("posts", {
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 });
 
+// Categories with localized names
+export const categories = sqliteTable("categories", {
+  id: integer("id").primaryKey(),
+  name: text("name", { mode: "json" })
+    .$type<Record<string, string>>()
+    .notNull(),
+  slug: text("slug", { mode: "json" })
+    .$type<Record<string, string>>()
+    .notNull(),
+  description: text("description", { mode: "json" }).$type<
+    Record<string, string>
+  >(),
+  color: text("color").default("#3b82f6"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+});
+
+// Tags with localized names
+export const tags = sqliteTable("tags", {
+  id: integer("id").primaryKey(),
+  name: text("name", { mode: "json" })
+    .$type<Record<string, string>>()
+    .notNull(),
+  slug: text("slug", { mode: "json" })
+    .$type<Record<string, string>>()
+    .notNull(),
+  color: text("color").default("#06b6d4"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+});
+
+// Junction table for posts and categories (many-to-many)
+export const postCategories = sqliteTable("post_categories", {
+  id: integer("id").primaryKey(),
+  postId: integer("post_id")
+    .notNull()
+    .references(() => posts.id, { onDelete: "cascade" }),
+  categoryId: integer("category_id")
+    .notNull()
+    .references(() => categories.id, { onDelete: "cascade" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+});
+
+// Junction table for posts and tags (many-to-many)
+export const postTags = sqliteTable("post_tags", {
+  id: integer("id").primaryKey(),
+  postId: integer("post_id")
+    .notNull()
+    .references(() => posts.id, { onDelete: "cascade" }),
+  tagId: integer("tag_id")
+    .notNull()
+    .references(() => tags.id, { onDelete: "cascade" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+});
+
 export const usersRelations = relations(users, ({ one, many }) => ({
   profile: one(userProfiles, {
     fields: [users.id],
@@ -161,7 +216,7 @@ export const emailVerificationsRelations = relations(
   }),
 );
 
-export const postsRelations = relations(posts, ({ one }) => ({
+export const postsRelations = relations(posts, ({ one, many }) => ({
   author: one(users, {
     fields: [posts.userId],
     references: [users.id],
@@ -169,6 +224,38 @@ export const postsRelations = relations(posts, ({ one }) => ({
   featuredImage: one(media, {
     fields: [posts.featuredImageId],
     references: [media.id],
+  }),
+  categories: many(postCategories),
+  tags: many(postTags),
+}));
+
+export const categoriesRelations = relations(categories, ({ many }) => ({
+  posts: many(postCategories),
+}));
+
+export const tagsRelations = relations(tags, ({ many }) => ({
+  posts: many(postTags),
+}));
+
+export const postCategoriesRelations = relations(postCategories, ({ one }) => ({
+  post: one(posts, {
+    fields: [postCategories.postId],
+    references: [posts.id],
+  }),
+  category: one(categories, {
+    fields: [postCategories.categoryId],
+    references: [categories.id],
+  }),
+}));
+
+export const postTagsRelations = relations(postTags, ({ one }) => ({
+  post: one(posts, {
+    fields: [postTags.postId],
+    references: [posts.id],
+  }),
+  tag: one(tags, {
+    fields: [postTags.tagId],
+    references: [tags.id],
   }),
 }));
 

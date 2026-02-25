@@ -1,17 +1,16 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
-import type { FormSubmitEvent } from "#ui/types";
-
-interface BlogFormData {
-  slug: string;
-  title: string;
-  shortDescription: string;
-  content: string;
-  status: "draft" | "published" | "archived";
-}
+import { ref, watch, computed } from "vue";
+import type { FormSubmitEvent } from "@nuxt/ui";
+import type { BlogCategory, BlogTag, BlogFormData } from "@/types/blog";
 
 interface Props {
-  post?: BlogFormData & { id?: number };
+  post?:
+    | (BlogFormData & {
+        id?: number;
+        categories?: BlogCategory[];
+        tags?: BlogTag[];
+      })
+    | null;
   isLoading?: boolean;
 }
 
@@ -22,13 +21,21 @@ interface Emits {
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
+const { data: categories } = useCategoriesQuery();
+const { data: tags } = useTagsQuery();
+
 const form = ref<BlogFormData>({
   slug: "",
   title: "",
   shortDescription: "",
   content: "",
   status: "draft",
+  categoryIds: [],
+  tagIds: [],
 });
+
+const selectedCategoryIds = ref<number[]>([]);
+const selectedTagIds = ref<number[]>([]);
 
 // Watch for prop changes to populate form
 watch(
@@ -41,17 +48,38 @@ watch(
         shortDescription: newPost.shortDescription || "",
         content: newPost.content || "",
         status: newPost.status || "draft",
+        categoryIds: [],
+        tagIds: [],
       };
+      selectedCategoryIds.value = (newPost.categories || []).map((c) => c.id);
+      selectedTagIds.value = (newPost.tags || []).map((t) => t.id);
     }
   },
   { immediate: true },
 );
 
-async function onSubmit(event: FormSubmitEvent<BlogFormData>) {
-  emit("submit", event.data);
-}
+// Category and tag options for selectors
+const categoryOptions = computed(() =>
+  (categories.value || []).map((c) => ({
+    id: c.id,
+    label: c.name,
+  })),
+);
 
-const { locale } = useI18n();
+const tagOptions = computed(() =>
+  (tags.value || []).map((t) => ({
+    id: t.id,
+    label: t.name,
+  })),
+);
+
+async function onSubmit(event: FormSubmitEvent<BlogFormData>) {
+  emit("submit", {
+    ...event.data,
+    categoryIds: selectedCategoryIds.value,
+    tagIds: selectedTagIds.value,
+  });
+}
 
 const statusOptions = [
   { label: "Draft", value: "draft" },
@@ -63,21 +91,7 @@ const statusOptions = [
 <template>
   <div class="space-y-6">
     <!-- Language Alert -->
-    <div
-      class="rounded-lg bg-blue-50 p-4 text-sm text-blue-900 dark:bg-blue-900/20 dark:text-blue-200"
-    >
-      <div class="flex items-start gap-2">
-        <UIcon name="i-lucide-info" class="mt-0.5 flex-shrink-0" />
-        <div>
-          <p class="font-medium">Language-Specific Content</p>
-          <p class="text-xs mt-1">
-            You are currently editing in
-            <strong>{{ locale.toUpperCase() }}</strong> language. Changes will
-            only affect this language's version.
-          </p>
-        </div>
-      </div>
-    </div>
+    <CommonLanguageContentViewer />
 
     <!-- Form -->
     <UForm :state="form" @submit="onSubmit" class="space-y-4">
@@ -88,6 +102,7 @@ const statusOptions = [
           placeholder="my-awesome-post"
           icon="i-lucide-link"
           :disabled="isLoading"
+          class="w-full"
         />
         <template #hint>
           This will be used in the URL. Use lowercase letters, numbers, and
@@ -99,38 +114,82 @@ const statusOptions = [
       <UFormField label="Title" name="title" required>
         <UInput
           v-model="form.title"
-          placeholder="Post title"
-          icon="i-lucide-heading-2"
+          placeholder="Blog title"
           :disabled="isLoading"
+          class="w-full"
         />
       </UFormField>
 
       <!-- Short Description -->
-      <UFormField label="Short Description (Optional)" name="shortDescription">
+      <UFormField label="Short Description," name="shortDescription">
         <UTextarea
           v-model="form.shortDescription"
           placeholder="Brief summary or excerpt for previews"
           :rows="3"
           :disabled="isLoading"
+          class="w-full"
         />
+        <template #description>
+          This is a brief summary that will appear in blog listings and previews
+          also for SEO meta description. Keep it concise and engaging.
+        </template>
       </UFormField>
 
       <!-- Content Editor -->
       <UFormField label="Content" name="content" required>
-        <AdminBlogContentEditor
+        <CommonContentEditor
           v-model="form.content"
           placeholder="Write your post content here..."
         />
       </UFormField>
 
+      <!-- Categories -->
+      <UFormField label="Categories" name="categories">
+        <USelectMenu
+          v-model="selectedCategoryIds"
+          :items="categoryOptions"
+          multiple
+          placeholder="Select categories..."
+          :disabled="isLoading"
+          searchable
+          label-key="label"
+          value-key="id"
+          class="w-full"
+          clear
+        />
+        <template #description>
+          Assign zero or more categories to organize this post.
+        </template>
+      </UFormField>
+
+      <!-- Tags -->
+      <UFormField label="Tags" name="tags">
+        <USelectMenu
+          v-model="selectedTagIds"
+          :items="tagOptions"
+          multiple
+          placeholder="Select tags..."
+          :disabled="isLoading"
+          searchable
+          label-key="label"
+          value-key="id"
+          class="w-full"
+          clear
+        />
+        <template #description>
+          Assign zero or more tags to help readers find related content.
+        </template>
+      </UFormField>
+
       <!-- Status -->
       <UFormField label="Status" name="status">
-        <USelect
+        <USelectMenu
           v-model="form.status"
-          :options="statusOptions"
-          option-attribute="label"
-          value-attribute="value"
+          :items="statusOptions"
+          value-key="value"
+          label-key="label"
           :disabled="isLoading"
+          class="w-full"
         />
       </UFormField>
 
