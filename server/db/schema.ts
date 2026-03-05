@@ -83,6 +83,8 @@ export const media = sqliteTable("media", {
   width: integer("width"),
   height: integer("height"),
   description: text("description"),
+  path: text("path"),
+  full_path : text("full_path"),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 });
