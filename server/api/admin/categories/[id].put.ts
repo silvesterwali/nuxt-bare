@@ -1,11 +1,13 @@
-import { useValidatedBody, useValidatedParams } from "h3-zod";
-
+import { H3Error } from "h3";
 export default defineAuthHandler(
   async (event, { language }) => {
-    const { id } = await useValidatedParams(event, paramsIdSchema);
+    const { id } = await getValidatedRouterParams(event, paramsIdSchema.parse);
 
     try {
-      const data = await useValidatedBody(event, UpdateCategoryBodySchema);
+      const data = await readValidatedBody(
+        event,
+        UpdateCategoryBodySchema.parse,
+      );
 
       const existing = await getCategoryByIdRaw(id);
       if (!existing) {
@@ -35,10 +37,18 @@ export default defineAuthHandler(
       const result = await updateCategory(id, merged);
       return jsonResponse(result[0], "Category updated successfully");
     } catch (error) {
+      if (error instanceof H3Error) {
+        throw createError({
+          statusCode: error.statusCode,
+          statusMessage: error.statusMessage,
+          data: JSON.parse(error.data.message),
+        });
+      }
+
       throw createError({
-        statusCode: 400,
-        statusMessage:
-          error instanceof Error ? error.message : "Failed to update category",
+        statusCode: 500,
+        statusMessage: "Internal Server Error",
+        data: process.env.NODE_ENV === "development" && error instanceof Error,
       });
     }
   },

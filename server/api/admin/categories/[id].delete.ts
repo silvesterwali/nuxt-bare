@@ -1,8 +1,6 @@
-import { useValidatedParams } from "h3-zod";
-
 export default defineAuthHandler(
   async (event) => {
-    const { id } = await useValidatedParams(event, paramsIdSchema);
+    const { id } = await getValidatedRouterParams(event, paramsIdSchema.parse);
 
     try {
       const existing = await getCategoryById(id);

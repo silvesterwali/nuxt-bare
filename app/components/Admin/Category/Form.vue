@@ -7,11 +7,15 @@ interface OtherProps {
   category: BlogCategory | null;
 }
 
-const open = defineModel<boolean>();
+// `open` is a v-model prop from parent; specify name so model binding works
+const open = defineModel<boolean>("open", { default: false });
 const props = defineProps<OtherProps>();
 
-const { mutate: createCategory } = useCategoryCreateMutation();
-const { mutate: updateCategory } = useCategoryUpdateMutation();
+// prefer mutateAsync so we can await completion and close modal only on success
+const { mutateAsync: createCategory, isLoading: creating } =
+  useCategoryCreateMutation();
+const { mutateAsync: updateCategory, isLoading: updating } =
+  useCategoryUpdateMutation();
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -19,7 +23,17 @@ const schema = z.object({
   color: z.string().optional(),
 });
 
-type FormData = z.infer<typeof schema>;
+// track server‑side validation issues (zod `ZodIssue[]`)
+import type { ZodIssue } from "zod";
+const issues = ref<ZodIssue[]>([]);
+const fieldErrors = computed(() => {
+  const map: Record<string, string> = {};
+  for (const i of issues.value) {
+    const key = i.path[0] as string;
+    if (!map[key]) map[key] = i.message;
+  }
+  return map;
+});
 
 const state = reactive({
   name: "",
@@ -27,7 +41,7 @@ const state = reactive({
   color: "",
 });
 
-const isLoading = ref(false);
+const isLoading = computed(() => creating.value || updating.value);
 const modalTitle = computed(() =>
   props.categoryId ? "Edit Category" : "New Category",
 );
@@ -46,6 +60,9 @@ watchEffect(() => {
 
 async function onSubmit() {
   try {
+    // clear any previous issues before submitting
+    issues.value = [];
+
     const data = {
       name: state.name,
       description: state.description || undefined,
@@ -53,17 +70,25 @@ async function onSubmit() {
     };
 
     if (props.categoryId) {
-      updateCategory({
+      await updateCategory({
         id: props.categoryId,
         data,
       });
     } else {
-      createCategory(data);
+      await createCategory(data);
     }
 
+    // only close when mutation succeeded
     open.value = false;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Form submission error:", error);
+    let array: any[] = [];
+    if (Array.isArray(error)) {
+      array = error;
+    } else if (Array.isArray(error?.data)) {
+      array = error.data;
+    }
+    issues.value = array as ZodIssue[];
   }
 }
 
@@ -73,7 +98,7 @@ function close() {
 </script>
 
 <template>
-  <UModal v-model="open" :title="modalTitle" @close="close">
+  <UModal v-model:open="open" :title="modalTitle" @close="close">
     <template #body>
       <div class="flex flex-col gap-4">
         <CommonLanguageContentViewer />
@@ -83,6 +108,9 @@ function close() {
             placeholder="Enter category name"
             class="w-full"
           />
+          <template #hint v-if="fieldErrors.name">
+            <span class="text-red-500">{{ fieldErrors.name }}</span>
+          </template>
         </UFormField>
 
         <UFormField label="Description">
@@ -92,6 +120,9 @@ function close() {
             :rows="3"
             class="w-full"
           />
+          <template #hint v-if="fieldErrors.description">
+            <span class="text-red-500">{{ fieldErrors.description }}</span>
+          </template>
         </UFormField>
 
         <UFormField label="Color">

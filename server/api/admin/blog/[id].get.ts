@@ -1,8 +1,8 @@
-import { useValidatedParams } from "h3-zod";
+import { getValidatedRouterParams } from "h3";
 
 export default defineAuthHandler(
   async (event) => {
-    const { id } = await useValidatedParams(event, paramsIdSchema);
+    const { id } = await getValidatedRouterParams(event, paramsIdSchema.parse);
 
     // Get raw post data with translation objects for editing
     const post = await postRepository.findById(id);

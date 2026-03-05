@@ -1,4 +1,4 @@
-import { useValidatedBody } from "h3-zod";
+import { readValidatedBody } from "h3";
 
 export default defineEventHandler(async (event) => {
   const clientIP = getClientIP(event);
@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   // Rate limiting
   await checkRateLimit(`login:${clientIP}`, RATE_LIMITS.LOGIN);
 
-  const body = await useValidatedBody(event, loginSchema);
+  const body = await readValidatedBody(event, loginSchema.parse);
 
   // Use AuthService (Application Layer)
   const user = await authService.login(body);

@@ -1,8 +1,6 @@
-import { useValidatedParams } from "h3-zod";
-
 export default defineAuthHandler(async (event, { user }) => {
   const session = user;
-  const { id } = await useValidatedParams(event, paramsIdSchema);
+  const { id } = await getValidatedRouterParams(event, paramsIdSchema.parse);
 
   // Delete the media
   const deletedMedia = await deleteMedia(id, session.id);

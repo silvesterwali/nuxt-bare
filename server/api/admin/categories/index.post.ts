@@ -1,15 +1,12 @@
-import { useValidatedBody } from "h3-zod";
-
 export default defineAuthHandler(
   async (event, { language }) => {
+    const {
+      name,
+      slug: inputSlug,
+      description,
+      color,
+    } = await readValidatedBody(event, CreateCategoryBodySchema.parse);
     try {
-      const {
-        name,
-        slug: inputSlug,
-        description,
-        color,
-      } = await useValidatedBody(event, CreateCategoryBodySchema);
-
       // Generate slug from name if not provided
       const slug = inputSlug || generateSlugFromInput(name);
 
@@ -23,9 +20,12 @@ export default defineAuthHandler(
       return jsonResponse(result[0], "Category created successfully");
     } catch (error) {
       throw createError({
-        statusCode: 400,
-        statusMessage:
-          error instanceof Error ? error.message : "Failed to create category",
+        statusCode: 500,
+        statusMessage: "Internal Server Error",
+        data:
+          process.env.NODE_ENV === "development" && error instanceof Error
+            ? { message: error.message, stack: error.stack }
+            : undefined,
       });
     }
   },

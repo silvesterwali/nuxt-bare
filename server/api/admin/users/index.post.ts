@@ -1,9 +1,8 @@
-import { useValidatedBody } from "h3-zod";
 import type { UserRole } from "~/types/db";
 
 export default defineAuthHandler(
   async (event) => {
-    const body = await useValidatedBody(event, createUserSchema);
+    const body = await readValidatedBody(event, createUserSchema.parse);
 
     // Use authService to ensure consistent creation logic
     const result = await authService.register({

@@ -33,6 +33,9 @@ declare module "#auth-utils" {
   interface SecureSessionData {
     // if you store extra secure session data
   }
+
+  type hashPassword = (password: string) => Promise<string>;
+  type verifyPassword = (hash: string, password: string) => Promise<boolean>;
 }
 
 export {};

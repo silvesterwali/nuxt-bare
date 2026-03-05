@@ -1,7 +1,5 @@
-import { useValidatedQuery } from "h3-zod";
-
 export default defineAuthHandler(async (event) => {
-  const filters = await useValidatedQuery(event, adminUserQuerySchema);
+  const filters = await getValidatedQuery(event, adminUserQuerySchema.parse);
 
   // Get users with filters and pagination
   return await getUsers(

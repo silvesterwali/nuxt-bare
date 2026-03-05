@@ -1,3 +1,4 @@
+
 export const passwordService = {
   async hash(password: string): Promise<string> {
     return await hashPassword(password);

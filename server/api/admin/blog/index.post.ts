@@ -1,5 +1,3 @@
-import { useValidatedBody } from "h3-zod";
-
 export default defineAuthHandler(
   async (event, { user, language }) => {
     try {
@@ -11,7 +9,7 @@ export default defineAuthHandler(
         status,
         categoryIds,
         tagIds,
-      } = await useValidatedBody(event, CreatePostBodySchema);
+      } = await readValidatedBody(event, CreatePostBodySchema.parse);
 
       const newPost = await postRepository.create({
         slug: normalize(slug, language),
@@ -40,10 +38,21 @@ export default defineAuthHandler(
       const postWithRelations = await getPostById(newPost.id, language);
       return jsonResponse(postWithRelations, "Blog post created successfully");
     } catch (error) {
+      if (error instanceof H3Error) {
+        throw createError({
+          statusCode: error.statusCode,
+          statusMessage: error.statusMessage,
+          data: JSON.parse(error.data.message),
+        });
+      }
+
       throw createError({
-        statusCode: 400,
-        statusMessage:
-          error instanceof Error ? error.message : "Invalid post data",
+        statusCode: 500,
+        statusMessage: "Internal Server Error",
+        data:
+          process.env.NODE_ENV === "development" && error instanceof Error
+            ? { message: error.message, stack: error.stack }
+            : undefined,
       });
     }
   },

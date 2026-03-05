@@ -173,7 +173,7 @@ const columns: TableColumn<BlogCategory>[] = [
     />
 
     <UModal
-      v-model="deleteConfirmOpen"
+      v-model:open="deleteConfirmOpen"
       title="Delete Category"
       icon="i-lucide-trash-2"
     >

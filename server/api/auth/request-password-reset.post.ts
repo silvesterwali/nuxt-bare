@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { useValidatedBody } from "h3-zod";
+import { readValidatedBody } from "h3";
 // import { findUserByEmail, createUserToken } from "../../utils/auth";
 
 const resetRequestSchema = z.object({
@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
     RATE_LIMITS.PASSWORD_RESET,
   );
 
-  const body = await useValidatedBody(event, resetRequestSchema); // Note: Missing semicolon in original
+  const body = await readValidatedBody(event, resetRequestSchema.parse);
 
   // Use AuthService
   const result = await authService.requestPasswordReset(body.email);

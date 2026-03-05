@@ -1,16 +1,15 @@
-import { useValidatedBody } from "h3-zod";
+import { H3Error } from "h3";
 
 export default defineAuthHandler(
   async (event, { language }) => {
     try {
-      const {
-        name,
-        slug: inputSlug,
-        color,
-      } = await useValidatedBody(event, CreateTagBodySchema);
+      const { name, color } = await readValidatedBody(
+        event,
+        CreateTagBodySchema.parse,
+      );
 
-      // Generate slug from name if not provided
-      const slug = inputSlug || generateSlugFromInput(name);
+      // Generate slug from name
+      const slug = generateSlugFromInput(name);
 
       const result = await createTag({
         name: normalize(name, language),
@@ -20,10 +19,18 @@ export default defineAuthHandler(
 
       return jsonResponse(result[0], "Tag created successfully");
     } catch (error) {
+      if (error instanceof H3Error) {
+        throw createError({
+          statusCode: error.statusCode,
+          statusMessage: error.statusMessage,
+          data: JSON.parse(error.data.message),
+        });
+      }
+
       throw createError({
-        statusCode: 400,
-        statusMessage:
-          error instanceof Error ? error.message : "Failed to create tag",
+        statusCode: 500,
+        statusMessage: "Internal Server Error",
+        data: process.env.NODE_ENV === "development" && error instanceof Error,
       });
     }
   },

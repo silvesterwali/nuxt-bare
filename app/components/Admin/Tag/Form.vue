@@ -7,11 +7,13 @@ interface OtherProps {
   tag: BlogTag | null;
 }
 
-const open = defineModel<boolean>();
+// bind `open` prop properly so parent v-model updates work
+const open = defineModel<boolean>("open", { default: false });
 const props = defineProps<OtherProps>();
 
-const { mutate: createTag } = useTagCreateMutation();
-const { mutate: updateTag } = useTagUpdateMutation();
+// use async mutations to await completion for closing modal
+const { mutateAsync: createTag, isLoading: creating } = useTagCreateMutation();
+const { mutateAsync: updateTag, isLoading: updating } = useTagUpdateMutation();
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -20,12 +22,24 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
+// validation issues returned from server
+import type { ZodIssue } from "zod";
+const issues = ref<ZodIssue[]>([]);
+const fieldErrors = computed(() => {
+  const map: Record<string, string> = {};
+  for (const i of issues.value) {
+    const key = i.path[0] as string;
+    if (!map[key]) map[key] = i.message;
+  }
+  return map;
+});
+
 const state = reactive({
   name: "",
   color: "",
 });
 
-const isLoading = ref(false);
+const isLoading = computed(() => creating.value || updating.value);
 const modalTitle = computed(() => (props.tagId ? "Edit Tag" : "New Tag"));
 
 watchEffect(() => {
@@ -40,23 +54,32 @@ watchEffect(() => {
 
 async function onSubmit() {
   try {
+    issues.value = [];
+
     const data = {
       name: state.name,
       color: state.color || undefined,
     };
 
     if (props.tagId) {
-      updateTag({
+      await updateTag({
         id: props.tagId,
         data,
       });
     } else {
-      createTag(data);
+      await createTag(data);
     }
 
     open.value = false;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Form submission error:", error);
+    let arr: any[] = [];
+    if (Array.isArray(error)) {
+      arr = error;
+    } else if (Array.isArray(error?.data)) {
+      arr = error.data;
+    }
+    issues.value = arr as ZodIssue[];
   }
 }
 
@@ -66,7 +89,7 @@ function close() {
 </script>
 
 <template>
-  <UModal v-model="open" :title="modalTitle" @close="close">
+  <UModal v-model:open="open" :title="modalTitle" @close="close">
     <template #body>
       <div class="flex flex-col gap-4">
         <CommonLanguageContentViewer />
@@ -76,6 +99,9 @@ function close() {
             placeholder="Enter tag name"
             class="w-full"
           />
+          <template #hint v-if="fieldErrors.name">
+            <span class="text-red-500">{{ fieldErrors.name }}</span>
+          </template>
         </UFormField>
 
         <UFormField label="Color">

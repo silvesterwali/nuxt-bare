@@ -1,4 +1,3 @@
-import { useValidatedBody } from "h3-zod";
 import type { MediaType, MediaPrivacy } from "~/types/db";
 
 export default defineEventHandler(async (event) => {
@@ -34,14 +33,11 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: "File is required" });
   }
 
-  // Validate metadata
-  const metadata = await useValidatedBody(event, uploadSchema, {
-    // pass object manually
-    body: {
-      type: typeData,
-      privacy: privacyData,
-      description: descriptionData,
-    },
+  // Validate metadata using Zod directly
+  const metadata = uploadSchema.parse({
+    type: typeData,
+    privacy: privacyData,
+    description: descriptionData,
   });
 
   // Create File object from form data

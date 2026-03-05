@@ -16,8 +16,7 @@ import { z } from "zod";
  * }
  */
 export const CreateTagBodySchema = z.object({
-  name: z.string(),
-  slug: z.string().optional(),
+  name: z.string().min(1, "Name is required"),
   color: z.string().optional(),
 });
 
@@ -25,11 +24,12 @@ export const CreateTagBodySchema = z.object({
  * Request body schema for updating a tag.
  * All fields are optional for partial updates while preserving other languages.
  */
-export const UpdateTagBodySchema = z.object({
-  name: z.string().optional(),
-  slug: z.string().optional(),
-  color: z.string().optional(),
-});
+export const UpdateTagBodySchema = z
+  .object({
+    name: z.string().min(1, "Name cannot be empty"),
+    color: z.string().optional(),
+  })
+  .partial(); // all fields optional for patch semantics
 
 // Type exports for TypeScript usage
 export type CreateTagBody = z.infer<typeof CreateTagBodySchema>;

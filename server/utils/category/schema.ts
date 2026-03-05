@@ -18,9 +18,11 @@ import { z } from "zod";
  * }
  */
 export const CreateCategoryBodySchema = z.object({
-  name: z.string(),
-  slug: z.string().optional(),
-  description: z.string().optional(),
+  name: z.string().min(1, "Name is required"),
+  // slug and description are optional on the request; we generate slug and
+  // accept an empty description if needed
+  slug: z.string().min(1, "Slug is required").optional(),
+  description: z.string().min(1, "Description is required").optional(),
   color: z.string().optional(),
 });
 
@@ -28,12 +30,14 @@ export const CreateCategoryBodySchema = z.object({
  * Request body schema for updating a category.
  * All fields are optional for partial updates while preserving other languages.
  */
-export const UpdateCategoryBodySchema = z.object({
-  name: z.string().optional(),
-  slug: z.string().optional(),
-  description: z.string().optional(),
-  color: z.string().optional(),
-});
+export const UpdateCategoryBodySchema = z
+  .object({
+    name: z.string().min(1, "Name cannot be empty"),
+    slug: z.string().min(1, "Slug cannot be empty"),
+    description: z.string().min(1, "Description cannot be empty"),
+    color: z.string().optional(),
+  })
+  .partial(); // all fields optional for patch semantics
 
 // Type exports for TypeScript usage
 export type CreateCategoryBody = z.infer<typeof CreateCategoryBodySchema>;

@@ -1,11 +1,9 @@
-import { useValidatedBody, useValidatedParams } from "h3-zod";
-
 export default defineAuthHandler(
   async (event, { language }) => {
-    const { id } = await useValidatedParams(event, paramsIdSchema);
+    const { id } = await getValidatedRouterParams(event, paramsIdSchema.parse);
 
     try {
-      const data = await useValidatedBody(event, UpdatePostBodySchema);
+      const data = await readValidatedBody(event, UpdatePostBodySchema.parse);
       const { categoryIds, tagIds, ...postData } = data;
 
       // Check if post exists

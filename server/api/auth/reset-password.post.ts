@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { useValidatedBody } from "h3-zod";
+import { readValidatedBody } from "h3";
 
 const resetPasswordSchema = z.object({
   token: z.string().min(1),
@@ -8,7 +8,7 @@ const resetPasswordSchema = z.object({
 });
 
 export default defineEventHandler(async (event) => {
-  const body = await useValidatedBody(event, resetPasswordSchema);
+  const body = await readValidatedBody(event, resetPasswordSchema.parse);
 
   // Use AuthService
   await authService.resetPassword(body.token, body.password);

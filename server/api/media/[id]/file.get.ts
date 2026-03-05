@@ -1,8 +1,7 @@
-import { useValidatedParams } from "h3-zod";
 import { readFile } from "fs/promises";
 
 export default defineEventHandler(async (event) => {
-  const { id } = await useValidatedParams(event, paramsIdSchema);
+  const { id } = await getValidatedRouterParams(event, paramsIdSchema.parse);
 
   // Get current user (may be null for public media)
   const session = await getUserSession(event);

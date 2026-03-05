@@ -1,12 +1,12 @@
 import { z } from "zod";
-import { useValidatedBody } from "h3-zod"; // dummy
+import { readValidatedBody } from "h3";
 
 const verifyEmailSchema = z.object({
   token: z.string().min(1),
 });
 
 export default defineEventHandler(async (event) => {
-  const body = await useValidatedBody(event, verifyEmailSchema);
+  const body = await readValidatedBody(event, verifyEmailSchema.parse);
 
   // Use AuthService
   const user = await authService.verifyEmail(body.token);

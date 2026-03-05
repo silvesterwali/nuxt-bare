@@ -1,4 +1,3 @@
-import { useValidatedBody, useValidatedParams } from "h3-zod";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db, schema } from "../../../../db";
@@ -13,8 +12,8 @@ const updateUserSchema = z.object({
 
 export default defineAuthHandler(
   async (event) => {
-    const { id } = await useValidatedParams(event, paramsIdSchema);
-    const body = await useValidatedBody(event, updateUserSchema);
+    const { id } = await getValidatedRouterParams(event, paramsIdSchema.parse);
+    const body = await readValidatedBody(event, updateUserSchema.parse);
 
     // Update user role if provided
     if (body.role) {

@@ -1,5 +1,3 @@
-import { useValidatedQuery } from "h3-zod";
-
 export default defineEventHandler(async (event) => {
   // Require authentication
   const session = await getUserSession(event);
@@ -9,9 +7,9 @@ export default defineEventHandler(async (event) => {
       statusMessage: "Authentication required",
     });
   }
-  const { type, privacy, page, limit } = await useValidatedQuery(
+  const { type, privacy, page, limit } = await getValidatedQuery(
     event,
-    MediaQuerySchema,
+    MediaQuerySchema.parse,
   );
 
   const { page: validPage, limit: validLimit } = validatePaginationParams({

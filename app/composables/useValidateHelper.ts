@@ -7,9 +7,10 @@ export const useValidateHelper = () => {
   const transformToIssue = (error: any): FormError[] => {
     const errors: FormError[] = [];
 
-    // specific handling for h3-zod or Standard API errors
+    // specific handling for validation errors returned by our API
+    // h3 built-in validators also produce a Zod-like `issues` array
     if (error?.data?.data?.issues) {
-      // h3-zod pattern if it returns zod issues directly
+      // pattern where issues are sent directly from the server
       error.data.data.issues.forEach((issue: any) => {
         errors.push({
           message: issue.message,

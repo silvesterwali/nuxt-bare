@@ -1,8 +1,10 @@
-import { useValidatedQuery } from "h3-zod";
 export default defineAuthHandler(
   async (event, { language }) => {
     try {
-      const filters = await useValidatedQuery(event, adminBlogQuerySchema);
+      const filters = await getValidatedQuery(
+        event,
+        adminBlogQuerySchema.parse,
+      );
       return await getPosts(
         {
           search: filters.search,

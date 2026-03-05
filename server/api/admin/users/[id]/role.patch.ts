@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { useValidatedBody, useValidatedParams } from "h3-zod";
 
 const updateRoleSchema = z.object({
   role: z.enum(["admin", "user"]),
@@ -8,7 +7,7 @@ const updateRoleSchema = z.object({
 export default defineAuthHandler(
   async (event, { user }) => {
     const session = user;
-    const { id } = await useValidatedParams(event, paramsIdSchema);
+    const { id } = await getValidatedRouterParams(event, paramsIdSchema.parse);
 
     // Prevent admin from changing their own role
     if (id === session.id) {
@@ -18,7 +17,7 @@ export default defineAuthHandler(
       });
     }
 
-    const body = await useValidatedBody(event, updateRoleSchema);
+    const body = await readValidatedBody(event, updateRoleSchema.parse);
 
     const updatedUser = await updateUserRole(id, body.role);
 

@@ -5,13 +5,13 @@ export default defineNuxtConfig({
     "@nuxt/hints",
     "@nuxt/image",
     "@nuxt/scripts",
-    "@nuxt/test-utils",
+    "@nuxt/test-utils/module",
     "@nuxtjs/google-fonts",
-    "@nuxtjs/mcp-toolkit",
+    // "@nuxtjs/mcp-toolkit",
     "@nuxtjs/seo",
     "@pinia/colada-nuxt",
     "@pinia/nuxt",
-    "evlog",
+    // "evlog",
     "nuxt-auth-utils",
     "nuxt-authorization",
     "nuxt-email-renderer",
@@ -28,11 +28,11 @@ export default defineNuxtConfig({
       external: ["better-sqlite3"],
     },
   },
-  evlog: {
-    env: {
-      service: "nuxt-bare",
-    },
-  },
+  // evlog: {
+  //   env: {
+  //     service: "nuxt-bare",
+  //   },
+  // },
 
   css: ["~/assets/css/main.css"],
 

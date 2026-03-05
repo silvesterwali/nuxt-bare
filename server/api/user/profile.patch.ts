@@ -1,7 +1,4 @@
 import { z } from "zod";
-import { useValidatedBody } from "h3-zod";
-import { jsonResponse } from "../../utils/common/response";
-import { userRepository } from "../../utils/user/repository";
 
 const updateProfileSchema = z.object({
   firstName: z.string().min(1).max(50).optional(),
@@ -22,7 +19,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const body = await useValidatedBody(event, updateProfileSchema);
+  const body = await readValidatedBody(event, updateProfileSchema.parse);
 
   // Update profile via repository
   const updatedProfile = await userRepository.updateProfile(session.user.id, {

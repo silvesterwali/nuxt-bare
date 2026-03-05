@@ -1,14 +1,17 @@
-import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 import { defineVitestProject } from "@nuxt/test-utils/config";
-
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 export default defineConfig({
   test: {
     globals: true,
     globalSetup: ["test/setup.ts"],
-    testTimeout: 20000,
-    hookTimeout: 20000,
-    teardownTimeout: 10000,
+    alias: {
+      "#auth-utils": path.resolve(
+        __dirname,
+        "./node_modules/nuxt-auth-utils/dist/runtime/server/utils/index.mjs",
+      ),
+    },
     projects: [
       {
         test: {
@@ -26,11 +29,9 @@ export default defineConfig({
           environment: "nuxt",
           environmentOptions: {
             nuxt: {
-              rootDir: fileURLToPath(new URL(".", import.meta.url)),
-              domEnvironment: "happy-dom",
+              rootDir: fileURLToPath(new URL("./", import.meta.url)),
             },
           },
-          globals: true,
         },
       }),
     ],
