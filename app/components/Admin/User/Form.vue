@@ -189,7 +189,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         </div>
 
         <UFormField label="Role" name="role">
-          <USelect v-model="state.role" :options="roles" class="w-full" />
+          <USelect v-model="state.role" :items="roles"  class="w-full" />
         </UFormField>
 
         <div class="flex justify-end">

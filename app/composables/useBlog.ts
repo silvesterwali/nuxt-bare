@@ -61,7 +61,6 @@ export const useBlogForm = (
   post?: Ref<BlogPost | undefined> | Ref<any>,
   options?: { onSuccess?: () => void },
 ) => {
-  const { locale } = useI18n();
   const { transformToIssue } = useValidateHelper();
   const toast = useToast();
 
@@ -135,18 +134,15 @@ export const useBlogForm = (
   ];
 
   // Populate form when post data changes
+  // Note: post data is expected to already have plain string fields (locale
+  // extraction happens in the edit page's formPost computed, not here)
   watchEffect(() => {
     if (post?.value) {
       const p = post.value as any;
-      form.slug = (p.slug as any)?.[locale.value] || (p.slug as any)?.en || "";
-      form.title =
-        (p.title as any)?.[locale.value] || (p.title as any)?.en || "";
-      form.shortDescription =
-        (p.shortDescription as any)?.[locale.value] ||
-        (p.shortDescription as any)?.en ||
-        "";
-      form.content =
-        (p.content as any)?.[locale.value] || (p.content as any)?.en || "";
+      form.slug = p.slug || "";
+      form.title = p.title || "";
+      form.shortDescription = p.shortDescription || "";
+      form.content = p.content || "";
       form.status = p.status || "draft";
       form.categoryIds = (p.categories || []).map((c: any) => c.id);
       form.tagIds = (p.tags || []).map((t: any) => t.id);
