@@ -60,10 +60,10 @@ function goToPage(newPage: number) {
         />
       </div>
 
-      <AdminMediaTable
+      <AdminMediaGrid
         :media="mediaItems"
         :loading="isLoading"
-        :selectMode="true"
+        :select-mode="true"
         @select="select"
       />
 
