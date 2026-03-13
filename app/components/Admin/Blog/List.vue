@@ -1,19 +1,29 @@
 <script setup lang="ts">
 import { h, resolveComponent } from "vue";
-import { formatTimeAgo } from "@vueuse/core";
 import type { TableColumn } from "@nuxt/ui";
-import type { BlogPost } from "@/types/blog";
-
-const UBadge = resolveComponent("UBadge");
+import { formatTimeAgo } from "@vueuse/core";
 
 const { locale } = useI18n();
 const { search, page, params } = useBlogListState();
 const { data: posts, isLoading: pending } = usePostsQuery(params);
-const { mutate: deletePost } = usePostDeleteMutation();
+const { mutate: deletePost, isLoading: deleting } = usePostDeleteMutation();
+const UBadge = resolveComponent("UBadge");
+const UDropdownMenu = resolveComponent("UDropdownMenu");
+const UButton = resolveComponent("UButton");
+
+const confirmDeleteOpen = ref(false);
+const postToDelete = ref<number | null>(null);
 
 function handleDeletePost(id: number) {
-  if (!confirm("Are you sure you want to delete this post?")) return;
-  deletePost(id);
+  postToDelete.value = id;
+  confirmDeleteOpen.value = true;
+}
+
+function confirmDelete() {
+  if (postToDelete.value) {
+    deletePost(postToDelete.value);
+    postToDelete.value = null;
+  }
 }
 
 function getRowActions(rowId: number) {
@@ -32,10 +42,16 @@ function getRowActions(rowId: number) {
   ];
 }
 
-const columns: TableColumn<BlogPost>[] = [
+const columnsData: TableColumn<BlogPost>[] = [
   {
     accessorKey: "title",
     header: "Title",
+    meta: {
+      class: {
+        th: "text-left",
+        td: "text-left",
+      },
+    },
   },
   {
     accessorKey: "slug",
@@ -44,18 +60,34 @@ const columns: TableColumn<BlogPost>[] = [
   {
     accessorKey: "language",
     header: "Language",
+    meta: {
+      class: {
+        th: "text-center",
+        td: "text-center",
+      },
+    },
     cell: ({ row }) =>
-      h(UBadge, { color: "primary", variant: "subtle" }, () =>
-        row.getValue("language"),
+      h(UBadge, { color: "primary", variant: "subtle", size: "sm" }, () =>
+        (row.getValue("language") as string).toUpperCase(),
       ),
   },
   {
     accessorKey: "status",
     header: "Status",
+    meta: {
+      class: {
+        th: "text-center",
+        td: "text-center",
+      },
+    },
     cell: ({ row }) => {
       const status = row.getValue("status") as string;
       const color = status === "published" ? "success" : "neutral";
-      return h(UBadge, { color, variant: "subtle" }, () => status);
+      return h(
+        UBadge,
+        { color, variant: "subtle", class: "capitalize", size: "sm" },
+        () => status,
+      );
     },
   },
   {
@@ -65,16 +97,26 @@ const columns: TableColumn<BlogPost>[] = [
   {
     accessorKey: "createdAt",
     header: "Created",
+    meta: {
+      class: {
+        th: "text-right",
+        td: "text-right text-sm",
+      },
+    },
     cell: ({ row }) =>
       formatTimeAgo(new Date(row.getValue("createdAt") as string)),
   },
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => {
-      const UDropdownMenu = resolveComponent("UDropdownMenu");
-      const UButton = resolveComponent("UButton");
-      return h(
+    meta: {
+      class: {
+        th: "text-right",
+        td: "text-right",
+      },
+    },
+    cell: ({ row }) =>
+      h(
         UDropdownMenu,
         {
           items: getRowActions(row.original.id),
@@ -88,8 +130,7 @@ const columns: TableColumn<BlogPost>[] = [
             size: "sm",
             "aria-label": "Actions",
           }),
-      );
-    },
+      ),
   },
 ];
 </script>
@@ -122,7 +163,11 @@ const columns: TableColumn<BlogPost>[] = [
         />
       </div>
 
-      <UTable :data="posts?.data || []" :columns="columns" :loading="pending" />
+      <UTable
+        :data="posts?.data || []"
+        :columns="columnsData as any"
+        :loading="pending"
+      />
 
       <div
         class="flex justify-end p-3 border-t border-gray-200 dark:border-gray-700"
@@ -134,5 +179,14 @@ const columns: TableColumn<BlogPost>[] = [
         />
       </div>
     </UCard>
+
+    <!-- Confirm Delete Modal -->
+    <CommonConfirmDelete
+      v-model:open="confirmDeleteOpen"
+      title="Delete Blog Post"
+      message="Are you sure you want to delete this blog post? This action cannot be undone and all content will be permanently removed."
+      :loading="deleting"
+      @confirm="confirmDelete"
+    />
   </div>
 </template>

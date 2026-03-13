@@ -40,13 +40,7 @@ export function useCategoryCreateMutation() {
         description: "Category created successfully",
       });
     },
-    onError: () => {
-      useToast().add({
-        title: "Error",
-        description: "Failed to create category",
-        color: "error",
-      });
-    },
+    // Errors are handled by the component calling mutateAsync()
   });
 }
 
@@ -72,16 +66,10 @@ export function useCategoryUpdateMutation() {
       });
       useToast().add({
         title: "Success",
-        description: "Category created successfully",
+        description: "Category updated successfully",
       });
     },
-    onError: () => {
-      useToast().add({
-        title: "Error",
-        description: "Failed to create category",
-        color: "error",
-      });
-    },
+    // Errors are handled by the component calling mutateAsync()
   });
 }
 

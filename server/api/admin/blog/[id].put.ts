@@ -62,10 +62,21 @@ export default defineAuthHandler(
       const postWithRelations = await getPostById(id, language);
       return jsonResponse(postWithRelations, "Post updated successfully");
     } catch (error) {
+      if (error instanceof H3Error) {
+        throw createError({
+          statusCode: error.statusCode,
+          statusMessage: error.statusMessage,
+          data: JSON.parse(error.data.message),
+        });
+      }
+
       throw createError({
-        statusCode: 400,
-        statusMessage:
-          error instanceof Error ? error.message : "Invalid post update data",
+        statusCode: 500,
+        statusMessage: "Internal Server Error",
+        data:
+          process.env.NODE_ENV === "development" && error instanceof Error
+            ? { message: error.message, stack: error.stack }
+            : undefined,
       });
     }
   },

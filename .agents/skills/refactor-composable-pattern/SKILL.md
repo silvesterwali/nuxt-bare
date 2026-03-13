@@ -27,19 +27,21 @@ Panduan lengkap untuk refactoring komponen dan logic dengan pola berbasis compos
 
 ## 📋 Core Patterns
 
-| Topic | Description | Reference |
-|-------|-------------|-----------|
-| **Component Structure** | Layout dan responsibility komponen | [component-structure.md](references/component-structure.md) |
-| **Composable Patterns** | Cara membuat dan menggunakan composable | [composable-patterns.md](references/composable-patterns.md) |
-| **Type Management** | Centralized type di shared/types | [type-management.md](references/type-management.md) |
-| **Form Pattern** | Form edit/create dengan unified composable | [form-pattern.md](references/form-pattern.md) |
-| **Import Best Practices** | Menghindari circular dependency dan import tidak perlu | [import-best-practices.md](references/import-best-practices.md) |
+| Topic                            | Description                                            | Reference                                                                 |
+| -------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------- |
+| **Component Structure**          | Layout dan responsibility komponen                     | [component-structure.md](references/component-structure.md)               |
+| **Composable Patterns**          | Cara membuat dan menggunakan composable                | [composable-patterns.md](references/composable-patterns.md)               |
+| **Type Management**              | Centralized type di shared/types                       | [type-management.md](references/type-management.md)                       |
+| **Form Pattern**                 | Form edit/create dengan unified composable             | [form-pattern.md](references/form-pattern.md)                             |
+| **Import Best Practices**        | Menghindari circular dependency dan import tidak perlu | [import-best-practices.md](references/import-best-practices.md)           |
+| **Modal & Drawer Accessibility** | Accessibility requirements untuk modal dan drawer      | [modal-drawer-accessibility.md](references/modal-drawer-accessibility.md) |
 
 ---
 
 ## ✅ Quick Start: Refactoring Steps
 
 ### Step 1: Map Types ke Shared/Types
+
 ```bash
 # Semua interface/type yang digunakan di app dan server
 shared/types/
@@ -52,6 +54,7 @@ shared/types/
 ```
 
 ### Step 2: Create Composables untuk Business Logic
+
 ```bash
 # Composables handle semua logic (fetch, validate, transform)
 app/composables/
@@ -62,6 +65,7 @@ app/composables/
 ```
 
 ### Step 3: Refactor Components sebagai Presentational
+
 ```bash
 # Components: hanya render + pass data ke composable
 app/components/
@@ -115,12 +119,15 @@ app/components/
 ## 🔄 Form Component Pattern (Smart Edit/Create)
 
 ### Core Concept
+
 Form detect apakah edit atau create berdasarkan props:
 
 ```vue
 <!-- Penggunaan: Props "blog" menentukan apakah edit/create -->
-<BlogForm />             <!-- No props = Create mode -->
-<BlogForm :blog="item" /> <!-- With props = Edit mode -->
+<BlogForm />
+<!-- No props = Create mode -->
+<BlogForm :blog="item" />
+<!-- With props = Edit mode -->
 ```
 
 Composable `useBlogForm` secara otomatis menentukan action:
@@ -130,7 +137,7 @@ Composable `useBlogForm` secara otomatis menentukan action:
 export function useBlogForm(initialBlog?: BlogData) {
   const isEdit = computed(() => !!initialBlog?.id);
   const isCreate = computed(() => !isEdit.value);
-  
+
   const submitForm = async (data) => {
     if (isEdit.value) {
       return updateBlog(initialBlog.id, data);
@@ -146,54 +153,61 @@ export function useBlogForm(initialBlog?: BlogData) {
 ## ⚠️ Common Mistakes
 
 ### ❌ DON'T: Import component dari component
+
 ```vue
 <!-- ❌ JANGAN -->
 <script setup lang="ts">
-import BlogList from './BlogList.vue'
-import BlogForm from './BlogForm.vue'
+import BlogList from "./BlogList.vue";
+import BlogForm from "./BlogForm.vue";
 </script>
 ```
+
 **Alasan:** Terjadi circular dependency, hard to test, tidak reusable
 
 ### ✅ DO: Use parent layout atau page untuk compose
+
 ```vue
 <!-- ✅ LAKUKAN -->
 <!-- pages/admin/blog/index.vue -->
 <script setup lang="ts">
-import BlogList from '@/components/Blog/BlogList.vue'
-import BlogForm from '@/components/Blog/BlogForm.vue'
+import BlogList from "@/components/Blog/BlogList.vue";
+import BlogForm from "@/components/Blog/BlogForm.vue";
 </script>
 ```
 
 ---
 
 ### ❌ DON'T: Put form logic di component
+
 ```vue
 <!-- ❌ JANGAN -->
 <script setup lang="ts">
-const blog = ref<BlogData | null>(null)
+const blog = ref<BlogData | null>(null);
 
 const submitForm = async (data) => {
   // 200 lines of form logic di sini
   // tidak bisa di-reuse
-}
+};
 </script>
 ```
 
 ### ✅ DO: Move ke composable
+
 ```typescript
 // ✅ LAKUKAN: composables/useBlogForm.ts
 export function useBlogForm(initialBlog?: BlogData) {
-  const blog = ref<BlogData | null>(initialBlog || null)
-  const submitForm = async (data) => { /* ... */ }
-  return { blog, submitForm }
+  const blog = ref<BlogData | null>(initialBlog || null);
+  const submitForm = async (data) => {
+    /* ... */
+  };
+  return { blog, submitForm };
 }
 ```
 
 ```vue
 <!-- Components/Blog/BlogForm.vue -->
 <script setup lang="ts">
-const { blog, submitForm } = useBlogForm(props.blog)
+const { blog, submitForm } = useBlogForm(props.blog);
 </script>
 ```
 

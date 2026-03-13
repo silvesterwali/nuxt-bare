@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { h, resolveComponent } from "vue";
 import type { TableColumn } from "@nuxt/ui";
-import type { Media } from "~/types/db";
+import type { Media } from "@/types/db";
 
 const props = withDefaults(
   defineProps<{

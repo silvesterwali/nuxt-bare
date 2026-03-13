@@ -8,6 +8,7 @@ description: How to handle validation errors from backend, transform them to for
 ## Overview
 
 This guide shows how to properly handle backend validation errors in forms. The pattern includes:
+
 1. **Composable Logic** - Form state, validation schema, API calls
 2. **Error Transformation** - Backend errors → form field errors
 3. **Component UI** - Display errors and show toast notifications
@@ -48,19 +49,23 @@ Component (Form.vue)
 // filepath: shared/types/index.ts
 export interface APIResponseFormError {
   errors: {
-    [key: string]: string[]  // field name → array of error messages
-  }
-  message?: string
+    [key: string]: string[]; // field name → array of error messages
+  };
+  message?: string;
 }
 ```
 
 **Example Backend Error Response:**
+
 ```json
 {
   "message": "Validation failed",
   "errors": {
     "title": ["Title is required"],
-    "start_date": ["Start date is required", "Start date must be before end date"],
+    "start_date": [
+      "Start date is required",
+      "Start date must be before end date"
+    ],
     "url": ["URL must be a valid URL"]
   }
 }
@@ -70,12 +75,12 @@ export interface APIResponseFormError {
 
 ```typescript
 export interface AdvertiseForm {
-  title: string
-  description?: string
-  start_date: string
-  end_date: string
-  url?: string
-  index: number
+  title: string;
+  description?: string;
+  start_date: string;
+  end_date: string;
+  url?: string;
+  index: number;
 }
 ```
 
@@ -85,56 +90,55 @@ export interface AdvertiseForm {
 
 ```typescript
 // filepath: composables/advertise.ts
-import type { Form, FormSubmitEvent } from '@nuxt/ui'
-import type { Advertise, AdvertiseForm } from '@/types/advertise'
-import type { ResponseCommon } from '@/types/response'
-import { FetchError } from 'ofetch'
-import * as z from 'zod'
+import type { Form, FormSubmitEvent } from "@nuxt/ui";
+import type { Advertise, AdvertiseForm } from "@/types/advertise";
+import type { ResponseCommon } from "@/types/response";
+import { FetchError } from "ofetch";
+import * as z from "zod";
 
 interface Opt {
-  callback?: (item?: Advertise) => void
+  callback?: (item?: Advertise) => void;
 }
 
 export function useAdvertiseForm({ callback }: Opt) {
-  const toast = useToast()
-  const pending = ref(false)
-  const item = ref<Advertise>()
-  
+  const toast = useToast();
+  const pending = ref(false);
+  const item = ref<Advertise>();
+
   // ✅ Helper to transform backend errors to form errors
-  const { transformToIssue } = useValidateHelper()
-  
+  const { transformToIssue } = useValidateHelper();
+
   // Form state - tracks current form values
   const state = ref<AdvertiseForm>({
-    title: '',
+    title: "",
     description: undefined,
-    start_date: '',
-    end_date: '',
+    start_date: "",
+    end_date: "",
     url: undefined,
     index: 0,
-  })
+  });
 
   // Schema for CLIENT-SIDE validation (before sending to backend)
   const schema = z.object({
-    title: z.string().min(1, 'Title is required'),
+    title: z.string().min(1, "Title is required"),
     description: z.string().optional(),
-    start_date: z.string().min(1, 'Start date is required'),
-    end_date: z.string().min(1, 'End date is required'),
-    url: z.string().url('URL must be a valid URL').optional(),
-    index: z.number().min(0, 'Index must be a positive number'),
-  })
+    start_date: z.string().min(1, "Start date is required"),
+    end_date: z.string().min(1, "End date is required"),
+    url: z.string().url("URL must be a valid URL").optional(),
+    index: z.number().min(0, "Index must be a positive number"),
+  });
 
   // Reference to NuxtUI Form component
-  const form = ref<Form<AdvertiseForm>>()
+  const form = ref<Form<AdvertiseForm>>();
 
   /**
    * Main submit handler - detects create vs edit
    */
   function onSubmit(event: FormSubmitEvent<AdvertiseForm>): void {
     if (item.value) {
-      _edit(event)
-    }
-    else {
-      _create(event)
+      _edit(event);
+    } else {
+      _create(event);
     }
   }
 
@@ -142,48 +146,51 @@ export function useAdvertiseForm({ callback }: Opt) {
    * CREATE new advertise
    */
   async function _create(event: FormSubmitEvent<AdvertiseForm>) {
-    pending.value = true
+    pending.value = true;
     try {
       // ✅ Send data to backend
-      const response = await $fetch<ResponseCommon<Advertise>>('/api/admin/advertise', {
-        method: 'POST',
-        body: {
-          ...event.data,
+      const response = await $fetch<ResponseCommon<Advertise>>(
+        "/api/admin/advertise",
+        {
+          method: "POST",
+          body: {
+            ...event.data,
+          },
         },
-      })
-      
+      );
+
       // ✅ Success - show toast
       toast.add({
-        title: 'Success',
-        description: 'Advertise created successfully',
-        color: 'success',
+        title: "Success",
+        description: "Advertise created successfully",
+        color: "success",
         duration: 15 * 1000,
-      })
-      
+      });
+
       // ✅ Call callback to parent component (reload data)
       if (callback) {
-        callback(response.data)
+        callback(response.data);
       }
-    }
-    catch (e) {
+    } catch (e) {
       // ❌ Error handling
       if (e instanceof FetchError) {
         // ✅ Transform backend errors to form field errors
         if (form.value) {
-          form.value.setErrors(transformToIssue(e?.response?._data))
+          form.value.setErrors(transformToIssue(e?.response?._data));
         }
-        
+
         // ✅ Show error toast
         toast.add({
-          title: 'Error',
-          description: e?.response?._data.message ?? 'Something went wrong. Please try again later',
-          color: 'error',
+          title: "Error",
+          description:
+            e?.response?._data.message ??
+            "Something went wrong. Please try again later",
+          color: "error",
           duration: 15 * 1000,
-        })
+        });
       }
-    }
-    finally {
-      pending.value = false
+    } finally {
+      pending.value = false;
     }
   }
 
@@ -191,41 +198,44 @@ export function useAdvertiseForm({ callback }: Opt) {
    * EDIT existing advertise
    */
   async function _edit(event: FormSubmitEvent<AdvertiseForm>) {
-    pending.value = true
+    pending.value = true;
     try {
-      const response = await $fetch<ResponseCommon<Advertise>>(`/api/admin/advertise/${item.value?.id}`, {
-        method: 'PUT',
-        body: {
-          ...event.data,
+      const response = await $fetch<ResponseCommon<Advertise>>(
+        `/api/admin/advertise/${item.value?.id}`,
+        {
+          method: "PUT",
+          body: {
+            ...event.data,
+          },
         },
-      })
-      
+      );
+
       toast.add({
-        title: 'Success',
-        description: 'Advertise updated successfully',
-        color: 'success',
+        title: "Success",
+        description: "Advertise updated successfully",
+        color: "success",
         duration: 15 * 1000,
-      })
-      
+      });
+
       if (callback) {
-        callback(response.data)
+        callback(response.data);
       }
-    }
-    catch (e) {
+    } catch (e) {
       if (e instanceof FetchError) {
         if (form.value) {
-          form.value.setErrors(transformToIssue(e?.response?._data))
+          form.value.setErrors(transformToIssue(e?.response?._data));
         }
         toast.add({
-          title: 'Error',
-          description: e?.response?._data.message ?? 'Something went wrong. Please try again later',
-          color: 'error',
+          title: "Error",
+          description:
+            e?.response?._data.message ??
+            "Something went wrong. Please try again later",
+          color: "error",
           duration: 15 * 1000,
-        })
+        });
       }
-    }
-    finally {
-      pending.value = false
+    } finally {
+      pending.value = false;
     }
   }
 
@@ -236,7 +246,7 @@ export function useAdvertiseForm({ callback }: Opt) {
     schema,
     pending,
     item,
-  }
+  };
 }
 ```
 
@@ -246,33 +256,33 @@ export function useAdvertiseForm({ callback }: Opt) {
 
 ```typescript
 // filepath: composables/useValidateHelper.ts
-import type { FormError } from '@nuxt/ui'
+import type { FormError } from "@nuxt/ui";
 
 export default function () {
   /**
    * Transform backend validation errors to NuxtUI FormError format
-   * 
+   *
    * Input: { errors: { title: ['Title is required'], url: ['Invalid URL'] } }
    * Output: [{ name: 'title', message: 'Title is required' }, ...]
    */
   function transformToIssue(issues?: APIResponseFormError): FormError<any>[] {
-    const errors: FormError<any>[] = []
-    
+    const errors: FormError<any>[] = [];
+
     if (issues?.errors) {
       Object.entries(issues.errors).forEach(([key, value]) => {
         errors.push({
-          message: value?.join(', '),  // Join multiple errors with comma
-          name: key,                    // Field name that has error
-        })
-      })
+          message: value?.join(", "), // Join multiple errors with comma
+          name: key, // Field name that has error
+        });
+      });
     }
 
-    return errors
+    return errors;
   }
 
   return {
     transformToIssue,
-  }
+  };
 }
 ```
 
@@ -283,37 +293,37 @@ export default function () {
 ```vue
 <!-- filepath: components/Advertise/Form.vue -->
 <script setup lang="ts">
-import type { Advertise } from '@/types/advertise'
+import type { Advertise } from "@/types/advertise";
 
 const props = defineProps<{
-  item?: Advertise
-}>()
+  item?: Advertise;
+}>();
 
 const emit = defineEmits<{
-  (e: 'reload', item?: Advertise): void
-}>()
+  (e: "reload", item?: Advertise): void;
+}>();
 
 // ✅ Get everything from composable
 const { state, item, onSubmit, form, schema, pending } = useAdvertiseForm({
   callback: (item) => {
     // ✅ Emit event so parent can reload data
-    emit('reload', item)
-  }
-})
+    emit("reload", item);
+  },
+});
 
 // ✅ Initialize form if editing
 onMounted(async () => {
-  await nextTick()
-  
+  await nextTick();
+
   if (props.item) {
-    item.value = props.item
-    state.value.title = props.item.title
-    state.value.description = props.item.description ?? undefined
-    state.value.start_date = props.item.start_date
-    state.value.end_date = props.item.end_date
-    state.value.url = props.item.url ?? undefined
+    item.value = props.item;
+    state.value.title = props.item.title;
+    state.value.description = props.item.description ?? undefined;
+    state.value.start_date = props.item.start_date;
+    state.value.end_date = props.item.end_date;
+    state.value.url = props.item.url ?? undefined;
   }
-})
+});
 </script>
 
 <template>
@@ -324,55 +334,59 @@ onMounted(async () => {
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <!-- ✅ UFormField displays errors automatically -->
           <UFormField label="Title" name="title">
-            <UInput 
-              v-model="state.title" 
-              class="w-full" 
-              placeholder="Enter the title" 
+            <UInput
+              v-model="state.title"
+              class="w-full"
+              placeholder="Enter the title"
             />
           </UFormField>
-          
+
           <UFormField label="Start Date" name="start_date">
-            <UInput 
-              v-model="state.start_date" 
-              type="date" 
-              class="w-full" 
-              placeholder="Select start date" 
+            <UInput
+              v-model="state.start_date"
+              type="date"
+              class="w-full"
+              placeholder="Select start date"
             />
           </UFormField>
-          
+
           <UFormField label="End Date" name="end_date">
-            <UInput 
-              v-model="state.end_date" 
-              type="date" 
-              class="w-full" 
-              placeholder="Select end date" 
+            <UInput
+              v-model="state.end_date"
+              type="date"
+              class="w-full"
+              placeholder="Select end date"
             />
           </UFormField>
-          
+
           <UFormField label="URL" name="url">
-            <UInput 
-              v-model="state.url" 
-              class="w-full" 
-              placeholder="Enter the URL" 
+            <UInput
+              v-model="state.url"
+              class="w-full"
+              placeholder="Enter the URL"
             />
           </UFormField>
-          
-          <UFormField label="Description" name="description" class="lg:col-span-3">
-            <UTextarea 
-              v-model="state.description" 
-              class="w-full" 
-              placeholder="Enter the description" 
-              :rows="4" 
+
+          <UFormField
+            label="Description"
+            name="description"
+            class="lg:col-span-3"
+          >
+            <UTextarea
+              v-model="state.description"
+              class="w-full"
+              placeholder="Enter the description"
+              :rows="4"
             />
           </UFormField>
         </div>
 
         <USeparator />
-        
+
         <div class="flex justify-end gap-2">
           <!-- ✅ loading state shows during submit -->
           <UButton type="submit" :loading="pending">
-            {{ props.item?.id ? 'Update' : 'Create' }}
+            {{ props.item?.id ? "Update" : "Create" }}
           </UButton>
         </div>
       </div>
@@ -397,7 +411,7 @@ onMounted(async () => {
 3. Backend validates again
    - If passes → returns success
    - If fails → returns APIResponseFormError
-        { 
+        {
           message: 'Validation failed',
           errors: {
             title: ['Title must be unique'],
@@ -432,21 +446,19 @@ When backend returns multiple error messages for one field:
 ```json
 {
   "errors": {
-    "title": [
-      "Title is required",
-      "Title must be unique",
-      "Title is too short"
-    ]
+    "title": ["Title is required", "Title must be unique", "Title is too short"]
   }
 }
 ```
 
 The `transformToIssue()` joins them:
+
 ```
 message: "Title is required, Title must be unique, Title is too short"
 ```
 
 Display in UFormField:
+
 ```
 Title ✗
 Title is required, Title must be unique, Title is too short
@@ -460,40 +472,40 @@ Title is required, Title must be unique, Title is too short
 // filepath: composables/advertise.ts
 
 export function useAdvertiseDelete({ callback }: Opt) {
-  const toast = useToast()
-  const pending = ref(false)
-  const item = ref<Advertise>()
+  const toast = useToast();
+  const pending = ref(false);
+  const item = ref<Advertise>();
 
   async function onDelete() {
-    pending.value = true
+    pending.value = true;
     try {
       await $fetch(`/api/admin/advertise/${item.value?.id}`, {
-        method: 'DELETE',
-      })
-      
+        method: "DELETE",
+      });
+
       toast.add({
-        title: 'Success',
-        description: 'Advertise deleted successfully',
-        color: 'success',
+        title: "Success",
+        description: "Advertise deleted successfully",
+        color: "success",
         duration: 15 * 1000,
-      })
-      
+      });
+
       if (callback) {
-        callback()
+        callback();
       }
-    }
-    catch (e) {
+    } catch (e) {
       if (e instanceof FetchError) {
         toast.add({
-          title: 'Error',
-          description: e?.response?._data.message ?? 'Something went wrong. Please try again later',
-          color: 'error',
+          title: "Error",
+          description:
+            e?.response?._data.message ??
+            "Something went wrong. Please try again later",
+          color: "error",
           duration: 15 * 1000,
-        })
+        });
       }
-    }
-    finally {
-      pending.value = false
+    } finally {
+      pending.value = false;
     }
   }
 
@@ -501,7 +513,7 @@ export function useAdvertiseDelete({ callback }: Opt) {
     onDelete,
     pending,
     item,
-  }
+  };
 }
 ```
 
@@ -512,21 +524,23 @@ export function useAdvertiseDelete({ callback }: Opt) {
 ### 1. Contract Between Frontend & Backend
 
 **Backend returns:**
+
 ```typescript
 interface APIResponseFormError {
   errors: {
-    [fieldName: string]: string[]
-  }
-  message?: string
+    [fieldName: string]: string[];
+  };
+  message?: string;
 }
 ```
 
 **Frontend expects:**
+
 ```typescript
 // transformToIssue converts to FormError[]
 interface FormError {
-  name: string      // field name
-  message: string   // error message(s)
+  name: string; // field name
+  message: string; // error message(s)
 }
 ```
 
@@ -577,7 +591,7 @@ const { ... } = useAdvertiseForm({
 ```
 Page (pages/admin/advertise/index.vue)
   ├─→ Table (Advertise/Table.vue)
-  ├─→ Page (Advertise/Page.vue) 
+  ├─→ Page (Advertise/Page.vue)
   │   ├─→ Form (Advertise/Form.vue)
   │   │   └─→ useAdvertiseForm() composable
   │   │       └─→ error handling with form.setErrors()
@@ -593,96 +607,97 @@ Page (pages/admin/advertise/index.vue)
 // filepath: composables/advertise.ts
 
 export function useAdvertiseImageForm({ callback }: Opt) {
-  const toast = useToast()
-  const pending = ref(false)
-  const item = ref<Advertise>()
-  const { transformToIssue } = useValidateHelper()
+  const toast = useToast();
+  const pending = ref(false);
+  const item = ref<Advertise>();
+  const { transformToIssue } = useValidateHelper();
 
   interface ImageForm {
-    image: File | undefined
-    description?: string
+    image: File | undefined;
+    description?: string;
   }
 
   const state = ref<ImageForm>({
     image: undefined,
     description: undefined,
-  })
+  });
 
-  const schema = z.object({
-    description: z.string().optional(),
-    image: z.instanceof(File),
-  }).superRefine((val, ctx) => {
-    // Custom validation
-    if (!val.image) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Image is required',
-        path: ['image'],
-      })
-    }
-    
-    // Only PNG, JPG, JPEG
-    if (!['image/png', 'image/jpeg', 'image/jpg'].includes(val.image?.type)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Image type must be PNG, JPG, JPEG',
-        path: ['image'],
-      })
-    }
-    
-    // Max 2MB
-    if (val.image && val.image.size > 2 * 1024 * 1024) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Image size must be less than 2MB',
-        path: ['image'],
-      })
-    }
-  })
+  const schema = z
+    .object({
+      description: z.string().optional(),
+      image: z.instanceof(File),
+    })
+    .superRefine((val, ctx) => {
+      // Custom validation
+      if (!val.image) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Image is required",
+          path: ["image"],
+        });
+      }
 
-  const form = ref<Form<ImageForm>>()
+      // Only PNG, JPG, JPEG
+      if (!["image/png", "image/jpeg", "image/jpg"].includes(val.image?.type)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Image type must be PNG, JPG, JPEG",
+          path: ["image"],
+        });
+      }
+
+      // Max 2MB
+      if (val.image && val.image.size > 2 * 1024 * 1024) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Image size must be less than 2MB",
+          path: ["image"],
+        });
+      }
+    });
+
+  const form = ref<Form<ImageForm>>();
 
   async function onSubmit(event: FormSubmitEvent<ImageForm>) {
-    pending.value = true
-    const formData = new FormData()
-    formData.append('image', event.data.image!)
-    formData.append('description', event.data.description ?? '')
+    pending.value = true;
+    const formData = new FormData();
+    formData.append("image", event.data.image!);
+    formData.append("description", event.data.description ?? "");
 
     try {
       const response = await $fetch<ResponseCommon<Advertise>>(
         `/api/admin/advertise/${item.value?.id}/image`,
         {
-          method: 'POST',
+          method: "POST",
           body: formData,
-        }
-      )
+        },
+      );
 
       toast.add({
-        title: 'Success',
-        description: 'Image uploaded successfully',
-        color: 'success',
+        title: "Success",
+        description: "Image uploaded successfully",
+        color: "success",
         duration: 15 * 1000,
-      })
+      });
 
       if (callback) {
-        callback(response.data)
+        callback(response.data);
       }
-    }
-    catch (error) {
+    } catch (error) {
       if (error instanceof FetchError) {
         if (form.value) {
-          form.value.setErrors(transformToIssue(error?.response?._data))
+          form.value.setErrors(transformToIssue(error?.response?._data));
         }
         toast.add({
-          title: 'Error',
-          description: error?.response?._data.message ?? 'Failed to upload image',
-          color: 'error',
+          title: "Error",
+          description:
+            error?.response?._data.message ?? "Failed to upload image",
+          color: "error",
           duration: 15 * 1000,
-        })
+        });
       }
-    }
-    finally {
-      pending.value = false
+    } finally {
+      pending.value = false;
     }
   }
 
@@ -693,7 +708,7 @@ export function useAdvertiseImageForm({ callback }: Opt) {
     schema,
     pending,
     item,
-  }
+  };
 }
 ```
 
@@ -703,18 +718,18 @@ export function useAdvertiseImageForm({ callback }: Opt) {
 
 ```typescript
 // Test transforming errors
-const helper = useValidateHelper()
+const helper = useValidateHelper();
 const result = helper.transformToIssue({
   errors: {
-    title: ['Required', 'Min 5 chars'],
-    url: ['Invalid URL']
-  }
-})
+    title: ["Required", "Min 5 chars"],
+    url: ["Invalid URL"],
+  },
+});
 
 expect(result).toEqual([
-  { name: 'title', message: 'Required, Min 5 chars' },
-  { name: 'url', message: 'Invalid URL' }
-])
+  { name: "title", message: "Required, Min 5 chars" },
+  { name: "url", message: "Invalid URL" },
+]);
 ```
 
 ---
@@ -722,6 +737,7 @@ expect(result).toEqual([
 ## Summary
 
 ✅ **Best Practices:**
+
 - Backend validates and returns structured errors
 - Frontend transforms errors to form field errors
 - Form displays errors under each field automatically
@@ -730,6 +746,7 @@ expect(result).toEqual([
 - Full type safety with TypeScript
 
 ❌ **Avoid:**
+
 - Manual error handling in components
 - Displaying raw backend error objects
 - Toast-only error feedback (needs field-level errors too)

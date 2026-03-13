@@ -47,8 +47,18 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     });
     navigateTo("/");
   } catch (err: any) {
-    const errors = transformToIssue(err);
-    if (errors && errors.length) authForm.value?.formRef?.setErrors(errors);
+    if (authForm.value?.formRef) {
+      const errors = transformToIssue(err);
+      if (errors && errors.length) {
+        authForm.value.formRef.setErrors(errors);
+      }
+    }
+
+    toast.add({
+      title: "Error",
+      description: err?.message || "Failed to login",
+      color: "error",
+    });
   }
 }
 </script>

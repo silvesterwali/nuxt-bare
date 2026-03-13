@@ -12,6 +12,7 @@ Gunakan checklist ini saat melakukan refactor pada setiap module/feature.
 ## Phase 1: Preparation
 
 ### Project Setup
+
 - [ ] Read SKILL.md (overview pattern)
 - [ ] Read component-structure.md (understand hierarchy)
 - [ ] Read type-management.md (type organization)
@@ -20,6 +21,7 @@ Gunakan checklist ini saat melakukan refactor pada setiap module/feature.
 - [ ] Read import-best-practices.md (prevent circular deps)
 
 ### Choose First Module to Refactor
+
 - [ ] Start with small module (e.g., Category, Tags)
 - [ ] NOT with complex features first
 - [ ] Document current structure
@@ -33,26 +35,37 @@ Gunakan checklist ini saat melakukan refactor pada setiap module/feature.
 For Blog module refactor example:
 
 ### Step 1: Collect All Types
+
 - [ ] List all types in `app/types/blog.ts`
 - [ ] List all types in `server/api/` routes
 - [ ] List all types in components (inline interfaces)
 - [ ] List all types in composables
 
 ### Step 2: Create Shared Type File
+
 ```bash
 # Create if not exists
 touch shared/types/blog.ts
 ```
 
 **File content template:**
+
 ```typescript
 // shared/types/blog.ts
-export interface Blog { /* ... */ }
-export interface BlogFormData { /* ... */ }
-export interface BlogListItem { /* ... */ }
-export type BlogListQuery = { /* ... */ }
-export type CreateBlogPayload = Omit<BlogFormData, 'id'>
-export type UpdateBlogPayload = Partial<BlogFormData>
+export interface Blog {
+  /* ... */
+}
+export interface BlogFormData {
+  /* ... */
+}
+export interface BlogListItem {
+  /* ... */
+}
+export type BlogListQuery = {
+  /* ... */
+};
+export type CreateBlogPayload = Omit<BlogFormData, "id">;
+export type UpdateBlogPayload = Partial<BlogFormData>;
 ```
 
 - [ ] Create comprehensive types (Entity + FormData + ListItem + Query + Payloads)
@@ -60,6 +73,7 @@ export type UpdateBlogPayload = Partial<BlogFormData>
 - [ ] Export from `shared/types/index.ts`
 
 ### Step 3: Update Imports Everywhere
+
 - [ ] In `server/api/**/*.ts` - import from `@/shared/types`
 - [ ] In `app/composables/**/*.ts` - import types
 - [ ] In `app/components/**/*.vue` - import types
@@ -67,6 +81,7 @@ export type UpdateBlogPayload = Partial<BlogFormData>
 - [ ] Run type check: `nuxi typecheck`
 
 Checklist:
+
 - [ ] No types in app/types (for this module)
 - [ ] All types in shared/types
 - [ ] shared/types/index.ts updated with barrel exports
@@ -77,7 +92,9 @@ Checklist:
 ## Phase 3: Composable Creation
 
 ### Step 1: Identify Business Logic
+
 For Blog module:
+
 - [ ] List fetching + search + filter + pagination → `useBlogList`
 - [ ] Single item fetching → `useBlogDetail`
 - [ ] Form create + update → `useBlogForm`
@@ -90,6 +107,7 @@ touch app/composables/useBlog{List,Detail,Form,Actions}.ts
 ```
 
 **For each composable:**
+
 - [ ] Clear naming: `use[Domain][Action]`
 - [ ] All params and return types typed
 - [ ] Error handling implemented
@@ -97,6 +115,7 @@ touch app/composables/useBlog{List,Detail,Form,Actions}.ts
 - [ ] Properly documented with JSDoc
 
 ### Step 3: Extract Logic from Components
+
 - [ ] Move all data fetching to composable
 - [ ] Move all validation to composable
 - [ ] Move form submission logic to composable
@@ -104,7 +123,8 @@ touch app/composables/useBlog{List,Detail,Form,Actions}.ts
 - [ ] Keep component focused on rendering
 
 Checklist:
-- [ ] All composables in app/composables/ 
+
+- [ ] All composables in app/composables/
 - [ ] Named exports only
 - [ ] Proper TypeScript types
 - [ ] No circular dependencies
@@ -116,7 +136,9 @@ Checklist:
 ## Phase 4: Component Refactoring
 
 ### Step 1: Identify Components
+
 For Blog module:
+
 - [ ] BlogForm.vue (create & edit, unified)
 - [ ] BlogList.vue (list with pagination)
 - [ ] BlogCard.vue (item display)
@@ -126,22 +148,24 @@ For Blog module:
 ### Step 2: Refactor Each Component
 
 **BlogForm.vue:**
+
 ```vue
 <script setup lang="ts">
-import type { BlogData } from '@/shared/types'
-import { useBlogForm } from '@/composables/useBlogForm'
+import type { BlogData } from "@/shared/types";
+import { useBlogForm } from "@/composables/useBlogForm";
 
-defineProps<{ blog?: BlogData }>()
+defineProps<{ blog?: BlogData }>();
 defineEmits<{
-  success: [blog: BlogData]
-  cancel: []
-}>()
+  success: [blog: BlogData];
+  cancel: [];
+}>();
 
-const { formData, submitForm } = useBlogForm(props.blog)
+const { formData, submitForm } = useBlogForm(props.blog);
 </script>
 ```
 
 Checklist:
+
 - [ ] Props properly typed
 - [ ] Emits defined with types
 - [ ] Minimal logic (delegated to composable)
@@ -149,24 +173,28 @@ Checklist:
 - [ ] Import statement clean
 
 **BlogList.vue:**
+
 - [ ] Uses useBlogList composable
 - [ ] Passes blogs as prop to BlogCard
 - [ ] Emits events, doesn't call API directly
 - [ ] No fetch logic
 
 **BlogCard.vue:**
+
 - [ ] Pure presentation
 - [ ] Receives blog as prop
 - [ ] Emits edit/delete/select events
 - [ ] No data transformation
 
 ### Step 3: Remove Old Code
+
 - [ ] Delete old components (if completely replaced)
 - [ ] Delete inline scripts (moved to composable)
 - [ ] Delete duplicate validation
 - [ ] Delete old API calls
 
 Checklist:
+
 - [ ] All components render-focused
 - [ ] No API calls in components
 - [ ] All types from shared/types
@@ -179,6 +207,7 @@ Checklist:
 ## Phase 5: Server Routes Update
 
 ### Step 1: Update API Routes
+
 For each route (`server/api/blogs/*.ts`):
 
 - [ ] Import types from `@/shared/types`
@@ -186,19 +215,25 @@ For each route (`server/api/blogs/*.ts`):
 - [ ] Use typed return value: `Promise<{ data: BlogData }>`
 
 Example:
+
 ```typescript
 // server/api/blogs/index.get.ts
-import type { PaginatedResponse, BlogListItem, BlogListQuery } from '@/shared/types'
+import type {
+  PaginatedResponse,
+  BlogListItem,
+  BlogListQuery,
+} from "@/shared/types";
 
 export default defineEventHandler(
   async (event): Promise<PaginatedResponse<BlogListItem>> => {
-    const query = getQuery(event) as BlogListQuery
+    const query = getQuery(event) as BlogListQuery;
     // ...
-  }
-)
+  },
+);
 ```
 
 Checklist:
+
 - [ ] All routes typed properly
 - [ ] Using types from shared/types
 - [ ] Request body validated
@@ -206,6 +241,7 @@ Checklist:
 - [ ] Error handling consistent
 
 ### Step 2: Test Routes
+
 - [ ] Test create endpoint (POST)
 - [ ] Test read endpoint (GET)
 - [ ] Test update endpoint (PATCH)
@@ -223,10 +259,10 @@ For routes using refactored components:
 ```vue
 <!-- pages/admin/blog/index.vue -->
 <script setup lang="ts">
-import BlogList from '@/components/Blog/BlogList.vue'
-import { useBlogManager } from '@/composables/useBlogManager'
+import BlogList from "@/components/Blog/BlogList.vue";
+import { useBlogManager } from "@/composables/useBlogManager";
 
-const { blogs, isLoading, search } = useBlogManager()
+const { blogs, isLoading, search } = useBlogManager();
 </script>
 
 <template>
@@ -237,6 +273,7 @@ const { blogs, isLoading, search } = useBlogManager()
 ```
 
 Checklist:
+
 - [ ] Pages import components and composables
 - [ ] Pages handle high-level logic
 - [ ] URLs and routing updated if needed
@@ -248,20 +285,25 @@ Checklist:
 ## Phase 7: Testing & Verification
 
 ### Run Type Check
+
 ```bash
 nuxi typecheck
 ```
+
 - [ ] No type errors
 - [ ] All imports resolve
 
 ### Run Linting
+
 ```bash
 npm run lint
 ```
+
 - [ ] No linting errors
 - [ ] Format is consistent
 
 ### Manual Testing
+
 - [ ] Create new item (create form)
 - [ ] Edit existing item (edit form)
 - [ ] Delete item
@@ -270,11 +312,13 @@ npm run lint
 - [ ] Error messages display
 
 ### Automated Testing (if applicable)
+
 - [ ] Composable unit tests
 - [ ] Component snapshots
 - [ ] Integration tests
 
 Checklist:
+
 - [ ] All features working
 - [ ] No console errors
 - [ ] No type errors
@@ -286,31 +330,37 @@ Checklist:
 ## Phase 8: Documentation & Handoff
 
 ### Create Module Documentation
+
 Create `docs/REFACTORED_[MODULE].md`:
 
 ```markdown
 # Blog Module Refactoring
 
 ## Structure
+
 - **Types:** shared/types/blog.ts
-- **Composables:** app/composables/useBlog*.ts
+- **Composables:** app/composables/useBlog\*.ts
 - **Components:** app/components/Blog/
 - **Routes:** server/api/blogs/
 
 ## Key Files
+
 - useBlogForm: handles create & update
 - useBlogList: handles listing & pagination
 - BlogForm.vue: smart create/edit form
 - BlogList.vue: list view
 
 ## Usage Example
+
 [Include example of using the module]
 
 ## Data Flow Diagram
+
 [Include architecture diagram]
 ```
 
 Checklist:
+
 - [ ] Code is well commented
 - [ ] Types are properly documented
 - [ ] Usage examples provided
@@ -324,6 +374,7 @@ Checklist:
 Copy & use for next refactor:
 
 ### Files to Create
+
 ```
 shared/types/[module].ts       # Types
 app/composables/use[Module]*.ts # Composables
@@ -332,6 +383,7 @@ docs/REFACTORED_[MODULE].md    # Docs
 ```
 
 ### Checklist Summary
+
 - [ ] Phase 1: Preparation (read docs)
 - [ ] Phase 2: Types (centralize in shared/types)
 - [ ] Phase 3: Composables (extract business logic)
@@ -346,23 +398,31 @@ docs/REFACTORED_[MODULE].md    # Docs
 ## Common Issues & Solutions
 
 ### Issue: Circular Import Detected
+
 **Solution:** Composable shouldn't import component
+
 - Move component to page/parent level
 - Use event emission or slots instead
 
 ### Issue: Type Conflicts
+
 **Solution:** Use specific types from shared/types
+
 - Don't use `any`
 - Import from barrel export (shared/types/index.ts)
 
 ### Issue: Form Not Updating
+
 **Solution:** Use ref/reactive properly in composable
+
 - Check isEdit detection
 - Verify initial data is passed
 - Check submitForm API call
 
 ### Issue: Validation Not Showing
+
 **Solution:** Check touched state
+
 - Mark field as touched on blur
 - Only show error if touched AND has error
 
@@ -371,6 +431,7 @@ docs/REFACTORED_[MODULE].md    # Docs
 ## When Complete
 
 ✅ Refactoring is complete when:
+
 - All phases finished
 - Type check passes
 - Linting passes

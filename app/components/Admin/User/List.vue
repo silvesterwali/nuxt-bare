@@ -1,20 +1,35 @@
 <script setup lang="ts">
 import { h, resolveComponent } from "vue";
 import type { TableColumn } from "@nuxt/ui";
-import type { UserWithProfile } from "~/types/db";
 
 const UBadge = resolveComponent("UBadge");
+const UDropdownMenu = resolveComponent("UDropdownMenu");
+const UButton = resolveComponent("UButton");
 
 const { search, page, params } = useUserListState();
 const { data: users, isLoading: pending } = useUsersQuery(params);
-const { mutate: deleteUser } = useUserDeleteMutation();
+const { mutate: deleteUser, isLoading: deleting } = useUserDeleteMutation();
 
-function handleDeleteUser(id: number) {
-  if (!confirm("Are you sure?")) return;
-  deleteUser(id);
+const confirmDeleteOpen = ref(false);
+const userToDelete = ref<number | null>(null);
+const userToDeleteEmail = ref<string>("");
+
+function handleDeleteUser(id: number, email: string) {
+  userToDelete.value = id;
+  userToDeleteEmail.value = email;
+  confirmDeleteOpen.value = true;
+}
+
+function confirmDelete() {
+  if (userToDelete.value) {
+    deleteUser(userToDelete.value);
+    userToDelete.value = null;
+    userToDeleteEmail.value = "";
+  }
 }
 
 function getRowActions(rowId: number) {
+  const user = users.value?.data?.find((u) => u.id === rowId);
   return [
     {
       label: "Edit User",
@@ -25,7 +40,7 @@ function getRowActions(rowId: number) {
       label: "Delete User",
       icon: "i-lucide-trash-2",
       color: "error",
-      onSelect: () => handleDeleteUser(rowId),
+      onSelect: () => handleDeleteUser(rowId, user?.email || ""),
     },
   ];
 }
@@ -36,24 +51,42 @@ const roleColors: Record<string, string> = {
   moderator: "warning",
 };
 
-const columns: TableColumn<UserWithProfile>[] = [
+const columnsData: TableColumn<UserWithProfile>[] = [
   {
     accessorKey: "email",
     header: "Email",
+    meta: {
+      class: {
+        th: "text-left",
+        td: "text-left",
+      },
+    },
   },
   {
     accessorKey: "name",
     header: "Name",
+    meta: {
+      class: {
+        th: "text-left",
+        td: "text-left",
+      },
+    },
   },
   {
     accessorKey: "role",
     header: "Role",
+    meta: {
+      class: {
+        th: "text-center",
+        td: "text-center",
+      },
+    },
     cell: ({ row }) => {
       const role = row.getValue("role") as string;
       const color = roleColors[role] || "neutral";
       return h(
         UBadge,
-        { color, variant: "subtle", class: "capitalize" },
+        { color, variant: "subtle", class: "capitalize", size: "sm" },
         () => role,
       );
     },
@@ -61,6 +94,12 @@ const columns: TableColumn<UserWithProfile>[] = [
   {
     accessorKey: "createdAt",
     header: "Created At",
+    meta: {
+      class: {
+        th: "text-right",
+        td: "text-right text-sm",
+      },
+    },
     cell: ({ row }) => {
       const date = new Date(row.getValue("createdAt") as string);
       return date.toLocaleDateString("en", {
@@ -73,10 +112,14 @@ const columns: TableColumn<UserWithProfile>[] = [
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => {
-      const UDropdownMenu = resolveComponent("UDropdownMenu");
-      const UButton = resolveComponent("UButton");
-      return h(
+    meta: {
+      class: {
+        th: "text-right",
+        td: "text-right",
+      },
+    },
+    cell: ({ row }) =>
+      h(
         UDropdownMenu,
         {
           items: getRowActions(row.original.id),
@@ -90,8 +133,7 @@ const columns: TableColumn<UserWithProfile>[] = [
             size: "sm",
             "aria-label": "Actions",
           }),
-      );
-    },
+      ),
   },
 ];
 </script>
@@ -115,7 +157,11 @@ const columns: TableColumn<UserWithProfile>[] = [
         />
       </div>
 
-      <UTable :columns="columns" :data="users?.data || []" :loading="pending" />
+      <UTable
+        :columns="columnsData as any"
+        :data="users?.data || []"
+        :loading="pending"
+      />
 
       <div
         class="flex justify-end p-3 border-t border-gray-200 dark:border-gray-700"
@@ -127,5 +173,15 @@ const columns: TableColumn<UserWithProfile>[] = [
         />
       </div>
     </UCard>
+
+    <!-- Confirm Delete Modal -->
+    <CommonConfirmDelete
+      v-model:open="confirmDeleteOpen"
+      title="Delete User"
+      message="Are you sure you want to delete this user? This action cannot be undone."
+      :item-name="userToDeleteEmail"
+      :loading="deleting"
+      @confirm="confirmDelete"
+    />
   </div>
 </template>

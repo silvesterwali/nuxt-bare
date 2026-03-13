@@ -62,11 +62,11 @@ const { blogs, isLoading, search } = useBlogList()
 <!-- pages/admin/blog/index.vue -->
 <script setup lang="ts">
 // ✅ Good: Page composes multiple things
-import BlogList from '@/components/Blog/BlogList.vue'
-import BlogFilter from '@/components/Blog/BlogFilter.vue'
-import { useBlogManager } from '@/composables/useBlogManager'
+import BlogList from "@/components/Blog/BlogList.vue";
+import BlogFilter from "@/components/Blog/BlogFilter.vue";
+import { useBlogManager } from "@/composables/useBlogManager";
 
-const { search, sort } = useBlogManager()
+const { search, sort } = useBlogManager();
 </script>
 
 <template>
@@ -84,7 +84,7 @@ const { search, sort } = useBlogManager()
 ```typescript
 // ❌ NEVER DO THIS
 // app/composables/useBlogManager.ts
-import BlogCard from '@/components/Blog/BlogCard.vue'  // ❌ CIRCULAR!
+import BlogCard from "@/components/Blog/BlogCard.vue"; // ❌ CIRCULAR!
 
 export function useBlogManager() {
   // ...
@@ -92,6 +92,7 @@ export function useBlogManager() {
 ```
 
 **Why?** Creates circular dependency:
+
 - BlogCard imports useBlog
 - useBlog imports BlogCard
 - Both need each other = circular dependency
@@ -105,8 +106,8 @@ export function useBlogManager() {
 <!-- app/components/Blog/BlogList.vue -->
 <script setup lang="ts">
 // ❌ AVOID: Direct component import
-import BlogCard from './BlogCard.vue'       // ❌ If BlogCard also needs BlogList
-import BlogActionMenu from './BlogActions.vue'  // ❌ Multiple cross-imports
+import BlogCard from "./BlogCard.vue"; // ❌ If BlogCard also needs BlogList
+import BlogActionMenu from "./BlogActions.vue"; // ❌ Multiple cross-imports
 
 // This creates hard-to-manage dependencies
 </script>
@@ -122,8 +123,8 @@ import BlogActionMenu from './BlogActions.vue'  // ❌ Multiple cross-imports
 <!-- pages/admin/blog/index.vue -->
 <script setup lang="ts">
 // ✅ GOOD: Compose at page level
-import BlogList from '@/components/Blog/BlogList.vue'
-import BlogCard from '@/components/Blog/BlogCard.vue'
+import BlogList from "@/components/Blog/BlogList.vue";
+import BlogCard from "@/components/Blog/BlogCard.vue";
 
 // BlogList and BlogCard don't know about each other
 </script>
@@ -165,10 +166,11 @@ app/components/
 ```
 
 **Import:**
+
 ```vue
 <!-- app/components/Blog/BlogForm.vue -->
 <script setup lang="ts">
-import FormInput from '@/components/Common/FormInput.vue'
+import FormInput from "@/components/Common/FormInput.vue";
 </script>
 ```
 
@@ -192,9 +194,10 @@ app/composables/
 ```
 
 **Import:**
+
 ```typescript
 // app/composables/useBlogForm.ts
-import { validateBlogData } from '@/shared/utils/validation'
+import { validateBlogData } from "@/shared/utils/validation";
 ```
 
 ---
@@ -209,14 +212,14 @@ Business logic stays in composable, component just renders
 // app/composables/useBlogList.ts
 export function useBlogList() {
   const blogs = ref<BlogData[]>([])
-  
+
   const fetchBlogs = async () => {
     const res = await $fetch('/api/blogs')
     blogs.value = res.data
   }
-  
+
   onMounted(fetchBlogs)
-  
+
   return { blogs }
 }
 
@@ -241,19 +244,19 @@ const { blogs } = useBlogList()
 
 ```typescript
 // Separate imports: distinguish types from runtime
-import type { BlogData, BlogFormData } from '@/shared/types'
-import { useBlogForm } from '@/composables/useBlogForm'
+import type { BlogData, BlogFormData } from "@/shared/types";
+import { useBlogForm } from "@/composables/useBlogForm";
 
 // Or
-import type { PropType } from 'vue'
-import { ref, computed } from 'vue'
+import type { PropType } from "vue";
+import { ref, computed } from "vue";
 ```
 
 ### ❌ Mixed Type and Runtime (avoid)
 
 ```typescript
 // ❌ Don't mix - harder to optimize
-import { BlogData, useBlogForm } from '@/shared/types'
+import { BlogData, useBlogForm } from "@/shared/types";
 ```
 
 ---
@@ -262,25 +265,26 @@ import { BlogData, useBlogForm } from '@/shared/types'
 
 ```typescript
 // shared/types/index.ts
-export type { BlogData, BlogFormData } from './blog'
-export type { Category, CategoryFormData } from './category'
-export type { User, UserProfile } from './user'
+export type { BlogData, BlogFormData } from "./blog";
+export type { Category, CategoryFormData } from "./category";
+export type { User, UserProfile } from "./user";
 ```
 
 **Usage:**
+
 ```typescript
-import type { BlogData, Category, User } from '@/shared/types'
+import type { BlogData, Category, User } from "@/shared/types";
 ```
 
 ### ❌ Don't: Mix import paths
 
 ```typescript
 // ❌ Avoid: importing from multiple paths
-import { BlogData } from '@/shared/types/blog'
-import { Category } from '@/shared/types/category'
+import { BlogData } from "@/shared/types/blog";
+import { Category } from "@/shared/types/category";
 
 // ✅ Better: use barrel export
-import type { BlogData, Category } from '@/shared/types'
+import type { BlogData, Category } from "@/shared/types";
 ```
 
 ---
@@ -290,6 +294,7 @@ import type { BlogData, Category } from '@/shared/types'
 ### Issue: Composable needs Component data
 
 **Problem:**
+
 ```typescript
 // ❌ useBlogManager wants to know about BlogCard
 export function useBlogManager() {
@@ -299,13 +304,14 @@ export function useBlogManager() {
 ```
 
 **Solution: Invert Control**
+
 ```typescript
 // ✅ Composable doesn't import component
 // Instead: accepts render function or config
 
 export function useBlogManager(options = {}) {
   const renderItem = options.renderItem || defaultRender
-  
+
   return { blogs, renderItem }
 }
 
@@ -322,6 +328,7 @@ const { blogs, renderItem } = useBlogManager({
 ### Issue: Two Components Need Each Other
 
 **Problem:**
+
 ```
 BlogList.vue imports BlogCard.vue
 BlogCard.vue imports BlogList.vue (for parent communication)
@@ -329,6 +336,7 @@ BlogCard.vue imports BlogList.vue (for parent communication)
 ```
 
 **Solution 1: Use Slots**
+
 ```vue
 <!-- Parent passes child template -->
 <BlogList>
@@ -339,12 +347,14 @@ BlogCard.vue imports BlogList.vue (for parent communication)
 ```
 
 **Solution 2: Use Events**
+
 ```vue
 <!-- Child emits, parent handles -->
 <BlogCard :blog="blog" @edit="onEdit" />
 ```
 
 **Solution 3: Lift to Page**
+
 ```vue
 <!-- Page composes both -->
 <BlogList ref="listRef" />
@@ -411,30 +421,32 @@ npx madge --extensions ts,tsx,vue app/
 
 ## Summary
 
-| What | Where | Can Import | Should NOT Import |
-|------|-------|------------|-------------------|
-| **Type** | `shared/types/` | Nothing | Components, Composables |
-| **Utility** | `shared/utils/` | Types, other utils | Components, Composables |
-| **Composable** | `app/composables/` | Types, utils, other composables | Components |
-| **Component** | `app/components/` | Types, utils, composables, other components | Pages |
-| **Page** | `app/pages/` | Everything | (Nothing off-limits) |
+| What           | Where              | Can Import                                  | Should NOT Import       |
+| -------------- | ------------------ | ------------------------------------------- | ----------------------- |
+| **Type**       | `shared/types/`    | Nothing                                     | Components, Composables |
+| **Utility**    | `shared/utils/`    | Types, other utils                          | Components, Composables |
+| **Composable** | `app/composables/` | Types, utils, other composables             | Components              |
+| **Component**  | `app/components/`  | Types, utils, composables, other components | Pages                   |
+| **Page**       | `app/pages/`       | Everything                                  | (Nothing off-limits)    |
 
 ---
 
 ## Real-World Example: Blog Module
 
 ### BEFORE (Tangled Dependencies)
+
 ```
 BlogList.vue → BlogCard.vue → useBlogActions.ts → BlogList.vue ❌ CIRCULAR
 ```
 
 ### AFTER (Clean Dependencies)
+
 ```
 BlogList.vue
 ├── imports: useBlogList (composable)
 └── emits: select, delete
 
-BlogCard.vue  
+BlogCard.vue
 ├── imports: useBlogActions (composable)
 └── emits: edit, delete
 

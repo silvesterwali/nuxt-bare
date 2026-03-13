@@ -19,7 +19,7 @@ export const uploadSchema = z.object({
   type: z.enum(["image", "document"]),
   alt: z.string().optional(),
   privacy: z.enum(["private", "public"]).optional().default("public"),
-  description: z.string().max(255).optional(),
+  description: z.string().min(2).max(255).optional(),
 });
 
 /**

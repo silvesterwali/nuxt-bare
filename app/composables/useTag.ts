@@ -39,13 +39,7 @@ export function useTagCreateMutation() {
         description: "Tag created successfully",
       });
     },
-    onError: () => {
-      useToast().add({
-        title: "Error",
-        description: "Failed to create tag",
-        color: "error",
-      });
-    },
+    // Errors are handled by the component calling mutateAsync()
   });
 }
 
@@ -74,13 +68,7 @@ export function useTagUpdateMutation() {
         description: "Tag updated successfully",
       });
     },
-    onError: () => {
-      useToast().add({
-        title: "Error",
-        description: "Failed to update tag",
-        color: "error",
-      });
-    },
+    // Errors are handled by the component calling mutateAsync()
   });
 }
 

@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import { useMediaUploadMutation } from "~/composables/useMediaManagementQuery";
-import { useValidateHelper } from "~/composables/useValidateHelper";
+import type { Form, FormSubmitEvent } from "@nuxt/ui";
 
 const props = defineProps({
   open: { type: Boolean, required: true },
@@ -17,28 +15,29 @@ const open = defineModel<boolean>("open", {
 
 const { transformToIssue } = useValidateHelper();
 
-import type { Ref, ComponentPublicInstance } from "vue";
+interface Schema {
+  file: File | null;
+  alt: string;
+  description: string;
+}
 
-type UFormInstance = ComponentPublicInstance<{
-  clear(): void;
-  setErrors(errs: any[]): void;
-}>;
-const form: Ref<UFormInstance | null> = ref(null);
+const form = ref<Form<Schema>>();
 
-const file = ref<File | null>(null);
-const alt = ref("");
-const description = ref("");
+const state = ref<Schema>({
+  file: null,
+  alt: "",
+  description: "",
+});
 
 const uploadMutation = useMediaUploadMutation();
 const loading = computed(() => uploadMutation.isLoading.value);
 
-async function submit() {
+async function submit(event: FormSubmitEvent<Schema>) {
   // clear previous validation errors if the form API is available
-  if (form.value && typeof form.value.clear === "function") {
-    form.value.clear();
-  }
 
-  if (!file.value) {
+  form.value?.clear();
+
+  if (!event.data.file) {
     useToast().add({
       title: "Error",
       description: "Please select a file to upload.",
@@ -47,29 +46,34 @@ async function submit() {
     return;
   }
 
-  const fileType = file.value.type || "";
+  const fileType = event.data.file.type || "";
   const mediaType = fileType.startsWith("image/") ? "image" : "document";
 
-  // Client-side size validation (backend also validates)
-  const maxSize = mediaType === "image" ? 2 * 1024 * 1024 : 50 * 1024 * 1024;
-  if (file.value.size > maxSize) {
+  // Client-side size validation using centralized config (backend also validates)
+  const config =
+    mediaType === "image"
+      ? MEDIA_CONFIG.UPLOAD.IMAGE
+      : MEDIA_CONFIG.UPLOAD.DOCUMENT;
+  const maxSize = config.maxSize;
+
+  if (event.data.file.size > maxSize) {
     useToast().add({
       title: "File too large",
       description:
         mediaType === "image"
-          ? "Images must be 2MB or less."
-          : "Documents must be 50MB or less.",
+          ? `Images must be ${maxSize / (1024 * 1024)}MB or less.`
+          : `Documents must be ${maxSize / (1024 * 1024)}MB or less.`,
       color: "error",
     });
     return;
   }
 
   const payload = {
-    file: file.value,
+    file: event.data.file,
     type: mediaType,
     privacy: "public",
-    description: description.value,
-    alt: alt.value,
+    description: event.data.description,
+    alt: event.data.alt,
   };
 
   try {
@@ -78,24 +82,25 @@ async function submit() {
     reset();
     open.value = false;
   } catch (err: any) {
-    const errors = transformToIssue(err);
-    if (errors.length) {
-      form.value?.setErrors(errors);
-      return;
+    if (form.value) {
+      const errors = transformToIssue(err);
+      if (errors.length) {
+        form.value.setErrors(errors);
+      }
     }
 
     useToast().add({
       title: "Error",
-      description: "Failed to upload media",
+      description: err?.message || "Failed to upload media",
       color: "error",
     });
   }
 }
 
 function reset() {
-  file.value = null;
-  alt.value = "";
-  description.value = "";
+  state.value.file = null;
+  state.value.alt = "";
+  state.value.description = "";
 }
 
 function close() {
@@ -105,29 +110,32 @@ function close() {
 </script>
 
 <template>
-  <UModal v-model:open="open" title="Upload media" icon="i-lucide-upload">
+  <UModal
+    v-model:open="open"
+    title="Upload media"
+    description="Upload an image (max 2MB) or document (max 50MB)"
+    icon="i-lucide-upload"
+  >
     <template #body>
-      <UForm ref="form" class="space-y-4" @submit.prevent="submit">
+      <UForm ref="form" :state="state" class="space-y-4" @submit="submit">
         <UFileUpload
           layout="list"
-          v-model="file"
+          v-model="state.file"
           label="Drop your file here"
           description="Images (max 2MB) or documents (PDF/Word/Excel, max 50MB)"
         />
 
-        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <UFormField label="Alt text" name="alt">
-            <UInput
-              v-model="alt"
-              placeholder="Optional alt text"
-              class="w-full"
-            />
-          </UFormField>
-        </div>
+        <UFormField label="Alt text" name="alt">
+          <UInput
+            v-model="state.alt"
+            placeholder="Optional alt text"
+            class="w-full"
+          />
+        </UFormField>
 
         <UFormField label="Description" name="description">
           <UTextarea
-            v-model="description"
+            v-model="state.description"
             :rows="3"
             placeholder="Optional description"
             class="w-full"

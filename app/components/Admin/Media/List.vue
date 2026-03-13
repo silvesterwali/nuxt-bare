@@ -1,8 +1,4 @@
 <script setup lang="ts">
-import FilterBar from "~/components/Admin/Media/FilterBar.vue";
-import UploadModal from "~/components/Admin/Media/UploadModal.vue";
-import DeleteConfirmModal from "~/components/Admin/Media/DeleteConfirmModal.vue";
-
 const { page, type, params } = useMediaListState();
 const { data: mediaResponse, isLoading: pending } =
   useMediaManagementQuery(params);
@@ -12,10 +8,15 @@ const pagination = computed(() => mediaResponse.value?.pagination);
 
 const deleteMutation = useMediaDeleteMutation();
 
-const uploadOpen = ref(false);
-
-const deleteConfirmOpen = ref(false);
-const deleteId = ref<number | null>(null);
+// Use centralized modal state management
+const {
+  uploadOpen,
+  deleteConfirmOpen,
+  deleteId,
+  openDeleteModal,
+  closeDeleteModal,
+  openUploadModal,
+} = useMediaModal();
 
 function openMedia(url: string) {
   if (!url) return;
@@ -32,16 +33,10 @@ function handleUploadReload(response: { message: string; data: any }) {
   console.debug("Media uploaded:", response);
 }
 
-function openDeleteModal(id: number) {
-  deleteId.value = id;
-  deleteConfirmOpen.value = true;
-}
-
 function confirmDelete() {
   if (!deleteId.value) return;
   deleteMutation.mutate(deleteId.value);
-  deleteConfirmOpen.value = false;
-  deleteId.value = null;
+  closeDeleteModal();
 }
 </script>
 
@@ -58,11 +53,11 @@ function confirmDelete() {
       <UButton
         icon="i-lucide-plus"
         label="Upload Media"
-        @click="uploadOpen = true"
+        @click="openUploadModal"
       />
     </div>
 
-    <FilterBar v-model:page="page" v-model:type="type" />
+    <AdminMediaFilterBar v-model:page="page" v-model:type="type" />
 
     <AdminMediaTable
       :media="media"
@@ -78,9 +73,12 @@ function confirmDelete() {
       class="self-end"
     />
 
-    <UploadModal v-model:open="uploadOpen" @reload="handleUploadReload" />
+    <AdminMediaUploadModal
+      v-model:open="uploadOpen"
+      @reload="handleUploadReload"
+    />
 
-    <DeleteConfirmModal
+    <AdminMediaDeleteConfirmModal
       v-model:open="deleteConfirmOpen"
       @confirm="confirmDelete"
     />

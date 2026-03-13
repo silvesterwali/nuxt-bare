@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { z } from "zod";
-import type { BlogTag } from "@/types/blog";
+import type { Form } from "@nuxt/ui";
 
 interface OtherProps {
   tagId: number | null;
@@ -15,24 +14,9 @@ const props = defineProps<OtherProps>();
 const { mutateAsync: createTag, isLoading: creating } = useTagCreateMutation();
 const { mutateAsync: updateTag, isLoading: updating } = useTagUpdateMutation();
 
-const schema = z.object({
-  name: z.string().min(1, "Name is required"),
-  color: z.string().optional(),
-});
+const { transformToIssue } = useValidateHelper();
 
-type FormData = z.infer<typeof schema>;
-
-// validation issues returned from server
-import type { ZodIssue } from "zod";
-const issues = ref<ZodIssue[]>([]);
-const fieldErrors = computed(() => {
-  const map: Record<string, string> = {};
-  for (const i of issues.value) {
-    const key = i.path[0] as string;
-    if (!map[key]) map[key] = i.message;
-  }
-  return map;
-});
+const form: Ref<Form<any> | null> = ref(null);
 
 const state = reactive({
   name: "",
@@ -41,6 +25,11 @@ const state = reactive({
 
 const isLoading = computed(() => creating.value || updating.value);
 const modalTitle = computed(() => (props.tagId ? "Edit Tag" : "New Tag"));
+const modalDescription = computed(() =>
+  props.tagId
+    ? "Update the tag details below."
+    : "Create a new tag by filling in the details below.",
+);
 
 watchEffect(() => {
   if (open.value && props.tag) {
@@ -53,9 +42,12 @@ watchEffect(() => {
 });
 
 async function onSubmit() {
-  try {
-    issues.value = [];
+  // clear previous validation errors if the form API is available
+  if (form.value && typeof form.value.clear === "function") {
+    form.value.clear();
+  }
 
+  try {
     const data = {
       name: state.name,
       color: state.color || undefined,
@@ -72,14 +64,18 @@ async function onSubmit() {
 
     open.value = false;
   } catch (error: any) {
-    console.error("Form submission error:", error);
-    let arr: any[] = [];
-    if (Array.isArray(error)) {
-      arr = error;
-    } else if (Array.isArray(error?.data)) {
-      arr = error.data;
+    if (form.value) {
+      const errors = transformToIssue(error);
+      if (errors.length) {
+        form.value.setErrors(errors);
+      }
     }
-    issues.value = arr as ZodIssue[];
+
+    useToast().add({
+      title: "Error",
+      description: error?.message || "Failed to save tag",
+      color: "error",
+    });
   }
 }
 
@@ -89,46 +85,55 @@ function close() {
 </script>
 
 <template>
-  <UModal v-model:open="open" :title="modalTitle" @close="close">
+  <UModal
+    v-model:open="open"
+    :title="modalTitle"
+    :description="modalDescription"
+    @close="close"
+  >
     <template #body>
       <div class="flex flex-col gap-4">
         <CommonLanguageContentViewer />
-        <UFormField label="Name" required>
-          <UInput
-            v-model="state.name"
-            placeholder="Enter tag name"
-            class="w-full"
-          />
-          <template #hint v-if="fieldErrors.name">
-            <span class="text-red-500">{{ fieldErrors.name }}</span>
-          </template>
-        </UFormField>
+        <UForm
+          ref="form"
+          :state="state"
+          class="space-y-4"
+          @submit.prevent="onSubmit"
+        >
+          <UFormField label="Name" name="name" required>
+            <UInput
+              v-model="state.name"
+              placeholder="Enter tag name"
+              class="w-full"
+            />
+          </UFormField>
 
-        <UFormField label="Color">
-          <div class="flex gap-2">
-            <UInput
-              v-model="state.color"
-              type="color"
-              placeholder="#000000"
-              class="w-16"
+          <UFormField label="Color" name="color">
+            <div class="flex gap-2">
+              <UInput
+                v-model="state.color"
+                type="color"
+                placeholder="#000000"
+                class="w-16"
+              />
+              <UInput
+                v-model="state.color"
+                placeholder="e.g., #FF5733"
+                class="flex-1"
+              />
+            </div>
+          </UFormField>
+
+          <div class="flex justify-end gap-2 pt-4">
+            <UButton
+              color="neutral"
+              variant="ghost"
+              label="Cancel"
+              @click="close"
             />
-            <UInput
-              v-model="state.color"
-              placeholder="e.g., #FF5733"
-              class="flex-1"
-            />
+            <UButton label="Save Tag" :loading="isLoading" type="submit" />
           </div>
-        </UFormField>
-
-        <div class="flex justify-end gap-2 pt-4">
-          <UButton
-            color="neutral"
-            variant="ghost"
-            label="Cancel"
-            @click="close"
-          />
-          <UButton label="Save Tag" :loading="isLoading" @click="onSubmit" />
-        </div>
+        </UForm>
       </div>
     </template>
   </UModal>

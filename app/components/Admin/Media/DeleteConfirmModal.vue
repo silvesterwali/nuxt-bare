@@ -9,7 +9,12 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <UModal v-model:open="open" title="Delete media" icon="i-lucide-trash-2">
+  <UModal
+    v-model:open="open"
+    title="Delete media"
+    description="This action cannot be undone. The media item will be permanently deleted."
+    icon="i-lucide-trash-2"
+  >
     <template #body>
       <p class="text-gray-600 dark:text-gray-400 mb-6">
         Are you sure you want to delete this media item? This action cannot be

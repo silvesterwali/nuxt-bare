@@ -1,95 +1,30 @@
 <script setup lang="ts">
-import { ref, watch, computed } from "vue";
-import type { FormSubmitEvent } from "@nuxt/ui";
-import type { BlogCategory, BlogTag, BlogFormData } from "@/types/blog";
-import MediaPicker from "~/components/Common/MediaPicker.vue";
-
 interface Props {
-  post?:
-    | (BlogFormData & {
-        id?: number;
-        categories?: BlogCategory[];
-        tags?: BlogTag[];
-      })
-    | null;
-  isLoading?: boolean;
-}
-
-interface Emits {
-  (e: "submit", data: BlogFormData): void;
+  post?: BlogPost | null;
 }
 
 const props = defineProps<Props>();
-const emit = defineEmits<Emits>();
+const emit = defineEmits<{
+  (e: "reload"): void;
+}>();
 
-const { data: categories } = useCategoriesQuery();
-const { data: tags } = useTagsQuery();
-
-const form = ref<BlogFormData>({
-  slug: "",
-  title: "",
-  shortDescription: "",
-  content: "",
-  status: "draft",
-  categoryIds: [],
-  tagIds: [],
-  featuredImageId: null,
-});
-
-const selectedCategoryIds = ref<number[]>([]);
-const selectedTagIds = ref<number[]>([]);
-
-// Watch for prop changes to populate form
-watch(
-  () => props.post,
-  (newPost) => {
-    if (newPost) {
-      form.value = {
-        slug: newPost.slug || "",
-        title: newPost.title || "",
-        shortDescription: newPost.shortDescription || "",
-        content: newPost.content || "",
-        status: newPost.status || "draft",
-        categoryIds: [],
-        tagIds: [],
-        featuredImageId: newPost.featuredImageId ?? null,
-      };
-      selectedCategoryIds.value = (newPost.categories || []).map((c) => c.id);
-      selectedTagIds.value = (newPost.tags || []).map((t) => t.id);
-    }
+// Extract form logic to composable - composable handles submit internally
+const {
+  form,
+  formRef,
+  categoryOptions,
+  tagOptions,
+  statusOptions,
+  isLoading,
+  onSubmit,
+} = useBlogForm(
+  computed(() => props.post as any),
+  {
+    onSuccess: () => {
+      navigateTo("/admin/blog");
+    },
   },
-  { immediate: true },
 );
-
-// Category and tag options for selectors
-const categoryOptions = computed(() =>
-  (categories.value || []).map((c) => ({
-    id: c.id,
-    label: c.name,
-  })),
-);
-
-const tagOptions = computed(() =>
-  (tags.value || []).map((t) => ({
-    id: t.id,
-    label: t.name,
-  })),
-);
-
-async function onSubmit(event: FormSubmitEvent<BlogFormData>) {
-  emit("submit", {
-    ...event.data,
-    categoryIds: selectedCategoryIds.value,
-    tagIds: selectedTagIds.value,
-    featuredImageId: form.value.featuredImageId ?? null,
-  });
-}
-
-const statusOptions = [
-  { label: "Draft", value: "draft" },
-  { label: "Published", value: "published" },
-  { label: "Archived", value: "archived" },
-];
 </script>
 
 <template>
@@ -98,7 +33,7 @@ const statusOptions = [
     <CommonLanguageContentViewer />
 
     <!-- Form -->
-    <UForm :state="form" @submit="onSubmit" class="space-y-4">
+    <UForm ref="formRef" :state="form" @submit="onSubmit" class="space-y-4">
       <!-- Slug -->
       <UFormField label="Slug (URL-friendly)" name="slug" required>
         <UInput
@@ -149,14 +84,13 @@ const statusOptions = [
 
       <!-- Featured Image -->
       <UFormField label="Featured Image" name="featuredImageId">
-        {{ form.featuredImageId }} <!-- Display selected media ID for debugging -->
-        <MediaPicker v-model:media-id="form.featuredImageId" />
+        <CommonMediaPicker v-model:media-id="form.featuredImageId" />
       </UFormField>
 
       <!-- Categories -->
       <UFormField label="Categories" name="categories">
         <USelectMenu
-          v-model="selectedCategoryIds"
+          v-model="form.categoryIds"
           :items="categoryOptions"
           multiple
           placeholder="Select categories..."
@@ -175,7 +109,7 @@ const statusOptions = [
       <!-- Tags -->
       <UFormField label="Tags" name="tags">
         <USelectMenu
-          v-model="selectedTagIds"
+          v-model="form.tagIds"
           :items="tagOptions"
           multiple
           placeholder="Select tags..."

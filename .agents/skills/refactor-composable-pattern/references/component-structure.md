@@ -21,15 +21,16 @@ Di Nuxt 4.x, kamu tidak perlu manual import untuk Vue composition APIs:
 
 ```typescript
 // ❌ TIDAK PERLU - Sudah auto-imported
-import { ref, computed, watch } from 'vue'
-import { PropType } from 'vue'
+import { ref, computed, watch } from "vue";
+import { PropType } from "vue";
 
 // ✅ LANGSUNG GUNAKAN
-const count = ref(0)
-const doubled = computed(() => count.value * 2)
+const count = ref(0);
+const doubled = computed(() => count.value * 2);
 ```
 
 **Auto-imported di Nuxt:**
+
 - Vue APIs: `ref`, `reactive`, `computed`, `watch`, `onMounted`, dll
 - Nuxt APIs: `useRouter`, `useFetch`, `useState`, `navigateTo`, dll
 - Custom Composables: Semua file di folder `composables/` (auto-imported)
@@ -43,46 +44,56 @@ const doubled = computed(() => count.value * 2)
 ## Commonly Auto-Imported APIs
 
 ### Vue Composition API
+
 ```typescript
 // ✅ No import needed
-ref, reactive, computed, watch, watchEffect
-onMounted, onUpdated, onUnmounted, onBeforeMount
-toRef, toRefs, unref, isRef, isReactive
+(ref, reactive, computed, watch, watchEffect);
+(onMounted, onUpdated, onUnmounted, onBeforeMount);
+(toRef, toRefs, unref, isRef, isReactive);
 
 // Usage:
-const count = ref(0)
-const doubled = computed(() => count.value * 2)
-watch(() => count.value, (newVal) => { /* ... */ })
+const count = ref(0);
+const doubled = computed(() => count.value * 2);
+watch(
+  () => count.value,
+  (newVal) => {
+    /* ... */
+  },
+);
 ```
 
 ### Vue Utilities
+
 ```typescript
 // ✅ No import needed
-defineProps, defineEmits, defineModel, withDefaults
-computed, ref, reactive, watch
+(defineProps, defineEmits, defineModel, withDefaults);
+(computed, ref, reactive, watch);
 
 // defineExpose, getCurrentInstance, etc
 ```
 
 ### Nuxt Composables
+
 ```typescript
 // ✅ No import needed
-useRouter, useRoute
-useFetch, useAsyncData, useLazyFetch
-useState, useCookie, useHead
-useNuxtData, useSeoMeta, useError
-usePreventScroll, useScrollToTop
+(useRouter, useRoute);
+(useFetch, useAsyncData, useLazyFetch);
+(useState, useCookie, useHead);
+(useNuxtData, useSeoMeta, useError);
+(usePreventScroll, useScrollToTop);
 ```
 
 ### Nuxt Utilities
+
 ```typescript
 // ✅ No import needed
-definePageMeta, defineRouteRules, navigateTo
-defineLayout, clearNuxtData, refreshNuxtData
-setResponseStatus, showError, clearError
+(definePageMeta, defineRouteRules, navigateTo);
+(defineLayout, clearNuxtData, refreshNuxtData);
+(setResponseStatus, showError, clearError);
 ```
 
 ### Check Auto-imports
+
 ```bash
 # Lihat semua auto-imports yang tersedia
 cat .nuxt/imports.d.ts
@@ -104,6 +115,7 @@ cat .nuxt/components.d.ts
 ```
 
 **Naming Convention:**
+
 - Folder name + File name (both PascalCase) = Component name
 - **Example:** `components/Blog/Card.vue` → `<BlogCard />`
 - **Example:** `components/admin/users/List.vue` → `<AdminUsersList />`
@@ -128,18 +140,20 @@ cat .nuxt/components.d.ts
 ```
 
 **Naming Convention:**
+
 - File: `composables/useBlogForm.ts` → Composable: `useBlogForm()`
 - File: `composables/admin/useAdminUsers.ts` → Composable: `useAdminUsers()`
 - Nested path → PascalCase (folder name included)
 - Always use `use` prefix for composables
 
 **Example:**
+
 ```vue
 <script setup lang="ts">
 // ✅ No import - auto-imported
-const { formData, isEdit, submitForm } = useBlogForm()
-const { blogs, loading } = useBlogList()
-const { users, deleteUser } = useAdminUsers()
+const { formData, isEdit, submitForm } = useBlogForm();
+const { blogs, loading } = useBlogList();
+const { users, deleteUser } = useAdminUsers();
 </script>
 ```
 
@@ -148,6 +162,7 @@ const { users, deleteUser } = useAdminUsers()
 ## Component Hierarchy
 
 ### Level 1: Page Components
+
 ```vue
 <!-- pages/admin/blog/index.vue -->
 <script setup lang="ts">
@@ -155,7 +170,7 @@ const { users, deleteUser } = useAdminUsers()
 // Tidak perlu manual import!
 
 // Komposisi di level page
-const { blogs, isLoading, search, sort, paginate } = useBlogList()
+const { blogs, isLoading, search, sort, paginate } = useBlogList();
 
 // ✅ BlogList auto-imported dari components/Blog/BlogList.vue
 </script>
@@ -170,21 +185,22 @@ const { blogs, isLoading, search, sort, paginate } = useBlogList()
 ```
 
 ### Level 2: Feature Components (Containers)
+
 ```vue
 <!-- components/Blog/List.vue -->
 <script setup lang="ts">
-import type { BlogData } from '@/shared/types'
+import type { BlogData } from "@/shared/types";
 
 interface Props {
-  blogs: BlogData[]
-  loading?: boolean
+  blogs: BlogData[];
+  loading?: boolean;
 }
 
 withDefaults(defineProps<Props>(), {
-  loading: false
-})
+  loading: false,
+});
 
-const selectedId = ref<string | null>(null)
+const selectedId = ref<string | null>(null);
 
 // ✅ Card auto-imported dari components/Blog/Card.vue
 </script>
@@ -194,8 +210,8 @@ const selectedId = ref<string | null>(null)
     <div v-if="loading" class="loading">Loading...</div>
     <div v-else class="grid gap-4">
       <!-- ✅ No import needed - auto-imported -->
-      <BlogCard 
-        v-for="blog in blogs" 
+      <BlogCard
+        v-for="blog in blogs"
         :key="blog.id"
         :blog="blog"
         :selected="selectedId === blog.id"
@@ -207,30 +223,31 @@ const selectedId = ref<string | null>(null)
 ```
 
 ### Level 3: UI Components (Dumb Components)
+
 ```vue
 <!-- components/Blog/Card.vue -->
 <script setup lang="ts">
-import type { BlogData } from '@/shared/types'
+import type { BlogData } from "@/shared/types";
 
 // ✅ No other imports needed - types auto-imported
 // ✅ If using FormInput: auto-imported dari components/Common/FormInput.vue
 
 interface Props {
-  blog: BlogData
-  selected?: boolean
+  blog: BlogData;
+  selected?: boolean;
 }
 
 withDefaults(defineProps<Props>(), {
-  selected: false
-})
+  selected: false,
+});
 
 defineEmits<{
-  (e: 'select'): void
-}>()
+  (e: "select"): void;
+}>();
 </script>
 
 <template>
-  <article 
+  <article
     class="blog-card"
     :class="{ 'is-selected': selected }"
     @click="$emit('select')"
@@ -247,63 +264,52 @@ defineEmits<{
 ## Form Components (Smart Pattern)
 
 ### Component: Edit/Create dengan Props Detection
+
 ```vue
 <!-- components/Blog/Form.vue -->
 <script setup lang="ts">
-import type { BlogData } from '@/shared/types'
+import type { BlogData } from "@/shared/types";
 
 // ✅ useBlogForm auto-imported dari composables/useBlogForm.ts
 // Tidak perlu manual import!
 
 interface Props {
-  blog?: BlogData
+  blog?: BlogData;
 }
 
-withDefaults(defineProps<Props>(), {})
+withDefaults(defineProps<Props>(), {});
 
 defineEmits<{
-  (e: 'success', blog: BlogData): void
-  (e: 'cancel'): void
-}>()
+  (e: "success", blog: BlogData): void;
+  (e: "cancel"): void;
+}>();
 
 // Composable detects edit vs create otomatis
-const { 
-  formData, 
-  isEdit, 
-  isSubmitting, 
-  submitForm,
-  reset 
-} = useBlogForm(props.blog)
+const { formData, isEdit, isSubmitting, submitForm, reset } = useBlogForm(
+  props.blog,
+);
 </script>
 
 <template>
   <form @submit.prevent="submitForm">
-    <h2>{{ isEdit ? 'Edit Blog' : 'Create New Blog' }}</h2>
-    
+    <h2>{{ isEdit ? "Edit Blog" : "Create New Blog" }}</h2>
+
     <!-- ✅ FormInput auto-imported dari components/Common/FormInput.vue -->
-    <FormInput 
-      v-model="formData.title" 
-      label="Title"
-      required
-    />
-    
+    <FormInput v-model="formData.title" label="Title" required />
+
     <!-- ✅ FormTextarea auto-imported -->
-    <FormTextarea 
-      v-model="formData.content" 
-      label="Content"
-      required
-    />
-    
+    <FormTextarea v-model="formData.content" label="Content" required />
+
     <!-- ✅ FormSelect auto-imported -->
-    <FormSelect 
-      v-model="formData.categoryId" 
+    <FormSelect
+      v-model="formData.categoryId"
       label="Category"
       :options="categories"
     />
-    
+
     <div class="actions">
       <button type="submit" :disabled="isSubmitting">
-        {{ isEdit ? 'Update' : 'Create' }}
+        {{ isEdit ? "Update" : "Create" }}
       </button>
       <button type="button" @click="reset">Cancel</button>
     </div>
@@ -316,6 +322,7 @@ const {
 ## Reusable Form Fields
 
 ### Input Component (Modern: defineModel)
+
 ```vue
 <!-- components/Common/Input.vue -->
 <script setup lang="ts">
@@ -323,28 +330,28 @@ const {
 // Cleaner than modelValue + defineEmits
 
 interface Props {
-  label?: string
-  type?: string
-  placeholder?: string
-  required?: boolean
-  error?: string
+  label?: string;
+  type?: string;
+  placeholder?: string;
+  required?: boolean;
+  error?: string;
 }
 
 withDefaults(defineProps<Props>(), {
-  type: 'text'
-})
+  type: "text",
+});
 
 // ✅ MODERN: Two-way binding dengan defineModel
 // Parent: <CommonInput v-model="title" label="Title" />
 const modelValue = defineModel<string | number>({
-  default: ''
-})
+  default: "",
+});
 </script>
 
 <template>
   <div class="form-field">
     <label v-if="label">{{ label }}</label>
-    <input 
+    <input
       :value="modelValue"
       :type="type"
       :placeholder="placeholder"
@@ -359,22 +366,23 @@ const modelValue = defineModel<string | number>({
 ### Input Component: Old vs Modern Pattern
 
 #### ❌ OLD: modelValue + defineEmits (Pre-Vue 3.4)
+
 ```vue
 <script setup lang="ts">
 interface Props {
-  modelValue: string | number
-  label?: string
+  modelValue: string | number;
+  label?: string;
 }
 
-withDefaults(defineProps<Props>(), {})
+withDefaults(defineProps<Props>(), {});
 
 defineEmits<{
-  'update:modelValue': [value: string | number]
-}>()
+  "update:modelValue": [value: string | number];
+}>();
 </script>
 
 <template>
-  <input 
+  <input
     :value="modelValue"
     @input="$emit('update:modelValue', $event.target.value)"
   />
@@ -382,46 +390,49 @@ defineEmits<{
 ```
 
 #### ✅ MODERN: defineModel (Vue 3.4+)
+
 ```typescript
 // Lebih ringkas, lebi jelas, dan type-safe
 const modelValue = defineModel<string>({
-  default: ''
-})
+  default: "",
+});
 ```
 
 **Parent usage tetap sama:**
+
 ```vue
 <CommonInput v-model="title" label="Title" />
 ```
 
 ### Textarea Component (Modern: defineModel)
+
 ```vue
 <!-- components/Common/Textarea.vue -->
 <script setup lang="ts">
 // ✅ Use defineModel for clean two-way binding
 
 interface Props {
-  label?: string
-  placeholder?: string
-  required?: boolean
-  rows?: number
-  error?: string
+  label?: string;
+  placeholder?: string;
+  required?: boolean;
+  rows?: number;
+  error?: string;
 }
 
 withDefaults(defineProps<Props>(), {
-  rows: 4
-})
+  rows: 4,
+});
 
 // ✅ defineModel instead of modelValue + defineEmits
 const modelValue = defineModel<string>({
-  default: ''
-})
+  default: "",
+});
 </script>
 
 <template>
   <div class="form-field">
     <label v-if="label">{{ label }}</label>
-    <textarea 
+    <textarea
       :value="modelValue"
       :placeholder="placeholder"
       :required="required"
@@ -434,34 +445,35 @@ const modelValue = defineModel<string>({
 ```
 
 ### Select Component (Modern: defineModel)
+
 ```vue
 <!-- components/Common/Select.vue -->
 <script setup lang="ts">
 export interface SelectOption {
-  value: string | number
-  label: string
+  value: string | number;
+  label: string;
 }
 
 interface Props {
-  label?: string
-  options: SelectOption[]
-  placeholder?: string
-  required?: boolean
-  error?: string
+  label?: string;
+  options: SelectOption[];
+  placeholder?: string;
+  required?: boolean;
+  error?: string;
 }
 
-withDefaults(defineProps<Props>(), {})
+withDefaults(defineProps<Props>(), {});
 
 // ✅ defineModel for clean two-way binding
 const modelValue = defineModel<string | number>({
-  default: ''
-})
+  default: "",
+});
 </script>
 
 <template>
   <div class="form-field">
     <label v-if="label">{{ label }}</label>
-    <select 
+    <select
       :value="modelValue"
       :required="required"
       @change="modelValue = $event.target.value"
@@ -484,37 +496,39 @@ const modelValue = defineModel<string | number>({
 
 ```typescript
 // ✅ Cleaner dan lebih ringkas
-const fullName = defineModel<string>('fullName', {
-  default: ''
-})
+const fullName = defineModel<string>("fullName", {
+  default: "",
+});
 
 // Parent automatically dapat v-model:full-name="data.fullName"
 // Tidak perlu defineEmits, tidak perlu :value + @input
 ```
 
 **Parent Component:**
+
 ```vue
 <template>
   <!-- ✅ Simple two-way binding -->
   <MyInput v-model:full-name="data.fullName" />
-  
+
   <!-- Atau dengan v-model singkat (model name = 'modelValue') -->
   <FormInput v-model="data.title" />
 </template>
 ```
 
 **Multiple Models dalam satu component:**
+
 ```vue
 <script setup lang="ts">
 // Component mendukung multiple v-model bindings
-const title = defineModel<string>()
-const description = defineModel<string>('description')
-const published = defineModel<boolean>('published')
+const title = defineModel<string>();
+const description = defineModel<string>("description");
+const published = defineModel<boolean>("published");
 </script>
 
 <template>
   <!-- Parent -->
-  <MyForm 
+  <MyForm
     v-model="post.title"
     v-model:description="post.description"
     v-model:published="post.published"
@@ -527,14 +541,14 @@ const published = defineModel<boolean>('published')
 ```typescript
 // ❌ Lebih verbose
 interface Props {
-  modelValue: string
+  modelValue: string;
 }
 
-withDefaults(defineProps<Props>(), {})
+withDefaults(defineProps<Props>(), {});
 
 defineEmits<{
-  'update:modelValue': [value: string]
-}>()
+  "update:modelValue": [value: string];
+}>();
 
 // Parent:
 // <MyInput v-model="data.fullName" />
@@ -546,23 +560,25 @@ defineEmits<{
 ## defineEmits Syntax: Old vs Modern
 
 ### ✅ MODERN: Function Overload Syntax (Vue 3.4+)
+
 ```typescript
 // Cleaner dan lebih explicit tentang apa yang di-emit
 defineEmits<{
-  (e: 'success', blog: BlogData): void
-  (e: 'cancel'): void
-  (e: 'delete', id: string): void
-}>()
+  (e: "success", blog: BlogData): void;
+  (e: "cancel"): void;
+  (e: "delete", id: string): void;
+}>();
 
 // Type-safe parent usage
-const handleSuccess = (blog: BlogData) => { }
-const handleCancel = () => { }
+const handleSuccess = (blog: BlogData) => {};
+const handleCancel = () => {};
 ```
 
 **Parent Component:**
+
 ```vue
 <template>
-  <BlogForm 
+  <BlogForm
     @success="handleSuccess"
     @cancel="handleCancel"
     @delete="handleDelete"
@@ -571,15 +587,17 @@ const handleCancel = () => { }
 ```
 
 ### ❌ OLD: Tuple Array Syntax (Pre-Vue 3.4)
+
 ```typescript
 defineEmits<{
-  success: [blog: BlogData]
-  cancel: [void]
-  delete: [id: string]
-}>()
+  success: [blog: BlogData];
+  cancel: [void];
+  delete: [id: string];
+}>();
 ```
 
 **Advantages of Function Overload:**
+
 - More explicit about parameter names and types
 - Better IDE autocomplete in parent components
 - Clearer intent: `(e: 'success', blog: BlogData)` vs `success: [BlogData]`
@@ -588,63 +606,65 @@ defineEmits<{
 
 ### Key Differences
 
-| Aspek | Old (Tuple) | Modern (Overload) |
-|-------|-------------|-------------------|
-| **Syntax** | `success: [blog: BlogData]` | `(e: 'success', blog: BlogData): void` |
-| **Clarity** | Less explicit | Very explicit |
-| **Maintainability** | Harder to read | Easier to understand |
-| **IDE Support** | Basic | Excellent |
-| **Parent Usage** | Same (`@success="..."`) | Same (`@success="..."`) |
+| Aspek               | Old (Tuple)                 | Modern (Overload)                      |
+| ------------------- | --------------------------- | -------------------------------------- |
+| **Syntax**          | `success: [blog: BlogData]` | `(e: 'success', blog: BlogData): void` |
+| **Clarity**         | Less explicit               | Very explicit                          |
+| **Maintainability** | Harder to read              | Easier to understand                   |
+| **IDE Support**     | Basic                       | Excellent                              |
+| **Parent Usage**    | Same (`@success="..."`)     | Same (`@success="..."`)                |
 
 ---
 
 ## defineProps Syntax: Old vs Modern
 
 ### ❌ OLD: Object Syntax (Pre-Vue 3.4)
+
 ```typescript
 // Perlu import PropType
-import { PropType } from 'vue'
+import { PropType } from "vue";
 
 // Manual type wrapping dengan as PropType
 defineProps({
   blogs: {
     type: Array as PropType<BlogData[]>,
-    required: true
+    required: true,
   },
   loading: {
     type: Boolean,
-    default: false
-  }
-})
+    default: false,
+  },
+});
 ```
 
 ### ✅ MODERN: TypeScript Interface Syntax (Vue 3.4+)
+
 ```typescript
 // Tidak perlu import PropType
 // Types langsung dalam interface
 
 interface Props {
-  blogs: BlogData[]      // required (tanpa ? = required)
-  loading?: boolean      // optional (dengan ?)
+  blogs: BlogData[]; // required (tanpa ? = required)
+  loading?: boolean; // optional (dengan ?)
 }
 
 // Gunakan withDefaults untuk optional props
 withDefaults(defineProps<Props>(), {
-  loading: false
-})
+  loading: false,
+});
 ```
 
 ### Key Differences
 
-| Aspek | Old | Modern |
-|-------|-----|--------|
-| **Import** | Perlu `import { PropType }` | Tidak perlu |
-| **Syntax** | Object literal | TypeScript interface |
-| **Required** | `required: true` | Tanpa `?` di interface |
-| **Optional** | `required: false` (tidak wajib) | Dengan `?` di interface |
-| **Default** | `default: value` | `withDefaults()` |
-| **Type Safety** | Compile-time saja | Full type inference |
-| **IDE Support** | Standar | Lebih baik |
+| Aspek           | Old                             | Modern                  |
+| --------------- | ------------------------------- | ----------------------- |
+| **Import**      | Perlu `import { PropType }`     | Tidak perlu             |
+| **Syntax**      | Object literal                  | TypeScript interface    |
+| **Required**    | `required: true`                | Tanpa `?` di interface  |
+| **Optional**    | `required: false` (tidak wajib) | Dengan `?` di interface |
+| **Default**     | `default: value`                | `withDefaults()`        |
+| **Type Safety** | Compile-time saja               | Full type inference     |
+| **IDE Support** | Standar                         | Lebih baik              |
 
 ### Contoh: Required vs Optional Props
 
@@ -653,20 +673,20 @@ withDefaults(defineProps<Props>(), {
 
 interface Props {
   // REQUIRED - harus di-pass
-  id: string
-  title: string
-  
+  id: string;
+  title: string;
+
   // OPTIONAL - dengan default
-  isPinned?: boolean
-  Tags?: string[]
-  status?: 'draft' | 'published'
+  isPinned?: boolean;
+  Tags?: string[];
+  status?: "draft" | "published";
 }
 
 withDefaults(defineProps<Props>(), {
   isPinned: false,
-  Tags: () => [],           // Array default pakai function
-  status: 'draft'
-})
+  Tags: () => [], // Array default pakai function
+  status: "draft",
+});
 
 // USAGE:
 // <MyComponent id="1" title="Hello" />                    ✅ OK
@@ -680,16 +700,17 @@ withDefaults(defineProps<Props>(), {
 ## Template Snippet: Usage
 
 ### Create Mode
+
 ```vue
 <!-- pages/admin/blog/new.vue -->
 <script setup lang="ts">
 // ✅ BlogForm auto-imported from components/Blog/Form.vue
 
-const router = useRouter()
+const router = useRouter();
 
 function handleSuccess(blog) {
   // Show success message
-  router.push(`/admin/blog/${blog.id}`)
+  router.push(`/admin/blog/${blog.id}`);
 }
 </script>
 
@@ -701,13 +722,14 @@ function handleSuccess(blog) {
 ```
 
 ### Edit Mode
+
 ```vue
 <!-- pages/admin/blog/[id].vue -->
 <script setup lang="ts">
 // ✅ useBlogDetail auto-imported from composables/useBlogDetail.ts
 
-const route = useRoute()
-const { blog } = await useBlogDetail(route.params.id)
+const route = useRoute();
+const { blog } = await useBlogDetail(route.params.id);
 </script>
 
 <template>
@@ -740,41 +762,42 @@ const { blog } = await useBlogDetail(route.params.id)
 ## Complete Real-World Example
 
 ### Complete Blog List Component
+
 ```vue
 <!-- components/Blog/List.vue -->
 <script setup lang="ts">
-import type { BlogData } from '@/shared/types'
+import type { BlogData } from "@/shared/types";
 
 // ✅ Card auto-imported: components/Blog/Card.vue
 // ✅ Pagination auto-imported: components/Blog/Pagination.vue
 
 interface Props {
-  blogs: BlogData[]
-  loading?: boolean
-  page?: number
-  totalPages?: number
-  perPage?: number
+  blogs: BlogData[];
+  loading?: boolean;
+  page?: number;
+  totalPages?: number;
+  perPage?: number;
 }
 
 withDefaults(defineProps<Props>(), {
   loading: false,
   page: 1,
   totalPages: 1,
-  perPage: 10
-})
+  perPage: 10,
+});
 
 defineEmits<{
-  (e: 'select', blog: BlogData): void
-  (e: 'delete', id: string): void
-  (e: 'edit', blog: BlogData): void
-  (e: 'page-change', page: number): void
-}>()
+  (e: "select", blog: BlogData): void;
+  (e: "delete", id: string): void;
+  (e: "edit", blog: BlogData): void;
+  (e: "page-change", page: number): void;
+}>();
 
-const selectedId = ref<string | null>(null)
+const selectedId = ref<string | null>(null);
 
 // ✅ No import needed - ref is auto-imported
 // ✅ No import needed - computed is auto-imported
-const hasItems = computed(() => blogs.length > 0)
+const hasItems = computed(() => blogs.length > 0);
 </script>
 
 <template>
@@ -791,19 +814,22 @@ const hasItems = computed(() => blogs.length > 0)
 
     <!-- List -->
     <div v-else class="grid gap-4">
-      <BlogCard 
-        v-for="blog in blogs" 
+      <BlogCard
+        v-for="blog in blogs"
         :key="blog.id"
         :blog="blog"
         :selected="selectedId === blog.id"
-        @select="selectedId = blog.id; $emit('select', blog)"
+        @select="
+          selectedId = blog.id;
+          $emit('select', blog);
+        "
         @edit="$emit('edit', blog)"
         @delete="$emit('delete', blog.id)"
       />
     </div>
 
     <!-- Pagination -->
-    <BlogPagination 
+    <BlogPagination
       v-if="hasItems && totalPages > 1"
       :current-page="page"
       :total-pages="totalPages"
@@ -834,55 +860,56 @@ const hasItems = computed(() => blogs.length > 0)
 ```
 
 ### Complete Blog Form Component
+
 ```vue
 <!-- components/Blog/Form.vue -->
 <script setup lang="ts">
-import type { BlogData } from '@/shared/types'
+import type { BlogData } from "@/shared/types";
 
 // ✅ Input auto-imported: components/Common/Input.vue
-// ✅ Textarea auto-imported: components/Common/Textarea.vue  
+// ✅ Textarea auto-imported: components/Common/Textarea.vue
 // ✅ CategorySelect auto-imported: components/Common/Select.vue
 
 interface Props {
-  blog?: BlogData
+  blog?: BlogData;
 }
 
-withDefaults(defineProps<Props>(), {})
+withDefaults(defineProps<Props>(), {});
 
 defineEmits<{
-  (e: 'success', blog: BlogData): void
-  (e: 'cancel'): void
-}>()
+  (e: "success", blog: BlogData): void;
+  (e: "cancel"): void;
+}>();
 
 // ✅ useBlogForm auto-imported from composables/useBlogForm.ts
-const { 
-  formData, 
-  errors, 
-  isEdit, 
+const {
+  formData,
+  errors,
+  isEdit,
   isSubmitting,
   submitForm,
   reset,
   getFieldError,
-  markTouched
-} = useBlogForm(props.blog)
+  markTouched,
+} = useBlogForm(props.blog);
 
 const onSubmit = async () => {
   try {
-    const result = await submitForm()
-    $emit('success', result)
+    const result = await submitForm();
+    $emit("success", result);
   } catch (error) {
-    console.error('Form submission error:', error)
+    console.error("Form submission error:", error);
   }
-}
+};
 </script>
 
 <template>
   <form class="blog-form" @submit.prevent="onSubmit">
     <div class="form-header">
-      <h2>{{ isEdit ? 'Edit Blog' : 'Create New Blog' }}</h2>
+      <h2>{{ isEdit ? "Edit Blog" : "Create New Blog" }}</h2>
     </div>
 
-    <FormInput 
+    <FormInput
       v-model="formData.title"
       label="Title"
       placeholder="Enter blog title"
@@ -919,18 +946,17 @@ const onSubmit = async () => {
     />
 
     <div class="form-actions">
-      <button 
-        type="submit" 
-        class="btn btn-primary"
-        :disabled="isSubmitting"
-      >
-        {{ isSubmitting ? 'Saving...' : (isEdit ? 'Update' : 'Create') }}
+      <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
+        {{ isSubmitting ? "Saving..." : isEdit ? "Update" : "Create" }}
       </button>
-      <button 
-        type="button" 
+      <button
+        type="button"
         class="btn btn-secondary"
         :disabled="isSubmitting"
-        @click="$emit('cancel'); reset()"
+        @click="
+          $emit('cancel');
+          reset();
+        "
       >
         Cancel
       </button>
@@ -1002,16 +1028,16 @@ const onSubmit = async () => {
 
 ## Where Business Logic Belongs
 
-| Feature | Location | Why |
-|---------|----------|-----|
-| Data fetching | Composable | Reusable, testable, controlled |
-| Validation | Composable | Can be used by API and client |
-| Data transformation | Composable | Reusable, decoupled from rendering |
-| UI visibility (modal, dropdown) | Component | Specific to UI state |
-| Form field errors | Composable | Tied to validation logic |
-| Form submission flow | Composable | Create/update/delete logic |
-| Event handlers | Component | Part of rendering |
-| Conditional rendering | Component | View logic |
+| Feature                         | Location   | Why                                |
+| ------------------------------- | ---------- | ---------------------------------- |
+| Data fetching                   | Composable | Reusable, testable, controlled     |
+| Validation                      | Composable | Can be used by API and client      |
+| Data transformation             | Composable | Reusable, decoupled from rendering |
+| UI visibility (modal, dropdown) | Component  | Specific to UI state               |
+| Form field errors               | Composable | Tied to validation logic           |
+| Form submission flow            | Composable | Create/update/delete logic         |
+| Event handlers                  | Component  | Part of rendering                  |
+| Conditional rendering           | Component  | View logic                         |
 
 ---
 
@@ -1024,20 +1050,23 @@ const onSubmit = async () => {
 // ✅ DON'T IMPORT - Already auto-imported in Nuxt
 
 // Vue APIs
-const count = ref(0)
-const total = computed(() => count.value * 2)
-watch(() => count.value, (newVal) => {})
+const count = ref(0);
+const total = computed(() => count.value * 2);
+watch(
+  () => count.value,
+  (newVal) => {},
+);
 
 // Nuxt composables
-const router = useRouter()
-const { data } = await useFetch('/api/data')
+const router = useRouter();
+const { data } = await useFetch("/api/data");
 
 // Custom composables (from composables/ directory)
-const { formData, isEdit, submitForm } = useBlogForm()
-const { blogs, loading, search } = useBlogList()
+const { formData, isEdit, submitForm } = useBlogForm();
+const { blogs, loading, search } = useBlogList();
 
 // Types (type-only imports when needed)
-import type { BlogData } from '@/shared/types'
+import type { BlogData } from "@/shared/types";
 </script>
 
 <template>
@@ -1056,22 +1085,22 @@ import type { BlogData } from '@/shared/types'
 ```vue
 <script setup lang="ts">
 // ❌ DON'T - These are already auto-imported
-import { ref, reactive, computed, watch } from 'vue'
-import { defineProps, defineEmits, withDefaults } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { PropType } from 'vue'  // ← Not needed anymore
+import { ref, reactive, computed, watch } from "vue";
+import { defineProps, defineEmits, withDefaults } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { PropType } from "vue"; // ← Not needed anymore
 
-// ❌ DON'T - Components are auto-imported  
+// ❌ DON'T - Components are auto-imported
 // File: components/Blog/Form.vue  →  Component: <BlogForm />
-import BlogForm from '@/components/Blog/Form.vue'  // ← Not needed
+import BlogForm from "@/components/Blog/Form.vue"; // ← Not needed
 // File: components/Common/Input.vue  →  Component: <CommonInput />
-import CommonInput from '@/components/Common/Input.vue'  // ← Not needed
+import CommonInput from "@/components/Common/Input.vue"; // ← Not needed
 // File: components/admin/Card.vue  →  Component: <AdminCard />
-import AdminCard from '@/components/admin/Card.vue'  // ← Not needed
+import AdminCard from "@/components/admin/Card.vue"; // ← Not needed
 
 // ❌ DON'T - Composables are auto-imported too!
-import { useBlogForm } from '@/composables/useBlogForm'  // ← Not needed
-import { useBlogList } from '@/composables/useBlogList'  // ← Not needed
+import { useBlogForm } from "@/composables/useBlogForm"; // ← Not needed
+import { useBlogList } from "@/composables/useBlogList"; // ← Not needed
 </script>
 ```
 
@@ -1082,11 +1111,11 @@ import { useBlogList } from '@/composables/useBlogList'  // ← Not needed
 // ✅ DO IMPORT:
 
 // 1. Types (type-only import)
-import type { BlogData, BlogFormData } from '@/shared/types'
+import type { BlogData, BlogFormData } from "@/shared/types";
 
 // 2. Utilities/Helpers (jika tidak ingin auto-imports)
-import { validateBlog } from '@/shared/utils/validation'
-import { formatDate } from '@/shared/utils/date'
+import { validateBlog } from "@/shared/utils/validation";
+import { formatDate } from "@/shared/utils/date";
 
 // ✅ Everything else is auto-imported:
 // - Vue APIs: ref, reactive, computed, watch, onMounted, etc
@@ -1127,6 +1156,7 @@ const { formData, isEdit, submitForm } = useBlogForm()  // ← auto-imported
 ## Component File Naming & Organization
 
 ### Directory Structure
+
 ```
 components/
 ├── Blog/
@@ -1150,11 +1180,13 @@ components/
 ```
 
 ### Naming Convention
+
 - **File path:** `components/Blog/List.vue` → Component: `<BlogList />` (folder "Blog" + file "List")
 - **File path:** `components/admin/users/form.vue` → Component: `<AdminUsersForm />` (nested folders concatenated)
-- **File path:** `components/Common/FormInput.vue` → Component: `<CommonFormInput />` 
+- **File path:** `components/Common/FormInput.vue` → Component: `<CommonFormInput />`
 
 ### Rules
+
 ✅ Folder name + File name (both capitalized) = Component name
 ✅ Nested folders are all concatenated together
 ✅ File names should NOT repeat the folder name (avoid: `Blog/BlogList.vue`)

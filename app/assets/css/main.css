@@ -17,7 +17,6 @@
   --color-green-950: #052e16;
 }
 
-
 a {
   @apply cursor-pointer;
 }

@@ -3,65 +3,6 @@ definePageMeta({
   layout: "admin",
   middleware: "auth",
 });
-
-const router = useRouter();
-const loading = ref(false);
-
-// form reference to set validation errors
-import type { Ref, ComponentPublicInstance } from "vue";
-const formRef: Ref<ComponentPublicInstance<{
-  setErrors(errs: any[]): void;
-}> | null> = ref(null);
-
-const { transformToIssue } = useValidateHelper();
-
-async function handleSubmit(formData: any) {
-  loading.value = true;
-  try {
-    const body = {
-      slug: formData.slug,
-      title: formData.title,
-      shortDescription: formData.shortDescription,
-      content: formData.content,
-      status: formData.status,
-      categoryIds: formData.categoryIds || [],
-      tagIds: formData.tagIds || [],
-      featuredImageId: formData.featuredImageId || null,
-    };
-
-    const result = await $fetch("/api/admin/blog", {
-      method: "POST",
-      body,
-    });
-
-    useToast().add({
-      title: "Post created",
-      description: "Your blog post has been created successfully.",
-      color: "success",
-    });
-    await router.push(`/admin/blog/${result?.data?.id}/edit`);
-  } catch (error: any) {
-    const errors = transformToIssue(error);
-    if (errors.length) {
-      formRef.value?.setErrors(errors as any);
-    }
-
-    const errorMessage =
-      error.data?.message ||
-      error.data?.statusMessage ||
-      error.statusMessage ||
-      error.message ||
-      "An error occurred";
-
-    useToast().add({
-      title: "Error creating post",
-      description: errorMessage,
-      color: "error",
-    });
-  } finally {
-    loading.value = false;
-  }
-}
 </script>
 
 <template>
@@ -86,11 +27,8 @@ async function handleSubmit(formData: any) {
 
     <!-- Form Card -->
     <UCard class="max-w-4xl">
-      <AdminBlogForm
-        ref="formRef"
-        :is-loading="loading"
-        @submit="handleSubmit"
-      />
+      <!-- No post prop = Create mode -->
+      <AdminBlogForm />
     </UCard>
   </div>
 </template>

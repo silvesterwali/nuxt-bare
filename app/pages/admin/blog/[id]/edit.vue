@@ -1,57 +1,21 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import type { BlogCategory, BlogTag, BlogFormData } from "@/types/blog";
-
 definePageMeta({
   layout: "admin",
   middleware: "auth",
 });
 
 const route = useRoute();
-const router = useRouter();
 const postId = computed(() => parseInt(route.params.id as string));
 
-const loading = ref(false);
-const postLoading = ref(true);
+const { locale } = useI18n();
 const {
   data: post,
   error: fetchError,
   isPending: pending,
 } = usePostQuery(postId);
 
-// form ref for validation errors
-import type { Ref, ComponentPublicInstance } from "vue";
-const formRef: Ref<ComponentPublicInstance<{
-  setErrors(errs: any[]): void;
-}> | null> = ref(null);
-const { transformToIssue } = useValidateHelper();
-
-watch(
-  pending,
-  (isPending) => {
-    postLoading.value = isPending;
-  },
-  { immediate: true },
-);
-
-watch(
-  post,
-  (newPost) => {
-    postLoading.value = false;
-  },
-  { immediate: true },
-);
-
 // Transform API response to form data for current locale
-const { locale } = useI18n();
-const formPost = computed<
-  | (BlogFormData & {
-      id?: number;
-      categories?: BlogCategory[];
-      tags?: BlogTag[];
-    })
-  | undefined
->(() => {
+const formPost = computed<any>(() => {
   if (!post.value) {
     return undefined;
   }
@@ -68,60 +32,9 @@ const formPost = computed<
     status: p.status || "draft",
     categories: p.categories || [],
     tags: p.tags || [],
-    featuredImageId: p.featuredImageId ?? null,
+    featuredImageId: p.featuredImage?.id ?? p.featuredImageId ?? null,
   };
 });
-
-async function handleSubmit(formData: any) {
-  loading.value = true;
-  try {
-    // simple values; API will localize via normalize
-    const updateData = {
-      slug: formData.slug,
-      title: formData.title,
-      shortDescription: formData.shortDescription,
-      content: formData.content,
-      status: formData.status,
-      categoryIds: formData.categoryIds || [],
-      tagIds: formData.tagIds || [],
-      featuredImageId: formData.featuredImageId || null,
-    };
-
-    const result = await $fetch(`/api/admin/blog/${postId.value}`, {
-      method: "PUT",
-      body: updateData,
-    });
-    useToast().add({
-      title: "Post updated",
-      description: "Your blog post has been updated successfully.",
-      color: "success",
-    });
-    await router.push("/admin/blog");
-  } catch (error: any) {
-    console.error("Blog update error details:", {
-      message: error.message,
-      data: error.data,
-      statusCode: error.statusCode,
-      statusMessage: error.statusMessage,
-      error: error,
-    });
-
-    const errorMessage =
-      error.data?.message ||
-      error.data?.statusMessage ||
-      error.statusMessage ||
-      error.message ||
-      "An error occurred";
-
-    useToast().add({
-      title: "Error updating post",
-      description: errorMessage,
-      color: "error",
-    });
-  } finally {
-    loading.value = false;
-  }
-}
 </script>
 
 <template>
@@ -145,7 +58,7 @@ async function handleSubmit(formData: any) {
     </div>
 
     <!-- Loading State -->
-    <div v-if="postLoading" class="flex justify-center py-12">
+    <div v-if="pending" class="flex justify-center py-12">
       <UCard class="w-full max-w-4xl">
         <div class="flex items-center justify-center py-12">
           <UIcon name="i-lucide-loader" class="animate-spin text-2xl" />
@@ -166,12 +79,8 @@ async function handleSubmit(formData: any) {
     <!-- Form Card -->
     <div v-else>
       <UCard class="max-w-4xl">
-        <AdminBlogForm
-          ref="formRef"
-          :post="formPost"
-          :is-loading="loading"
-          @submit="handleSubmit"
-        />
+        <!-- Pass formPost to component - composable handles update internally -->
+        <AdminBlogForm :post="formPost" />
       </UCard>
     </div>
   </div>

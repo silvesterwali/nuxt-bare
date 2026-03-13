@@ -1,12 +1,12 @@
 export default defineAuthHandler(
   async (event, { language }) => {
-    const {
-      name,
-      slug: inputSlug,
-      description,
-      color,
-    } = await readValidatedBody(event, CreateCategoryBodySchema.parse);
     try {
+      const {
+        name,
+        slug: inputSlug,
+        description,
+        color,
+      } = await readValidatedBody(event, CreateCategoryBodySchema.parse);
       // Generate slug from name if not provided
       const slug = inputSlug || generateSlugFromInput(name);
 
@@ -19,6 +19,14 @@ export default defineAuthHandler(
 
       return jsonResponse(result[0], "Category created successfully");
     } catch (error) {
+      if (error instanceof H3Error) {
+        throw createError({
+          statusCode: error.statusCode,
+          statusMessage: error.statusMessage,
+          data: JSON.parse(error.data.message),
+        });
+      }
+
       throw createError({
         statusCode: 500,
         statusMessage: "Internal Server Error",

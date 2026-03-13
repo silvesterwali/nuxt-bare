@@ -1,9 +1,12 @@
 import { H3Error } from "h3";
 export default defineAuthHandler(
   async (event, { language }) => {
-    const { id } = await getValidatedRouterParams(event, paramsIdSchema.parse);
-
     try {
+      const { id } = await getValidatedRouterParams(
+        event,
+        paramsIdSchema.parse,
+      );
+
       const data = await readValidatedBody(
         event,
         UpdateCategoryBodySchema.parse,

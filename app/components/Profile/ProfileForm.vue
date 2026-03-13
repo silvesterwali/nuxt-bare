@@ -43,8 +43,18 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       color: "success",
     });
   } catch (err: any) {
-    const errors = transformToIssue(err);
-    if (errors.length) form.value?.setErrors(errors);
+    if (form.value) {
+      const errors = transformToIssue(err);
+      if (errors.length) {
+        form.value.setErrors(errors);
+      }
+    }
+
+    toast.add({
+      title: "Error",
+      description: err?.message || "Failed to update profile",
+      color: "error",
+    });
   }
 }
 </script>

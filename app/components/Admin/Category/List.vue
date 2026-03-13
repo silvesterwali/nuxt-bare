@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { h, resolveComponent } from "vue";
 import type { TableColumn } from "@nuxt/ui";
-import type { BlogCategory } from "@/types/blog";
 
 const UBadge = resolveComponent("UBadge");
+const UDropdownMenu = resolveComponent("UDropdownMenu");
+const UButton = resolveComponent("UButton");
 
 const { locale } = useI18n();
 const { data: categories, isLoading: pending } = useCategoriesQuery();
-const { mutate: deleteCategory } = useCategoryDeleteMutation();
+const { mutate: deleteCategory, isLoading: deleting } =
+  useCategoryDeleteMutation();
 
 // pagination
 const page = ref(1);
@@ -44,7 +46,6 @@ function openDeleteModal(id: number) {
 function confirmDelete() {
   if (categoryToDelete.value) {
     deleteCategory(categoryToDelete.value);
-    deleteConfirmOpen.value = false;
     categoryToDelete.value = null;
   }
 }
@@ -69,10 +70,16 @@ function getRowActions(rowId: number, category: BlogCategory) {
   ];
 }
 
-const columns: TableColumn<BlogCategory>[] = [
+const columnsData: TableColumn<BlogCategory>[] = [
   {
     accessorKey: "name",
     header: "Name",
+    meta: {
+      class: {
+        th: "text-left",
+        td: "text-left",
+      },
+    },
   },
   {
     accessorKey: "slug",
@@ -81,28 +88,39 @@ const columns: TableColumn<BlogCategory>[] = [
   {
     accessorKey: "color",
     header: "Color",
+    meta: {
+      class: {
+        th: "text-center",
+        td: "text-center",
+      },
+    },
     cell: ({ row }) => {
       const color = row.getValue("color") as string | undefined;
       if (!color) return "-";
-      return h("div", { class: "flex items-center gap-2" }, [
+      return h("div", { class: "flex items-center justify-center gap-2" }, [
         h("div", {
           class: "w-4 h-4 rounded",
           style: { backgroundColor: color },
         }),
-        h("span", color),
+        h("span", { class: "text-sm" }, color),
       ]);
     },
   },
   {
     accessorKey: "language",
     header: "Language",
+    meta: {
+      class: {
+        th: "text-center",
+        td: "text-center",
+      },
+    },
     cell: ({ row }) => {
       const language = row.getValue("language") as string | undefined;
       if (!language) return "-";
       return h(
         "div",
-        { class: "flex gap-1 flex-wrap" },
-
+        { class: "flex gap-1 flex-wrap justify-center" },
         h(UBadge, { color: "primary", variant: "subtle", size: "sm" }, () =>
           language.toUpperCase(),
         ),
@@ -112,10 +130,14 @@ const columns: TableColumn<BlogCategory>[] = [
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => {
-      const UDropdownMenu = resolveComponent("UDropdownMenu");
-      const UButton = resolveComponent("UButton");
-      return h(
+    meta: {
+      class: {
+        th: "text-right",
+        td: "text-right",
+      },
+    },
+    cell: ({ row }) =>
+      h(
         UDropdownMenu,
         {
           items: getRowActions(row.original.id, row.original),
@@ -129,8 +151,7 @@ const columns: TableColumn<BlogCategory>[] = [
             size: "sm",
             "aria-label": "Actions",
           }),
-      );
-    },
+      ),
   },
 ];
 </script>
@@ -154,7 +175,7 @@ const columns: TableColumn<BlogCategory>[] = [
     </div>
 
     <UCard>
-      <UTable :data="paginated" :columns="columns" :loading="pending" />
+      <UTable :data="paginated" :columns="columnsData" :loading="pending" />
       <div
         class="flex justify-end p-3 border-t border-gray-200 dark:border-gray-700"
       >
@@ -172,26 +193,13 @@ const columns: TableColumn<BlogCategory>[] = [
       :category="selectedCategory"
     />
 
-    <UModal
+    <!-- Confirm Delete Modal -->
+    <CommonConfirmDelete
       v-model:open="deleteConfirmOpen"
       title="Delete Category"
-      icon="i-lucide-trash-2"
-    >
-      <template #body>
-        <p class="text-gray-600 dark:text-gray-400 mb-6">
-          Are you sure you want to delete this category? This action cannot be
-          undone.
-        </p>
-        <div class="flex justify-end gap-2">
-          <UButton
-            color="neutral"
-            variant="ghost"
-            label="Cancel"
-            @click="deleteConfirmOpen = false"
-          />
-          <UButton color="error" label="Delete" @click="confirmDelete" />
-        </div>
-      </template>
-    </UModal>
+      message="Are you sure you want to delete this category? This action cannot be undone."
+      :loading="deleting"
+      @confirm="confirmDelete"
+    />
   </div>
 </template>

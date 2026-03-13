@@ -42,8 +42,18 @@ async function onPasswordSubmit(event: FormSubmitEvent<any>) {
       color: "success",
     });
   } catch (err: any) {
-    const errors = transformToIssue(err);
-    if (errors.length) passwordForm.value?.setErrors(errors as any);
+    if (passwordForm.value) {
+      const errors = transformToIssue(err);
+      if (errors.length) {
+        passwordForm.value.setErrors(errors as any);
+      }
+    }
+
+    useToast().add({
+      title: "Error",
+      description: err?.message || "Failed to change password",
+      color: "error",
+    });
   } finally {
     passwordLoading.value = false;
   }

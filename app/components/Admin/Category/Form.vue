@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import type { Form } from "@nuxt/ui";
 import { z } from "zod";
-import type { BlogCategory } from "@/types/blog";
 
 interface OtherProps {
   categoryId: number | null;
@@ -17,23 +17,9 @@ const { mutateAsync: createCategory, isLoading: creating } =
 const { mutateAsync: updateCategory, isLoading: updating } =
   useCategoryUpdateMutation();
 
-const schema = z.object({
-  name: z.string().min(1, "Name is required"),
-  description: z.string().optional(),
-  color: z.string().optional(),
-});
+const { transformToIssue } = useValidateHelper();
 
-// track server‑side validation issues (zod `ZodIssue[]`)
-import type { ZodIssue } from "zod";
-const issues = ref<ZodIssue[]>([]);
-const fieldErrors = computed(() => {
-  const map: Record<string, string> = {};
-  for (const i of issues.value) {
-    const key = i.path[0] as string;
-    if (!map[key]) map[key] = i.message;
-  }
-  return map;
-});
+const form: Ref<Form<any> | null> = ref(null);
 
 const state = reactive({
   name: "",
@@ -44,6 +30,11 @@ const state = reactive({
 const isLoading = computed(() => creating.value || updating.value);
 const modalTitle = computed(() =>
   props.categoryId ? "Edit Category" : "New Category",
+);
+const modalDescription = computed(() =>
+  props.categoryId
+    ? "Update the category details below."
+    : "Create a new category by filling in the details below.",
 );
 
 watchEffect(() => {
@@ -59,10 +50,12 @@ watchEffect(() => {
 });
 
 async function onSubmit() {
-  try {
-    // clear any previous issues before submitting
-    issues.value = [];
+  // clear previous validation errors if the form API is available
+  if (form.value && typeof form.value.clear === "function") {
+    form.value.clear();
+  }
 
+  try {
     const data = {
       name: state.name,
       description: state.description || undefined,
@@ -81,14 +74,18 @@ async function onSubmit() {
     // only close when mutation succeeded
     open.value = false;
   } catch (error: any) {
-    console.error("Form submission error:", error);
-    let array: any[] = [];
-    if (Array.isArray(error)) {
-      array = error;
-    } else if (Array.isArray(error?.data)) {
-      array = error.data;
+    if (form.value) {
+      const errors = transformToIssue(error);
+      if (errors.length) {
+        form.value.setErrors(errors);
+      }
     }
-    issues.value = array as ZodIssue[];
+
+    useToast().add({
+      title: "Error",
+      description: error?.message || "Failed to save category",
+      color: "error",
+    });
   }
 }
 
@@ -98,62 +95,64 @@ function close() {
 </script>
 
 <template>
-  <UModal v-model:open="open" :title="modalTitle" @close="close">
+  <UModal
+    v-model:open="open"
+    :title="modalTitle"
+    :description="modalDescription"
+    @close="close"
+  >
     <template #body>
       <div class="flex flex-col gap-4">
         <CommonLanguageContentViewer />
-        <UFormField label="Name" required>
-          <UInput
-            v-model="state.name"
-            placeholder="Enter category name"
-            class="w-full"
-          />
-          <template #hint v-if="fieldErrors.name">
-            <span class="text-red-500">{{ fieldErrors.name }}</span>
-          </template>
-        </UFormField>
-
-        <UFormField label="Description">
-          <UTextarea
-            v-model="state.description"
-            placeholder="Enter category description"
-            :rows="3"
-            class="w-full"
-          />
-          <template #hint v-if="fieldErrors.description">
-            <span class="text-red-500">{{ fieldErrors.description }}</span>
-          </template>
-        </UFormField>
-
-        <UFormField label="Color">
-          <div class="flex gap-2">
+        <UForm
+          ref="form"
+          :state="state"
+          class="space-y-4"
+          @submit.prevent="onSubmit"
+        >
+          <UFormField label="Name" name="name" required>
             <UInput
-              v-model="state.color"
-              type="color"
-              placeholder="#000000"
-              class="w-16"
+              v-model="state.name"
+              placeholder="Enter category name"
+              class="w-full"
             />
-            <UInput
-              v-model="state.color"
-              placeholder="e.g., #FF5733"
-              class="flex-1"
+          </UFormField>
+
+          <UFormField label="Description" name="description">
+            <UTextarea
+              v-model="state.description"
+              placeholder="Enter category description"
+              :rows="3"
+              class="w-full"
             />
+          </UFormField>
+
+          <UFormField label="Color" name="color">
+            <div class="flex gap-2">
+              <UInput
+                v-model="state.color"
+                type="color"
+                placeholder="#000000"
+                class="w-16"
+              />
+              <UInput
+                v-model="state.color"
+                placeholder="e.g., #FF5733"
+                class="flex-1"
+              />
+            </div>
+          </UFormField>
+
+          <div class="flex justify-end gap-2 pt-4">
+            <UButton
+              color="neutral"
+              variant="ghost"
+              label="Cancel"
+              @click="close"
+            />
+            <UButton label="Save Category" :loading="isLoading" type="submit" />
           </div>
-        </UFormField>
-
-        <div class="flex justify-end gap-2 pt-4">
-          <UButton
-            color="neutral"
-            variant="ghost"
-            label="Cancel"
-            @click="close"
-          />
-          <UButton
-            label="Save Category"
-            :loading="isLoading"
-            @click="onSubmit"
-          />
-        </div>
+        </UForm>
       </div>
     </template>
   </UModal>
