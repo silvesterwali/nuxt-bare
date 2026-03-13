@@ -4,7 +4,7 @@ export default defineAuthHandler(
 
     try {
       const data = await readValidatedBody(event, UpdatePostBodySchema.parse);
-      const { categoryIds, tagIds, ...postData } = data;
+      const { categoryIds, tagIds, featuredImageId, ...postData } = data;
 
       // Check if post exists
       const existing = await postRepository.findById(id);
@@ -40,6 +40,10 @@ export default defineAuthHandler(
       }
       if (postData.status) {
         merged.status = postData.status;
+      }
+
+      if (featuredImageId !== undefined) {
+        merged.featuredImageId = featuredImageId;
       }
 
       const updated = await postRepository.update(id, merged);

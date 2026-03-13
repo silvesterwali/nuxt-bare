@@ -34,6 +34,12 @@ const links: NavigationMenuItem[][] = [
       onSelect: () => (open.value = false),
     },
     {
+      label: "Media",
+      to: "/admin/media",
+      icon: "i-lucide-image",
+      onSelect: () => (open.value = false),
+    },
+    {
       label: "Users",
       to: "/admin/users",
       icon: "i-lucide-users",
@@ -60,7 +66,7 @@ const userItems = [
   },
 ];
 
-const groups = computed(() => [
+const groups = computed<any>(() => [
   {
     id: "links",
     label: "Go to",

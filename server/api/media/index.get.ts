@@ -1,12 +1,4 @@
-export default defineEventHandler(async (event) => {
-  // Require authentication
-  const session = await getUserSession(event);
-  if (!session?.user?.id) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: "Authentication required",
-    });
-  }
+export default defineAuthHandler(async (event) => {
   const { type, privacy, page, limit } = await getValidatedQuery(
     event,
     MediaQuerySchema.parse,
@@ -18,13 +10,7 @@ export default defineEventHandler(async (event) => {
   });
 
   // Get user media
-  const media = await getUserMedia(
-    session.user.id,
-    type,
-    privacy,
-    validPage,
-    validLimit,
-  );
+  const media = await getUserMedia(type, privacy, validPage, validLimit);
 
   // In a real implementation we'd also compute totalCount; for now assume returned length
   const totalCount = media.length;

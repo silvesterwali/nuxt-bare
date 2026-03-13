@@ -35,6 +35,7 @@ export const CreatePostBodySchema = z.object({
     .default("draft"),
   categoryIds: z.array(z.number().int().positive()).optional(),
   tagIds: z.array(z.number().int().positive()).optional(),
+  featuredImageId: z.number().int().positive().optional(),
 });
 
 /**
@@ -51,6 +52,7 @@ export const UpdatePostBodySchema = z.object({
   status: z.enum(["draft", "published", "archived"]).optional(),
   categoryIds: z.array(z.number().int().positive()).optional(),
   tagIds: z.array(z.number().int().positive()).optional(),
+  featuredImageId: z.number().int().positive().optional(),
 });
 
 /**

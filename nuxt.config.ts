@@ -27,6 +27,12 @@ export default defineNuxtConfig({
     externals: {
       external: ["better-sqlite3"],
     },
+    storage: {
+      file: {
+        driver: "fs",
+        base: "assets",
+      },
+    },
   },
   // evlog: {
   //   env: {

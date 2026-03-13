@@ -74,6 +74,9 @@ export const media = sqliteTable("media", {
   userId: integer("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
+  parentId: integer("parent_id").references(() => media.id, {
+    onDelete: "cascade",
+  }),
   filename: text("filename").notNull(),
   originalName: text("original_name").notNull(),
   mimeType: text("mime_type").notNull(),
@@ -84,10 +87,10 @@ export const media = sqliteTable("media", {
   height: integer("height"),
   description: text("description"),
   path: text("path"),
-  full_path : text("full_path"),
+  full_path: text("full_path"),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
-});
+}) as any;
 
 // Media usage tracking
 export const mediaUsage = sqliteTable("media_usage", {
@@ -262,11 +265,15 @@ export const postTagsRelations = relations(postTags, ({ one }) => ({
 }));
 
 export const mediaRelations = relations(media, ({ one, many }) => ({
-  // Changed to one, many just in case
   owner: one(users, {
     fields: [media.userId],
     references: [users.id],
   }),
+  parent: one(media, {
+    fields: [media.parentId],
+    references: [media.id],
+  }),
+  thumbnails: many(media, { relationName: "thumbnails" }),
   usage: many(mediaUsage),
 }));
 

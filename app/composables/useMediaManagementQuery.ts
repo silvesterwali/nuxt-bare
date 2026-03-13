@@ -1,0 +1,100 @@
+import { useMutation, useQuery, useQueryCache } from "@pinia/colada";
+import type { Ref } from "vue";
+import type { Media } from "~/types/db";
+
+export interface MediaListParams {
+  page?: number;
+  limit?: number;
+  type?: string;
+  privacy?: string;
+}
+
+export function useMediaManagementQuery(params: Ref<MediaListParams>) {
+  return useQuery({
+    key: () => ["admin", "media", params.value],
+    query: async () => {
+      const p = params.value;
+      return $fetch<{
+        data: Media[];
+        pagination: {
+          page: number;
+          perPage: number;
+          total: number;
+          totalPages: number;
+          hasNext: boolean;
+          hasPrev: boolean;
+        };
+      }>("/api/media", {
+        params: {
+          page: p.page,
+          limit: p.limit,
+          type: p.type,
+          privacy: p.privacy,
+        },
+      });
+    },
+  });
+}
+
+export function useMediaUploadMutation() {
+  const cache = useQueryCache();
+
+  return useMutation({
+    mutation: async (payload: {
+      file: File;
+      type: string;
+      privacy: string;
+      description?: string;
+      alt?: string;
+    }) => {
+      const formData = new FormData();
+      formData.append("file", payload.file);
+      formData.append("type", payload.type);
+      formData.append("privacy", payload.privacy);
+      if (payload.description) {
+        formData.append("description", payload.description);
+      }
+      if (payload.alt) {
+        formData.append("alt", payload.alt);
+      }
+
+      return $fetch<{ message: string; data: Media }>("/api/media/upload", {
+        method: "POST",
+        body: formData,
+      });
+    },
+    onSuccess: async () => {
+      await cache.invalidateQueries({ key: ["admin", "media"] });
+      useToast().add({
+        title: "Success",
+        description: "Media uploaded successfully",
+      });
+    },
+    onError: (error) => {
+      console.log("Media upload failed:", error);
+      throw error; // Let the component handle the error and show the toast
+    },
+  });
+}
+
+export function useMediaDeleteMutation() {
+  const cache = useQueryCache();
+
+  return useMutation({
+    mutation: async (id: number) => {
+      return $fetch<{ success: boolean; id: number }>(`/api/media/${id}`, {
+        method: "DELETE",
+      });
+    },
+    onSuccess: async () => {
+      await cache.invalidateQueries({ key: ["admin", "media"] });
+      useToast().add({
+        title: "Success",
+        description: "Media deleted successfully",
+      });
+    },
+    onError: (error) => {
+      throw error; // Let the component handle the error and show the toast
+    },
+  });
+}

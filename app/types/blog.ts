@@ -36,6 +36,7 @@ export interface BlogPost {
   };
   categories: BlogCategory[];
   tags: BlogTag[];
+  featuredImage?: BlogFeaturedImage | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -48,4 +49,13 @@ export interface BlogFormData {
   status: "draft" | "published" | "archived";
   categoryIds?: number[];
   tagIds?: number[];
+  featuredImageId?: number | null;
+}
+
+export interface BlogFeaturedImage {
+  id: number;
+  full_path: string;
+  thumbnail?: {
+    full_path: string;
+  };
 }

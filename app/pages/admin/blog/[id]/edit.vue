@@ -68,6 +68,7 @@ const formPost = computed<
     status: p.status || "draft",
     categories: p.categories || [],
     tags: p.tags || [],
+    featuredImageId: p.featuredImageId ?? null,
   };
 });
 
@@ -83,6 +84,7 @@ async function handleSubmit(formData: any) {
       status: formData.status,
       categoryIds: formData.categoryIds || [],
       tagIds: formData.tagIds || [],
+      featuredImageId: formData.featuredImageId || null,
     };
 
     const result = await $fetch(`/api/admin/blog/${postId.value}`, {

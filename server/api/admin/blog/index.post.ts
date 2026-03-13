@@ -9,6 +9,7 @@ export default defineAuthHandler(
         status,
         categoryIds,
         tagIds,
+        featuredImageId,
       } = await readValidatedBody(event, CreatePostBodySchema.parse);
 
       const newPost = await postRepository.create({
@@ -18,6 +19,7 @@ export default defineAuthHandler(
         content: normalize(content, language),
         userId: user.id,
         status,
+        featuredImageId,
       });
 
       if (!newPost) {

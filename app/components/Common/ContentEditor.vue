@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import type { EditorToolbarItem } from "@nuxt/ui";
 
+const modelValue = defineModel<string>({
+  required: true,
+});
+
 interface Props {
-  modelValue: string;
   placeholder?: string;
   readonly?: boolean;
 }
 
 defineProps<Props>();
-
-defineEmits<{
-  "update:modelValue": [value: string];
-}>();
 
 const items: EditorToolbarItem[][] = [
   [
@@ -109,8 +108,7 @@ const items: EditorToolbarItem[][] = [
 <template>
   <div class="space-y-2">
     <UEditor
-      :model-value="modelValue"
-      @update:model-value="$emit('update:modelValue', $event)"
+      v-model="modelValue"
       v-slot="{ editor }"
       content-type="markdown"
       :placeholder="

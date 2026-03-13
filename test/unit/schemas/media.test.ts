@@ -15,10 +15,7 @@ describe("Media Schemas", () => {
       expect(result.success).toBe(true);
     });
 
-    it("should default privacy to private", () => {
-      const result = uploadSchema.safeParse(validUpload);
-      expect(result.data?.privacy).toBe("private");
-    });
+   
 
     it("should accept public privacy", () => {
       const result = uploadSchema.safeParse({

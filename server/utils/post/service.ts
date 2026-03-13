@@ -318,6 +318,7 @@ export async function getPostById(postId: number, language: string = "en") {
       shortDescription: schema.posts.shortDescription,
       content: schema.posts.content,
       status: schema.posts.status,
+      featuredImageId: schema.posts.featuredImageId,
       createdAt: schema.posts.createdAt,
       updatedAt: schema.posts.updatedAt,
       author: {
@@ -359,6 +360,11 @@ export async function getPostById(postId: number, language: string = "en") {
   const categories = await getLocalizedCategories(post.id, language);
   const tags = await getLocalizedTags(post.id, language);
 
+  let featuredImage = null;
+  if (post.featuredImageId) {
+    featuredImage = await getMediaById(post.featuredImageId);
+  }
+
   return {
     ...post,
     slug,
@@ -368,5 +374,6 @@ export async function getPostById(postId: number, language: string = "en") {
     language,
     categories,
     tags,
+    featuredImage,
   };
 }

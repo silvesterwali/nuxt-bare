@@ -1,13 +1,8 @@
-import { createWriteStream, existsSync, mkdirSync, unlink } from "fs";
-import { promisify } from "util";
-import { join } from "path";
 import { randomBytes } from "crypto";
 import sharp from "sharp";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, inArray, sql } from "drizzle-orm";
 import { db, schema } from "../../db";
 import type { MediaType, MediaPrivacy } from "~/types/db";
-
-const unlinkAsync = promisify(unlink);
 
 export interface UploadConfig {
   maxSize: number; // in bytes
@@ -19,19 +14,28 @@ export interface UploadConfig {
 
 export const MEDIA_CONFIG = {
   IMAGE: {
-    maxSize: 5 * 1024 * 1024, // 5MB
+    maxSize: 2 * 1024 * 1024, // 2MB
     allowedTypes: ["image/jpeg", "image/png", "image/gif", "image/webp"],
     quality: 85,
     maxWidth: 2048,
     maxHeight: 2048,
+    thumbnail: {
+      maxWidth: 300,
+      maxHeight: 300,
+      quality: 70,
+    },
   },
   DOCUMENT: {
-    maxSize: 10 * 1024 * 1024, // 10MB
+    maxSize: 50 * 1024 * 1024, // 50MB
     allowedTypes: [
       "application/pdf",
       "text/plain",
       "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.ms-powerpoint",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     ],
   },
 } as const;
@@ -41,14 +45,6 @@ export function generateFilename(originalName: string, userId: number): string {
   const random = randomBytes(8).toString("hex");
   const extension = originalName.split(".").pop() || "";
   return `${userId}_${timestamp}_${random}.${extension}`;
-}
-
-export function getMediaPath(filename: string): string {
-  const uploadDir = join(process.cwd(), "uploads");
-  if (!existsSync(uploadDir)) {
-    mkdirSync(uploadDir, { recursive: true });
-  }
-  return join(uploadDir, filename);
 }
 
 export async function processImage(
@@ -88,16 +84,15 @@ export async function saveFile(
   buffer: Buffer,
   filename: string,
 ): Promise<string> {
-  const filePath = getMediaPath(filename);
+  const storage = useStorage("file");
+  // Use raw methods to avoid UTF-8 text encoding (which corrupts binary data)
+  await storage.setItemRaw(filename, buffer);
+  return filename;
+}
 
-  return new Promise((resolve, reject) => {
-    const stream = createWriteStream(filePath);
-    stream.write(buffer);
-    stream.end();
-
-    stream.on("finish", () => resolve(filePath));
-    stream.on("error", reject);
-  });
+export async function deleteFile(filename: string): Promise<void> {
+  const storage = useStorage("file");
+  await storage.removeItem(filename);
 }
 
 export async function createMediaRecord(data: {
@@ -111,15 +106,19 @@ export async function createMediaRecord(data: {
   width?: number;
   height?: number;
   description?: string;
+  parentId?: number;
 }) {
-  const result = await db
+  const path = `/assets/${data.filename}`;
+  const result = (await db
     .insert(schema.media)
     .values({
       ...data,
+      path,
+      full_path: path,
       createdAt: new Date(),
       updatedAt: new Date(),
     })
-    .returning();
+    .returning()) as any[];
 
   if (result.length === 0) {
     throw createError({
@@ -175,10 +174,10 @@ export async function uploadFile(
     finalFilename = filename.replace(/\.[^.]+$/, ".webp");
   }
 
-  // Save file
+  // Save file to unstorage-backed filesystem
   await saveFile(processedBuffer, finalFilename);
 
-  // Create database record
+  // Create database record for the main file
   const mediaRecord = await createMediaRecord({
     userId,
     filename: finalFilename,
@@ -192,7 +191,46 @@ export async function uploadFile(
     description,
   });
 
-  return mediaRecord;
+  // If we uploaded an image, also generate a thumbnail record
+  let thumbnailRecord: ReturnType<typeof createMediaRecord> | null = null;
+
+  if (type === "image") {
+    const thumbnailBuffer = await sharp(processedBuffer)
+      .resize({
+        width: MEDIA_CONFIG.IMAGE.thumbnail.maxWidth,
+        height: MEDIA_CONFIG.IMAGE.thumbnail.maxHeight,
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .webp({ quality: MEDIA_CONFIG.IMAGE.thumbnail.quality })
+      .toBuffer();
+
+    const thumbnailFilename = finalFilename.replace(
+      /\.[^.]+$/,
+      (match) => `_thumb${match}`,
+    );
+
+    await saveFile(thumbnailBuffer, thumbnailFilename);
+
+    thumbnailRecord = await createMediaRecord({
+      userId,
+      filename: thumbnailFilename,
+      originalName: file.name,
+      mimeType: "image/webp",
+      size: thumbnailBuffer.length,
+      type,
+      privacy,
+      width: Math.min(width ?? 0, MEDIA_CONFIG.IMAGE.thumbnail.maxWidth),
+      height: Math.min(height ?? 0, MEDIA_CONFIG.IMAGE.thumbnail.maxHeight),
+      description,
+      parentId: mediaRecord.id,
+    });
+  }
+
+  return {
+    ...mediaRecord,
+    thumbnail: thumbnailRecord,
+  };
 }
 
 export async function getMediaById(id: number, userId?: number) {
@@ -200,16 +238,19 @@ export async function getMediaById(id: number, userId?: number) {
     .select({
       id: schema.media.id,
       filename: schema.media.filename,
-      originalName: schema.media.originalName,
-      mimeType: schema.media.mimeType,
+      original_name: schema.media.originalName,
+      mime_type: schema.media.mimeType,
       size: schema.media.size,
       type: schema.media.type,
       privacy: schema.media.privacy,
       width: schema.media.width,
       height: schema.media.height,
       description: schema.media.description,
-      userId: schema.media.userId,
-      createdAt: schema.media.createdAt,
+      user_id: schema.media.userId,
+      parent_id: schema.media.parentId,
+      full_path: schema.media.full_path,
+      path: schema.media.path,
+      created_at: schema.media.createdAt,
     })
     .from(schema.media)
     .where(eq(schema.media.id, id))
@@ -222,43 +263,84 @@ export async function getMediaById(id: number, userId?: number) {
   }
 
   // Check access permissions
-  if (media.privacy === "private" && media.userId !== userId) {
+  if (media.privacy === "private" && media.user_id !== userId) {
     throw createError({ statusCode: 403, statusMessage: "Access denied" });
   }
 
-  return media;
+  // If this is a thumbnail, include the original media record too
+  if (media.parent_id) {
+    const original = (
+      await db
+        .select()
+        .from(schema.media)
+        .where(eq(schema.media.id, media.parent_id))
+        .limit(1)
+    )[0];
+
+    return { ...media, original };
+  }
+
+  // Otherwise, include the thumbnail (if any)
+  const thumbnail = (
+    await db
+      .select()
+      .from(schema.media)
+      .where(eq(schema.media.parentId, media.id))
+      .limit(1)
+  )[0];
+
+  return { ...media, thumbnail };
 }
 
 export async function deleteMedia(id: number, userId: number) {
   const media = await getMediaById(id, userId);
 
-  if (media.userId !== userId) {
+  if (media.user_id !== userId) {
     throw createError({ statusCode: 403, statusMessage: "Access denied" });
   }
 
   // Delete from database
   await db.delete(schema.media).where(eq(schema.media.id, id));
 
-  // Delete file from filesystem
-  const filePath = getMediaPath(media.filename);
+  // Delete file from storage
   try {
-    await unlinkAsync(filePath);
+    await deleteFile(media.filename);
   } catch (error) {
     // File might not exist, but don't fail the operation
-    console.warn("Failed to delete file:", filePath, error);
+    console.warn("Failed to delete file:", media.filename, error);
+  }
+
+  // If this media has thumbnails, delete their files too.
+  try {
+    const thumbnails = await db
+      .select()
+      .from(schema.media)
+      .where(eq(schema.media.parentId, id));
+
+    await Promise.all(
+      thumbnails.map(async (thumb) => {
+        await deleteFile(thumb.filename);
+      }),
+    );
+  } catch (error) {
+    console.warn("Failed to delete thumbnail files for media:", id, error);
   }
 
   return media;
 }
 
 export async function getUserMedia(
-  userId: number,
   type?: MediaType,
   privacy?: MediaPrivacy,
   page = 1,
   limit = 20,
+  userId?: number,
 ) {
-  const conditions = [eq(schema.media.userId, userId)];
+  const conditions = [sql`parent_id IS NULL`];
+
+  if (userId) {
+    conditions.push(eq(schema.media.userId, userId));
+  }
 
   if (type) {
     conditions.push(eq(schema.media.type, type));
@@ -277,5 +359,25 @@ export async function getUserMedia(
     .limit(limit)
     .offset(offset);
 
-  return media;
+  // Attach thumbnails for each media item (if any)
+  const mediaIds = media.map((item) => item.id);
+  if (mediaIds.length === 0) return media;
+
+  const thumbnails = await db
+    .select()
+    .from(schema.media)
+    .where(inArray(schema.media.parentId, mediaIds));
+
+  const thumbnailsByParent = thumbnails.reduce(
+    (acc, thumb) => {
+      if (thumb.parentId) acc[thumb.parentId] = thumb;
+      return acc;
+    },
+    {} as Record<number, (typeof thumbnails)[number]>,
+  );
+
+  return media.map((item) => ({
+    ...item,
+    thumbnail: thumbnailsByParent[item.id] ?? null,
+  }));
 }

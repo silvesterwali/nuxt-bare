@@ -2,6 +2,7 @@
 import { ref, watch, computed } from "vue";
 import type { FormSubmitEvent } from "@nuxt/ui";
 import type { BlogCategory, BlogTag, BlogFormData } from "@/types/blog";
+import MediaPicker from "~/components/Common/MediaPicker.vue";
 
 interface Props {
   post?:
@@ -32,6 +33,7 @@ const form = ref<BlogFormData>({
   status: "draft",
   categoryIds: [],
   tagIds: [],
+  featuredImageId: null,
 });
 
 const selectedCategoryIds = ref<number[]>([]);
@@ -50,6 +52,7 @@ watch(
         status: newPost.status || "draft",
         categoryIds: [],
         tagIds: [],
+        featuredImageId: newPost.featuredImageId ?? null,
       };
       selectedCategoryIds.value = (newPost.categories || []).map((c) => c.id);
       selectedTagIds.value = (newPost.tags || []).map((t) => t.id);
@@ -78,6 +81,7 @@ async function onSubmit(event: FormSubmitEvent<BlogFormData>) {
     ...event.data,
     categoryIds: selectedCategoryIds.value,
     tagIds: selectedTagIds.value,
+    featuredImageId: form.value.featuredImageId ?? null,
   });
 }
 
@@ -141,6 +145,12 @@ const statusOptions = [
           v-model="form.content"
           placeholder="Write your post content here..."
         />
+      </UFormField>
+
+      <!-- Featured Image -->
+      <UFormField label="Featured Image" name="featuredImageId">
+        {{ form.featuredImageId }} <!-- Display selected media ID for debugging -->
+        <MediaPicker v-model:media-id="form.featuredImageId" />
       </UFormField>
 
       <!-- Categories -->

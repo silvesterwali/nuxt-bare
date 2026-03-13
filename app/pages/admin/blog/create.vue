@@ -6,7 +6,6 @@ definePageMeta({
 
 const router = useRouter();
 const loading = ref(false);
-const { locale } = useI18n();
 
 // form reference to set validation errors
 import type { Ref, ComponentPublicInstance } from "vue";
@@ -27,6 +26,7 @@ async function handleSubmit(formData: any) {
       status: formData.status,
       categoryIds: formData.categoryIds || [],
       tagIds: formData.tagIds || [],
+      featuredImageId: formData.featuredImageId || null,
     };
 
     const result = await $fetch("/api/admin/blog", {

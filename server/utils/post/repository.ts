@@ -39,6 +39,7 @@ export const postRepository = {
     content: Record<string, string>;
     userId: number;
     status?: "draft" | "published" | "archived";
+    featuredImageId?: number | null;
   }) {
     const result = await db
       .insert(schema.posts)
@@ -49,6 +50,7 @@ export const postRepository = {
         content: data.content,
         userId: data.userId,
         status: data.status || "draft",
+        featuredImageId: data.featuredImageId ?? null,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -65,6 +67,7 @@ export const postRepository = {
       shortDescription?: Record<string, string>;
       content?: Record<string, string>;
       status?: "draft" | "published" | "archived";
+      featuredImageId?: number | null;
     },
   ) {
     const result = await db

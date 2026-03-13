@@ -33,3 +33,4 @@ server/db/migrations/*.sql
 
 # Test coverage
 coverage/
+assets/**

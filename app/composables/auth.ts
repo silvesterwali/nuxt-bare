@@ -98,7 +98,7 @@ export const useAuth = () => {
       loading.value = true;
       // Assuming this endpoint exists, currently matching the page implementation
       await $fetch("/api/user/password", {
-        method: "PUT",
+        method: "PUT" as any,
         body: payload,
       });
       toast.add({

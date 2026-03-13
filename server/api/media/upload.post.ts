@@ -1,58 +1,52 @@
 import type { MediaType, MediaPrivacy } from "~/types/db";
+import { uploadSchema } from "~~/server/utils/media/schema";
+import { uploadFile } from "~~/server/utils/media/service";
+import { z } from "zod";
 
-export default defineEventHandler(async (event) => {
-  // Require authentication
-  const session = await getUserSession(event);
-  if (!session?.user?.id) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: "Authentication required",
-    });
+export default defineAuthHandler(async (event, { user }) => {
+  const form = await readFormData(event);
+
+  const file = form.get("file") as File;
+  if (!file) {
+    throw createError({ statusCode: 400, statusMessage: "No file provided" });
   }
 
-  // Parse multipart form data
-  const form = await readMultipartFormData(event);
-  if (!form) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "No form data provided",
-    });
+  const payload = {
+    type: form.get("type") as string as MediaType,
+    privacy: form.get("privacy") as string as MediaPrivacy,
+    description: (form.get("description") as string | null) ?? "",
+    alt:
+      (form.get("alt") as string) ||
+      (form.get("altText") as string) ||
+      (form.get("alt_text") as string) ||
+      "",
+  };
+
+  try {
+    const { type, privacy, description } = uploadSchema.parse(payload);
+
+    const media = await uploadFile(file, user.id, type, privacy, description);
+
+    if (!media) {
+      throw createError({
+        statusCode: 500,
+        statusMessage: "Failed to upload file",
+      });
+    }
+
+    return jsonResponse({ ...media }, "File uploaded successfully");
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "Invalid input",
+        data: JSON.parse(err.message),
+      });
+    } else {
+      throw createError({
+        statusCode: 500,
+        statusMessage: "An unexpected error occurred",
+      });
+    }
   }
-
-  // Find the file and metadata
-  const fileData = form.find((item) => item.name === "file");
-  const typeData = form.find((item) => item.name === "type")?.data?.toString();
-  const privacyData = form
-    .find((item) => item.name === "privacy")
-    ?.data?.toString();
-  const descriptionData = form
-    .find((item) => item.name === "description")
-    ?.data?.toString();
-
-  if (!fileData || !fileData.filename || !fileData.data) {
-    throw createError({ statusCode: 400, statusMessage: "File is required" });
-  }
-
-  // Validate metadata using Zod directly
-  const metadata = uploadSchema.parse({
-    type: typeData,
-    privacy: privacyData,
-    description: descriptionData,
-  });
-
-  // Create File object from form data
-  const file = new File([new Uint8Array(fileData.data)], fileData.filename, {
-    type: fileData.type || "application/octet-stream",
-  });
-
-  // Upload the file
-  const mediaRecord = await uploadFile(
-    file,
-    session.user.id,
-    metadata.type as MediaType,
-    metadata.privacy as MediaPrivacy,
-    metadata.description,
-  );
-
-  return jsonResponse(mediaRecord, "File uploaded successfully");
 });

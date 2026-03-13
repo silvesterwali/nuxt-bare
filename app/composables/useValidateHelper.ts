@@ -17,23 +17,25 @@ export const useValidateHelper = () => {
           name: issue.path.join("."),
         });
       });
+    } else if (Array.isArray(error?.data?.data)) {
+      // Some responses return errors directly as an array of Zod issues
+      error.data.data.forEach((issue: any) => {
+        errors.push({
+          message: issue.message,
+          name: issue.path?.join(".") || "",
+        });
+      });
     } else if (error?.data?.startLine) {
       // Fallback for some error structures
     }
 
     // If we have a standard Validation Error format from our backend
     // Assuming backend returns { message: "Validation Failed", data: { fieldName: "Error message" } }
-    if (error?.data?.data && typeof error.data.data === "object") {
-      Object.entries(error.data.data).forEach(([key, value]) => {
-        errors.push({
-          name: key,
-          message: Array.isArray(value) ? value.join(", ") : String(value),
-        });
-      });
-    }
-
-    // Default to generic error if no specific field errors
-    if (errors.length === 0 && error?.data?.message) {
+    if (
+      error?.data?.data &&
+      typeof error.data.data === "object" &&
+      !Array.isArray(error.data.data)
+    ) {
       // Can't map to a specific field easily without path, but could add a general error
     }
 
