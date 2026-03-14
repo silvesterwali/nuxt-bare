@@ -23,6 +23,11 @@ const items = computed(() => {
       icon: "i-lucide-house",
     },
     {
+      label: "Blog",
+      to: "/blog",
+      icon: "i-lucide-newspaper",
+    },
+    {
       label: "Profile",
       to: "/profile",
       icon: "i-lucide-user",

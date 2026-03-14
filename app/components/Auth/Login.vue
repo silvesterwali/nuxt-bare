@@ -1,17 +1,13 @@
 <script setup lang="ts">
-import { z } from "zod";
 import type { FormSubmitEvent, AuthFormField } from "@nuxt/ui";
+import type { LoginInput } from "~~/shared/utils/schema/auth";
 
 const { login, loading } = useAuth();
 const { transformToIssue } = useValidateHelper();
 const toast = useToast();
 
-const schema = z.object({
-  email: z.string().email("Invalid email"),
-  password: z.string().min(8, "Must be at least 8 characters"),
-});
-
-type Schema = z.output<typeof schema>;
+// loginSchema auto-imported from shared/utils/schema/auth.ts
+type Schema = LoginInput;
 
 const authForm = useTemplateRef("authForm");
 
@@ -69,7 +65,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     title="Login"
     description="Welcome back"
     icon="i-lucide-lock"
-    :schema="schema"
+    :schema="loginSchema"
     :fields="fields"
     :loading="loading"
     :submit="{ label: 'Login', block: true }"

@@ -24,6 +24,9 @@ export default defineNuxtConfig({
   },
 
   nitro: {
+    experimental: {
+      tasks: true,
+    },
     externals: {
       external: ["better-sqlite3"],
     },
@@ -73,6 +76,15 @@ export default defineNuxtConfig({
       appName: process.env.NUXT_APP_NAME || "Nuxt App",
     },
   },
+  googleFonts: {
+    families: {
+      Inter: [300, 400, 500, 600, 700],
+      "Plus Jakarta Sans": [500, 600, 700, 800],
+    },
+    display: "swap",
+    preload: true,
+  },
+
   i18n: {
     vueI18n: "./i18n.config.ts",
     // list of supported locales; each can include a code, ISO, and file path

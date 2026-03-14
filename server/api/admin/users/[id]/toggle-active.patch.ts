@@ -18,5 +18,8 @@ export default defineAuthHandler(
       `User ${updatedUser.isActive ? "activated" : "deactivated"} successfully`,
     );
   },
-  ["admin"],
+  {
+    role: ["admin"],
+    permissions: ["users"],
+  },
 );

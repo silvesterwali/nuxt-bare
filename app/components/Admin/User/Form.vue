@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import type { Form } from "@nuxt/ui";
-import { z } from "zod";
 import type { FormSubmitEvent } from "@nuxt/ui";
+import type {
+  CreateUserInput,
+  EditUserInput,
+} from "~~/shared/utils/schema/user";
 
 interface Props {
   userId?: string | null;
@@ -34,27 +37,12 @@ const isLoading = computed(
 
 const pending = computed(() => isCreating.value || isUpdating.value);
 
-// Schema for validation
-const createSchema = z.object({
-  email: z.email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  role: z.enum(["admin", "user", "moderator"]),
-});
+// createUserSchema / editUserSchema auto-imported from shared/utils/schema/user.ts
+const schema = computed(() =>
+  isEditMode.value ? editUserSchema : createUserSchema,
+);
 
-const editSchema = z.object({
-  email: z.email("Invalid email address"),
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  role: z.enum(["admin", "user", "moderator"]),
-});
-
-const schema = computed(() => (isEditMode.value ? editSchema : createSchema));
-
-type CreateSchema = z.output<typeof createSchema>;
-type EditSchema = z.output<typeof editSchema>;
-type Schema = CreateSchema | EditSchema;
+type Schema = CreateUserInput | EditUserInput;
 
 const roles = ["admin", "user", "moderator"];
 
@@ -142,8 +130,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       />
     </div>
 
-    <UCard>
-      <template v-if="isEditMode && isFetching">
+    <template v-if="isEditMode && isFetching">
+      <UCard>
         <div class="flex items-center justify-center py-8">
           <UButton
             disabled
@@ -152,9 +140,69 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
             label="Loading user data..."
           />
         </div>
+      </UCard>
+    </template>
+
+    <UTabs
+      v-else-if="isEditMode"
+      :items="[
+        { label: 'User Info', icon: 'i-lucide-user', slot: 'info' },
+        { label: 'Permissions', icon: 'i-lucide-shield', slot: 'permissions' },
+      ]"
+      class="w-full"
+    >
+      <template #info>
+        <UCard class="mt-4">
+          <UForm
+            ref="form"
+            :schema="schema"
+            :state="state"
+            class="space-y-4"
+            @submit="onSubmit"
+          >
+            <UFormField label="Email" name="email">
+              <UInput
+                v-model="state.email"
+                type="email"
+                :disabled="isEditMode"
+                class="w-full"
+              />
+            </UFormField>
+
+            <div class="grid grid-cols-2 gap-4">
+              <UFormField label="First Name" name="firstName">
+                <UInput v-model="state.firstName" class="w-full" />
+              </UFormField>
+              <UFormField label="Last Name" name="lastName">
+                <UInput v-model="state.lastName" class="w-full" />
+              </UFormField>
+            </div>
+
+            <UFormField label="Role" name="role">
+              <USelect v-model="state.role" :items="roles" class="w-full" />
+            </UFormField>
+
+            <div class="flex justify-end">
+              <UButton
+                type="submit"
+                :label="submitButtonLabel"
+                :loading="pending"
+              />
+            </div>
+          </UForm>
+        </UCard>
       </template>
+
+      <template #permissions>
+        <div class="mt-4">
+          <AdminUserPermissions :user-id="currentUserId!" />
+        </div>
+      </template>
+    </UTabs>
+
+    <!-- Create mode: no tabs needed -->
+    <UCard v-else>
       <UForm
-        v-else
         ref="form"
         :schema="schema"
         :state="state"
@@ -162,15 +210,10 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         @submit="onSubmit"
       >
         <UFormField label="Email" name="email">
-          <UInput
-            v-model="state.email"
-            type="email"
-            :disabled="isEditMode"
-            class="w-full"
-          />
+          <UInput v-model="state.email" type="email" class="w-full" />
         </UFormField>
 
-        <UFormField v-if="!isEditMode" label="Password" name="password">
+        <UFormField label="Password" name="password">
           <UInput
             v-model="state.password"
             type="password"
@@ -189,7 +232,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         </div>
 
         <UFormField label="Role" name="role">
-          <USelect v-model="state.role" :items="roles"  class="w-full" />
+          <USelect v-model="state.role" :items="roles" class="w-full" />
         </UFormField>
 
         <div class="flex justify-end">

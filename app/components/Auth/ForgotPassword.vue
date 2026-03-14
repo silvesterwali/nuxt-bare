@@ -1,15 +1,12 @@
 <script setup lang="ts">
-import { z } from "zod";
 import type { FormSubmitEvent, AuthFormField } from "@nuxt/ui";
+import type { ForgotPasswordInput } from "~~/shared/utils/schema/auth";
 
 const { requestPasswordReset, loading } = useAuth();
 const toast = useToast();
 
-const schema = z.object({
-  email: z.string().trim().toLowerCase().email("Invalid email"),
-});
-
-type Schema = z.output<typeof schema>;
+// forgotPasswordSchema auto-imported from shared/utils/schema/auth.ts
+type Schema = ForgotPasswordInput;
 
 const success = ref(false);
 
@@ -48,7 +45,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     title="Forgot Password"
     description="No worries, it happens."
     icon="i-lucide-circle-help"
-    :schema="schema"
+    :schema="forgotPasswordSchema"
     :fields="fields"
     :loading="loading"
     :submit="{ label: 'Send Reset Link', block: true }"

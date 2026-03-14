@@ -7,6 +7,16 @@ const { locale } = useI18n();
 const { search, page, params } = useBlogListState();
 const { data: posts, isLoading: pending } = usePostsQuery(params);
 const { mutate: deletePost, isLoading: deleting } = usePostDeleteMutation();
+
+const limit = computed(() => posts.value?.meta?.limit ?? 10);
+const total = computed(() => posts.value?.meta?.total ?? 0);
+const paginationFrom = computed(() =>
+  total.value === 0 ? 0 : Math.min((page.value - 1) * limit.value + 1, total.value),
+);
+const paginationTo = computed(() =>
+  Math.min(page.value * limit.value, total.value),
+);
+
 const UBadge = resolveComponent("UBadge");
 const UDropdownMenu = resolveComponent("UDropdownMenu");
 const UButton = resolveComponent("UButton");
@@ -137,31 +147,26 @@ const columnsData: TableColumn<BlogPost>[] = [
 
 <template>
   <div class="flex flex-col gap-4">
-    <div class="flex items-center justify-between">
-      <div>
-        <h2 class="text-2xl font-bold tracking-tight">Blog Posts</h2>
-        <p class="text-gray-500 dark:text-gray-400">
-          Manage your localized content. Currently editing in
-          <span class="font-semibold uppercase">{{ locale }}</span> language.
-        </p>
-      </div>
+    <CommonPageHeader title="Blog Posts">
+      <template #description>
+        Manage your localized content. Currently editing in
+        <span class="font-semibold uppercase">{{ locale }}</span> language.
+      </template>
+      <UButton to="/admin/blog/create" icon="i-lucide-plus" label="New Post" />
+    </CommonPageHeader>
 
-      <NuxtLink to="/admin/blog/create">
-        <UButton icon="i-lucide-plus" label="New Post" />
-      </NuxtLink>
-    </div>
-
-    <UCard>
-      <div
-        class="flex justify-between items-center py-3 border-b border-gray-200 dark:border-gray-700"
-      >
-        <UInput
-          v-model="search"
-          icon="i-lucide-search"
-          placeholder="Search posts..."
-          class="w-full max-w-xs"
-        />
-      </div>
+    <UCard :ui="{ body: 'p-0' }">
+      <template #header>
+        <div class="flex items-center gap-3">
+          <UInput
+            v-model="search"
+            icon="i-lucide-search"
+            placeholder="Search posts..."
+            class="w-full max-w-xs"
+          />
+          <span class="text-sm text-muted ml-auto">{{ total }} results</span>
+        </div>
+      </template>
 
       <UTable
         :data="posts?.data || []"
@@ -169,15 +174,18 @@ const columnsData: TableColumn<BlogPost>[] = [
         :loading="pending"
       />
 
-      <div
-        class="flex justify-end p-3 border-t border-gray-200 dark:border-gray-700"
-      >
-        <UPagination
-          v-model:page="page"
-          :total="posts?.meta?.total || 0"
-          :items-per-page="posts?.meta?.limit || 10"
-        />
-      </div>
+      <template #footer>
+        <div class="flex items-center justify-between gap-3">
+          <p class="text-sm text-muted">
+            Showing {{ paginationFrom }}–{{ paginationTo }} of {{ total }}
+          </p>
+          <UPagination
+            v-model:page="page"
+            :total="posts?.meta?.total || 0"
+            :items-per-page="posts?.meta?.limit || 10"
+          />
+        </div>
+      </template>
     </UCard>
 
     <!-- Confirm Delete Modal -->

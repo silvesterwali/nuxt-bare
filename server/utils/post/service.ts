@@ -6,9 +6,47 @@ export interface PostFilters {
   language?: string;
 }
 
+export interface PublicPostFilters {
+  search?: string;
+  language?: string;
+  categorySlug?: string;
+  tagSlug?: string;
+}
+
 export interface PaginationParams {
   page?: number;
   limit?: number;
+}
+
+/**
+ * Fetch media for post rendering without privacy checks.
+ * Published posts' featured images must be visible to all readers
+ * regardless of the media's privacy setting.
+ */
+async function getMediaForPost(mediaId: number) {
+  const [media] = await db
+    .select({
+      id: schema.media.id,
+      filename: schema.media.filename,
+      full_path: schema.media.full_path,
+      path: schema.media.path,
+      type: schema.media.type,
+      width: schema.media.width,
+      height: schema.media.height,
+    })
+    .from(schema.media)
+    .where(eq(schema.media.id, mediaId))
+    .limit(1);
+
+  if (!media) return null;
+
+  const [thumbnail] = await db
+    .select({ id: schema.media.id, full_path: schema.media.full_path })
+    .from(schema.media)
+    .where(eq(schema.media.parentId, mediaId))
+    .limit(1);
+
+  return { ...media, thumbnail: thumbnail ?? null };
 }
 
 export async function getLocalizedCategories(postId: number, language: string) {
@@ -362,7 +400,7 @@ export async function getPostById(postId: number, language: string = "en") {
 
   let featuredImage = null;
   if (post.featuredImageId) {
-    featuredImage = await getMediaById(post.featuredImageId);
+    featuredImage = await getMediaForPost(post.featuredImageId);
   }
 
   return {
@@ -377,3 +415,126 @@ export async function getPostById(postId: number, language: string = "en") {
     featuredImage,
   };
 }
+
+/**
+ * Fetch published posts for the public blog listing.
+ * Supports filtering by language, category slug, tag slug, and search.
+ */
+export async function getPublicPosts(
+  filters: PublicPostFilters = {},
+  paginationParams?: Partial<PaginationParams>,
+) {
+  const { page, limit } = validatePaginationParams(paginationParams || {});
+  const language = filters.language || "en";
+
+  const allPosts = await db
+    .select({
+      id: schema.posts.id,
+      slug: schema.posts.slug,
+      title: schema.posts.title,
+      shortDescription: schema.posts.shortDescription,
+      featuredImageId: schema.posts.featuredImageId,
+      createdAt: schema.posts.createdAt,
+      updatedAt: schema.posts.updatedAt,
+      author: {
+        id: schema.users.id,
+        name: schema.users.name,
+      },
+    })
+    .from(schema.posts)
+    .leftJoin(schema.users, eq(schema.posts.userId, schema.users.id))
+    .where(eq(schema.posts.status, "published"))
+    .orderBy(desc(schema.posts.createdAt));
+
+  const localized = await Promise.all(
+    (allPosts as any[]).map(async (p) => {
+      const slug =
+        p.slug?.[language] ||
+        p.slug?.en ||
+        Object.values(p.slug || {})[0] ||
+        "";
+      const title =
+        p.title?.[language] ||
+        p.title?.en ||
+        Object.values(p.title || {})[0] ||
+        "";
+      const shortDescription =
+        p.shortDescription?.[language] ||
+        p.shortDescription?.en ||
+        Object.values(p.shortDescription || {})[0] ||
+        "";
+      const categories = await getLocalizedCategories(p.id, language);
+      const tags = await getLocalizedTags(p.id, language);
+      return { ...p, slug, title, shortDescription, language, categories, tags };
+    }),
+  );
+
+  let results = localized.filter((p) => p.slug && p.slug !== "");
+
+  if (filters.categorySlug) {
+    const catSlug = filters.categorySlug;
+    results = results.filter((p) =>
+      p.categories.some((c: any) => c.slug === catSlug),
+    );
+  }
+
+  if (filters.tagSlug) {
+    const tagSlug = filters.tagSlug;
+    results = results.filter((p) =>
+      p.tags.some((t: any) => t.slug === tagSlug),
+    );
+  }
+
+  if (filters.search) {
+    const q = filters.search.toLowerCase();
+    results = results.filter(
+      (p) =>
+        p.title.toLowerCase().includes(q) ||
+        p.slug.toLowerCase().includes(q) ||
+        p.shortDescription.toLowerCase().includes(q),
+    );
+  }
+
+  const totalCount = results.length;
+  const offset = (page - 1) * limit;
+  const pageSlice = results.slice(offset, offset + limit);
+
+  const data = await Promise.all(
+    pageSlice.map(async (p) => {
+      let featuredImage = null;
+      if (p.featuredImageId) {
+        featuredImage = await getMediaForPost(p.featuredImageId);
+      }
+      return { ...p, featuredImage };
+    }),
+  );
+
+  return createPaginationResponse(data, totalCount, page, limit, "Posts retrieved");
+}
+
+/**
+ * Fetch a single published post by its localized slug.
+ */
+export async function getPublicPostBySlug(
+  slug: string,
+  language: string = "en",
+) {
+  const allPosts = await db
+    .select({ id: schema.posts.id, slug: schema.posts.slug })
+    .from(schema.posts)
+    .where(eq(schema.posts.status, "published"));
+
+  const match = (allPosts as any[]).find((p) => {
+    const localizedSlug =
+      p.slug?.[language] ||
+      p.slug?.en ||
+      Object.values(p.slug || {})[0] ||
+      "";
+    return localizedSlug === slug;
+  });
+
+  if (!match) return null;
+
+  return getPostById(match.id, language);
+}
+

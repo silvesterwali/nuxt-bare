@@ -6,47 +6,64 @@ const router = useRouter();
 
 const open = ref(false);
 
-const links: NavigationMenuItem[][] = [
-  [
-    {
-      label: "Dashboard",
-      to: "/admin",
-      exact: true,
-      icon: "i-lucide-layout-dashboard",
-      onSelect: () => (open.value = false),
-    },
-    {
-      label: "Blog",
-      to: "/admin/blog",
-      icon: "i-lucide-file-text",
-      onSelect: () => (open.value = false),
-    },
-    {
-      label: "Categories",
-      to: "/admin/categories",
-      icon: "i-lucide-folder",
-      onSelect: () => (open.value = false),
-    },
-    {
-      label: "Tags",
-      to: "/admin/tags",
-      icon: "i-lucide-tag",
-      onSelect: () => (open.value = false),
-    },
-    {
-      label: "Media",
-      to: "/admin/media",
-      icon: "i-lucide-image",
-      onSelect: () => (open.value = false),
-    },
-    {
-      label: "Users",
-      to: "/admin/users",
-      icon: "i-lucide-users",
-      onSelect: () => (open.value = false),
-    },
-  ],
+const { data: permissionsData } = usePermissionsQuery();
+
+const userFeatures = computed(
+  () => new Set((permissionsData.value?.data ?? []).map((p) => p.feature)),
+);
+
+type NavItem = NavigationMenuItem & { feature?: string };
+
+const allLinks: NavItem[] = [
+  {
+    label: "Dashboard",
+    to: "/admin",
+    exact: true,
+    icon: "i-lucide-layout-dashboard",
+    onSelect: () => (open.value = false),
+  },
+  {
+    label: "Blog",
+    to: "/admin/blog",
+    icon: "i-lucide-file-text",
+    onSelect: () => (open.value = false),
+    feature: "blog",
+  },
+  {
+    label: "Categories",
+    to: "/admin/categories",
+    icon: "i-lucide-folder",
+    onSelect: () => (open.value = false),
+    feature: "category",
+  },
+  {
+    label: "Tags",
+    to: "/admin/tags",
+    icon: "i-lucide-tag",
+    onSelect: () => (open.value = false),
+    feature: "tags",
+  },
+  {
+    label: "Media",
+    to: "/admin/media",
+    icon: "i-lucide-image",
+    onSelect: () => (open.value = false),
+    feature: "media",
+  },
+  {
+    label: "Users",
+    to: "/admin/users",
+    icon: "i-lucide-users",
+    onSelect: () => (open.value = false),
+    feature: "users",
+  },
 ];
+
+const navLinks = computed<NavigationMenuItem[]>(() =>
+  allLinks
+    .filter((link) => !link.feature || userFeatures.value.has(link.feature))
+    .map(({ feature: _f, ...rest }) => rest as NavigationMenuItem),
+);
 
 const logout = async () => {
   await clear();
@@ -70,7 +87,7 @@ const groups = computed<any>(() => [
   {
     id: "links",
     label: "Go to",
-    items: [...(links[0] || []), ...(links[1] || [])],
+    items: navLinks.value,
   },
 ]);
 </script>
@@ -103,18 +120,10 @@ const groups = computed<any>(() => [
 
         <UNavigationMenu
           :collapsed="collapsed"
-          :items="links[0]"
+          :items="navLinks"
           orientation="vertical"
           tooltip
           popover
-        />
-
-        <UNavigationMenu
-          :collapsed="collapsed"
-          :items="links[1]"
-          orientation="vertical"
-          tooltip
-          class="mt-auto"
         />
       </template>
 

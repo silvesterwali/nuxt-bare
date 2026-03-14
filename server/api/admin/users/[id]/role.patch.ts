@@ -24,5 +24,8 @@ export default defineAuthHandler(
     // Use jsonResponse (was singleResponse)
     return jsonResponse(updatedUser, "User role updated successfully");
   },
-  ["admin"],
+  {
+    role: ["admin"],
+    permissions: ["users"],
+  },
 );

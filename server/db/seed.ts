@@ -27,6 +27,7 @@ async function seed() {
     await db.delete(schema.posts);
     await db.delete(schema.categories);
     await db.delete(schema.tags);
+    await db.delete(schema.userPermissions);
     await db.delete(schema.userProfiles);
     await db.delete(schema.users);
 
@@ -169,6 +170,42 @@ async function seed() {
       }
     }
     console.log(`✅ Associated categories/tags with posts`);
+
+    // Seed permissions:
+    // - superadmin gets full "users" permissions
+    // - all other users get full "blog", "media", "category" permissions
+    const superAdmin = sampleUsers.find(
+      (u) => u.email === "superadmin@gmail.com",
+    )!;
+    const otherUsers = sampleUsers.filter(
+      (u) => u.email !== "superadmin@gmail.com",
+    );
+    const now = new Date();
+
+    const allPermissions = AllPermissions();
+    const permissionsData: (typeof schema.userPermissions.$inferInsert)[] = [
+      {
+        userId: superAdmin.id,
+        feature: "users",
+        permissions: allPermissions.users,
+        createdAt: now,
+        updatedAt: now,
+      },
+      ...otherUsers.flatMap((user) =>
+        (["blog", "media", "category"] as const).map((feature) => ({
+          userId: user.id,
+          feature,
+          permissions: allPermissions[feature],
+          createdAt: now,
+          updatedAt: now,
+        })),
+      ),
+    ];
+
+    await db.insert(schema.userPermissions).values(permissionsData);
+    console.log(
+      `✅ Inserted permissions (superadmin: users | others: blog, media, category)`,
+    );
 
     console.log("🎉 Database seeded successfully!");
   } catch (error) {

@@ -158,29 +158,28 @@ const columns: TableColumn<BlogTag>[] = [
 
 <template>
   <div class="flex flex-col gap-4">
-    <div class="flex items-center justify-between">
-      <div>
-        <h2 class="text-2xl font-bold tracking-tight">Tags</h2>
-        <p class="text-gray-500 dark:text-gray-400">
-          Manage blog tags. Currently editing in
-          <span class="font-semibold uppercase">{{ locale }}</span> language.
-        </p>
-      </div>
-
+    <CommonPageHeader title="Tags">
+      <template #description>
+        Manage blog tags. Currently editing in
+        <span class="font-semibold uppercase">{{ locale }}</span> language.
+      </template>
       <UButton icon="i-lucide-plus" label="New Tag" @click="openCreateModal" />
-    </div>
+    </CommonPageHeader>
 
-    <UCard>
+    <UCard :ui="{ body: 'p-0' }">
       <UTable :data="paginated" :columns="columns" :loading="pending" />
-      <div
-        class="flex justify-end p-3 border-t border-gray-200 dark:border-gray-700"
-      >
-        <UPagination
-          v-model:page="page"
-          :total="(tags || []).length"
-          :items-per-page="perPage"
-        />
-      </div>
+      <template #footer>
+        <div class="flex items-center justify-between gap-3">
+          <p class="text-sm text-muted">
+            {{ (tags || []).length }} entries
+          </p>
+          <UPagination
+            v-model:page="page"
+            :total="(tags || []).length"
+            :items-per-page="perPage"
+          />
+        </div>
+      </template>
     </UCard>
 
     <AdminTagForm

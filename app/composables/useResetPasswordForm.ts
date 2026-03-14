@@ -1,5 +1,5 @@
-import { z } from "zod";
 import type { FormSubmitEvent } from "@nuxt/ui";
+import type { ResetPasswordInput } from "~~/shared/utils/schema/auth";
 
 export const useResetPasswordForm = () => {
   const { resetPassword, loading } = useAuth();
@@ -7,22 +7,13 @@ export const useResetPasswordForm = () => {
   const toast = useToast();
   const token = computed(() => route.query.token as string);
 
-  const schema = z
-    .object({
-      password: z.string().min(8, "Must be at least 8 characters"),
-      confirmPassword: z.string().min(8, "Must be at least 8 characters"),
-    })
-    .refine((data) => data.password === data.confirmPassword, {
-      message: "Passwords don't match",
-      path: ["confirmPassword"],
-    });
-
+  // resetPasswordSchema auto-imported from shared/utils/schema/auth.ts
   const state = reactive({
     password: "",
     confirmPassword: "",
   });
 
-  type Schema = z.output<typeof schema>;
+  type Schema = ResetPasswordInput;
 
   async function onSubmit(event: FormSubmitEvent<Schema>) {
     if (!token.value) {
@@ -46,7 +37,7 @@ export const useResetPasswordForm = () => {
   }
 
   return {
-    schema,
+    schema: resetPasswordSchema,
     state,
     onSubmit,
     loading,

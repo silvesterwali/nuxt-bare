@@ -9,7 +9,7 @@ const emit = defineEmits<{
 
 const { mediaItems, pagination, page, isLoading, refetch, type } =
   useMediaManagement({
-    limit: 12,
+    limit: 20,
     initialType: "image",
   });
 
@@ -34,6 +34,7 @@ function goToPage(newPage: number) {
     v-model:open="open"
     title="Choose media"
     description="Choose media from your library or upload new files."
+    class="max-w-5xl!"
   >
     <template #body>
       <div

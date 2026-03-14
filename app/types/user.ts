@@ -1,6 +1,2 @@
-export interface UserListParams {
-  page?: number;
-  limit?: number;
-  search?: string;
-  role?: string;
-}
+// Re-exported from shared — canonical source is shared/types/user.ts
+export * from "~~/shared/types/user";

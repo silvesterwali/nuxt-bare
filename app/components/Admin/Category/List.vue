@@ -158,33 +158,28 @@ const columnsData: TableColumn<BlogCategory>[] = [
 
 <template>
   <div class="flex flex-col gap-4">
-    <div class="flex items-center justify-between">
-      <div>
-        <h2 class="text-2xl font-bold tracking-tight">Categories</h2>
-        <p class="text-gray-500 dark:text-gray-400">
-          Manage blog categories. Currently editing in
-          <span class="font-semibold uppercase">{{ locale }}</span> language.
-        </p>
-      </div>
+    <CommonPageHeader title="Categories">
+      <template #description>
+        Manage blog categories. Currently editing in
+        <span class="font-semibold uppercase">{{ locale }}</span> language.
+      </template>
+      <UButton icon="i-lucide-plus" label="New Category" @click="openCreateModal" />
+    </CommonPageHeader>
 
-      <UButton
-        icon="i-lucide-plus"
-        label="New Category"
-        @click="openCreateModal"
-      />
-    </div>
-
-    <UCard>
+    <UCard :ui="{ body: 'p-0' }">
       <UTable :data="paginated" :columns="columnsData" :loading="pending" />
-      <div
-        class="flex justify-end p-3 border-t border-gray-200 dark:border-gray-700"
-      >
-        <UPagination
-          v-model:page="page"
-          :total="(categories || []).length"
-          :items-per-page="perPage"
-        />
-      </div>
+      <template #footer>
+        <div class="flex items-center justify-between gap-3">
+          <p class="text-sm text-muted">
+            {{ (categories || []).length }} entries
+          </p>
+          <UPagination
+            v-model:page="page"
+            :total="(categories || []).length"
+            :items-per-page="perPage"
+          />
+        </div>
+      </template>
     </UCard>
 
     <AdminCategoryForm

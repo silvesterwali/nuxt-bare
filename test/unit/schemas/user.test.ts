@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { CreateUserBodySchema } from "../../../server/utils/user/schema";
+import { CreateUserBodySchema } from "../../../shared/utils/schema/user";
 
 describe("User Schemas", () => {
   describe("CreateUserBodySchema", () => {

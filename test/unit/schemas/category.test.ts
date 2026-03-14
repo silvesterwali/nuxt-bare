@@ -1,9 +1,9 @@
-import { describe, it, expect, vi } from "vitest";
-import { TranslationSchema } from "../../../server/utils/common/schema";
-
-vi.stubGlobal("TranslationSchema", TranslationSchema);
-const { CreateCategoryBodySchema, UpdateCategoryBodySchema } =
-  await import("../../../server/utils/category/schema");
+import { describe, it, expect } from "vitest";
+import { TranslationSchema } from "../../../shared/utils/schema/common";
+import {
+  CreateCategoryBodySchema,
+  UpdateCategoryBodySchema,
+} from "../../../shared/utils/schema/category";
 
 describe("Category Schemas", () => {
   describe("TranslationSchema", () => {

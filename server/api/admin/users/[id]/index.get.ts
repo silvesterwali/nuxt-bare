@@ -10,5 +10,8 @@ export default defineAuthHandler(
 
     return jsonResponse(userData);
   },
-  ["admin"],
+  {
+    role: ["admin"],
+    permissions: ["users"],
+  },
 );

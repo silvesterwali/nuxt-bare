@@ -10,6 +10,15 @@ const { search, page, params } = useUserListState();
 const { data: users, isLoading: pending } = useUsersQuery(params);
 const { mutate: deleteUser, isLoading: deleting } = useUserDeleteMutation();
 
+const limit = computed(() => users.value?.meta?.limit ?? 10);
+const total = computed(() => users.value?.meta?.total ?? 0);
+const paginationFrom = computed(() =>
+  total.value === 0 ? 0 : Math.min((page.value - 1) * limit.value + 1, total.value),
+);
+const paginationTo = computed(() =>
+  Math.min(page.value * limit.value, total.value),
+);
+
 const confirmDeleteOpen = ref(false);
 const userToDelete = ref<number | null>(null);
 const userToDeleteEmail = ref<string>("");
@@ -139,23 +148,23 @@ const columnsData: TableColumn<UserWithProfile>[] = [
 </script>
 
 <template>
-  <div class="p-4">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold">Manage Users</h1>
+  <div class="flex flex-col gap-4">
+    <CommonPageHeader title="Manage Users">
       <UButton to="/admin/users/new" icon="i-lucide-plus">Add User</UButton>
-    </div>
+    </CommonPageHeader>
 
-    <UCard>
-      <div
-        class="flex justify-between items-center py-3 border-b border-gray-200 dark:border-gray-700"
-      >
-        <UInput
-          v-model="search"
-          icon="i-lucide-search"
-          placeholder="Search users..."
-          class="w-full max-w-xs"
-        />
-      </div>
+    <UCard :ui="{ body: 'p-0' }">
+      <template #header>
+        <div class="flex items-center gap-3">
+          <UInput
+            v-model="search"
+            icon="i-lucide-search"
+            placeholder="Search users..."
+            class="w-full max-w-xs"
+          />
+          <span class="text-sm text-muted ml-auto">{{ total }} results</span>
+        </div>
+      </template>
 
       <UTable
         :columns="columnsData as any"
@@ -163,15 +172,18 @@ const columnsData: TableColumn<UserWithProfile>[] = [
         :loading="pending"
       />
 
-      <div
-        class="flex justify-end p-3 border-t border-gray-200 dark:border-gray-700"
-      >
-        <UPagination
-          v-model:page="page"
-          :total="users?.meta?.total || 0"
-          :items-per-page="users?.meta?.limit || 10"
-        />
-      </div>
+      <template #footer>
+        <div class="flex items-center justify-between gap-3">
+          <p class="text-sm text-muted">
+            Showing {{ paginationFrom }}–{{ paginationTo }} of {{ total }}
+          </p>
+          <UPagination
+            v-model:page="page"
+            :total="users?.meta?.total || 0"
+            :items-per-page="users?.meta?.limit || 10"
+          />
+        </div>
+      </template>
     </UCard>
 
     <!-- Confirm Delete Modal -->

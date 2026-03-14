@@ -4,10 +4,13 @@ import { db, schema } from "../server/db";
 export async function clearDb() {
   await db.delete(schema.userTokens);
   await db.delete(schema.mediaUsage);
+  await db.delete(schema.postTags);
+  await db.delete(schema.postCategories);
   await db.delete(schema.media);
   await db.delete(schema.posts);
   await db.delete(schema.passwordResets);
   await db.delete(schema.emailVerifications);
+  await db.delete(schema.userPermissions);
   await db.delete(schema.userProfiles);
   await db.delete(schema.users);
 }

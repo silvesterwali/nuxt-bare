@@ -6,16 +6,20 @@ import PasswordForm from "~/components/Profile/PasswordForm.vue";
 </script>
 
 <template>
-  <UContainer>
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold">Profile</h1>
-    </div>
+  <UContainer class="max-w-3xl">
+    <CommonPageHeader
+      title="Account Settings"
+      description="Manage your personal information and security credentials"
+    />
 
-    <UCard>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="space-y-6">
+      <UCard>
         <ProfileForm />
+      </UCard>
+
+      <UCard>
         <PasswordForm />
-      </div>
-    </UCard>
+      </UCard>
+    </div>
   </UContainer>
 </template>

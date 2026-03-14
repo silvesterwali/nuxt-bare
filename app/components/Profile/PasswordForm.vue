@@ -1,27 +1,19 @@
 <script setup lang="ts">
-import { z } from "zod";
 import type { FormSubmitEvent } from "@nuxt/ui";
+import type { ChangePasswordInput } from "~~/shared/utils/schema/auth";
 
 const { changePassword } = useAuth();
 const { transformToIssue } = useValidateHelper();
 const toast = useToast();
 
-const passwordSchema = z
-  .object({
-    currentPassword: z.string().min(1, "Required"),
-    newPassword: z.string().min(8, "Must be at least 8 characters"),
-    confirmPassword: z.string().min(8, "Must be at least 8 characters"),
-  })
-  .refine((d) => d.newPassword === d.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
-
+// changePasswordSchema auto-imported from shared/utils/schema/auth.ts
 const passwordState = reactive({
   currentPassword: "",
   newPassword: "",
   confirmPassword: "",
 });
+
+type Schema = ChangePasswordInput;
 
 const passwordLoading = ref(false);
 const passwordForm = ref<{ setErrors(errs: any[]): void } | null>(null);
@@ -61,11 +53,11 @@ async function onPasswordSubmit(event: FormSubmitEvent<any>) {
 </script>
 
 <template>
-  <div class="border-l border-gray-200 pl-6">
-    <h2 class="text-xl font-semibold mb-4">Change Password</h2>
+  <div>
+    <h2 class="text-base font-display font-semibold text-highlighted mb-5">Change Password</h2>
     <UForm
       ref="passwordForm"
-      :schema="passwordSchema"
+      :schema="changePasswordSchema"
       :state="passwordState"
       class="space-y-4"
       @submit="onPasswordSubmit"

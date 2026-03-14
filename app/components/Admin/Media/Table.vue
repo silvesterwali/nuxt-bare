@@ -62,8 +62,7 @@ const columns: TableColumn<Media>[] = [
           : h(
               "div",
               {
-                class:
-                  "w-12 h-12 grid place-items-center rounded bg-gray-100 dark:bg-gray-800",
+                class: "w-12 h-12 grid place-items-center rounded bg-elevated",
               },
               [h("span", { class: "text-sm" }, "📄")],
             ),

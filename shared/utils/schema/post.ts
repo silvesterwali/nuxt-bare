@@ -1,29 +1,5 @@
 import { z } from "zod";
 
-/**
- * Request body schema for creating a blog post.
- * Accepts fields in admin panel as either strings (single language) or full translation records.
- *
- * Fields:
- * - `slug`: URL-friendly identifier (required, multilingual)
- * - `title`: Post headline (required, multilingual)
- * - `shortDescription`: Excerpt for listings (optional, multilingual)
- * - `content`: Full post body (required, multilingual)
- * - `status`: Publication status (draft, published, archived) - defaults to draft
- * - `categoryIds`: Array of category IDs to assign (optional)
- * - `tagIds`: Array of tag IDs to assign (optional)
- *
- * @example
- * // String input (current language only):
- * {
- *   slug: "hello-world",
- *   title: "Hello World",
- *   content: "...",
- *   status: "published",
- *   categoryIds: [1, 2],
- *   tagIds: [1, 3, 5]
- * }
- */
 export const CreatePostBodySchema = z.object({
   slug: z.string(),
   title: z.string(),
@@ -38,12 +14,6 @@ export const CreatePostBodySchema = z.object({
   featuredImageId: z.number().int().positive().optional(),
 });
 
-/**
- * Request body schema for updating a blog post.
- * All fields are optional - only provided fields are updated.
- * Uses same translation pattern as create, but allows partial updates.
- * Also supports updating categories and tags.
- */
 export const UpdatePostBodySchema = z.object({
   slug: z.string().optional(),
   title: z.string().optional(),
@@ -55,10 +25,6 @@ export const UpdatePostBodySchema = z.object({
   featuredImageId: z.number().int().positive().optional(),
 });
 
-/**
- * Request body schema for creating a public blog post.
- * Simpler than admin schema - expects single title and content strings.
- */
 export const PublicCreatePostBodySchema = z.object({
   title: z.string().min(1).max(100),
   content: z.string().min(1),
@@ -66,7 +32,23 @@ export const PublicCreatePostBodySchema = z.object({
   published: z.boolean().optional().default(false),
 });
 
-// Type exports for TypeScript usage
+export const adminBlogQuerySchema = z.object({
+  search: z.string().optional(),
+  page: z.coerce.number().int().positive().optional(),
+  limit: z.coerce.number().int().positive().optional(),
+});
+
+export const publicBlogQuerySchema = z.object({
+  search: z.string().optional(),
+  lang: z.string().optional(),
+  category: z.string().optional(),
+  tag: z.string().optional(),
+  page: z.coerce.number().int().positive().optional(),
+  limit: z.coerce.number().int().positive().optional(),
+});
+
 export type CreatePostBody = z.infer<typeof CreatePostBodySchema>;
 export type UpdatePostBody = z.infer<typeof UpdatePostBodySchema>;
 export type PublicCreatePostBody = z.infer<typeof PublicCreatePostBodySchema>;
+export type AdminBlogQuery = z.infer<typeof adminBlogQuerySchema>;
+export type PublicBlogQuery = z.infer<typeof publicBlogQuerySchema>;

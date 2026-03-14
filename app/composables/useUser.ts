@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryCache } from "@pinia/colada";
 import type { UserWithProfile } from "@/types/db";
 import type { ResponsePagination, APIResponseSuccess } from "@/types/response";
 import type { UserListParams } from "@/types/user";
+import type { PermissionEntry } from "~~/shared/types/permission";
 
 export const useUsersQuery = (params: Ref<UserListParams>) => {
   return useQuery({
@@ -104,6 +105,56 @@ export const useUserDeleteMutation = () => {
     onError: (err: any) => {
       const msg = err.data?.message || "Failed to delete user";
       toast.add({ title: "Error", description: msg, color: "error" });
+    },
+  });
+};
+
+export const useAvailablePermissionsQuery = () => {
+  return useQuery({
+    key: () => ["permissions", "available"],
+    query: () => $fetch<{ data: PermissionEntry[] }>("/api/admin/permissions"),
+  });
+};
+
+export const useUserPermissionsQuery = (id: Ref<number | string | null>) => {
+  return useQuery({
+    key: () => ["users", id.value, "permissions"],
+    query: () =>
+      $fetch<{ data: PermissionEntry[] }>(
+        `/api/admin/users/${id.value}/permissions`,
+      ),
+    enabled: computed(() => !!id.value),
+  });
+};
+
+export const useUserPermissionsMutation = () => {
+  const queryCache = useQueryCache();
+  const toast = useToast();
+
+  return useMutation({
+    mutation: ({
+      id,
+      permissions,
+    }: {
+      id: number | string;
+      permissions: PermissionEntry[];
+    }) =>
+      $fetch(`/api/admin/users/${id}/permissions`, {
+        method: "POST",
+        body: permissions,
+      }),
+    onSuccess: (_, { id }) => {
+      queryCache.invalidateQueries({ key: ["users", id, "permissions"] });
+      toast.add({
+        title: "Success",
+        description: "Permissions updated successfully",
+        color: "success",
+      });
+    },
+    onError: (err: any) => {
+      const msg = err.data?.message || "Failed to update permissions";
+      toast.add({ title: "Error", description: msg, color: "error" });
+      throw err;
     },
   });
 };

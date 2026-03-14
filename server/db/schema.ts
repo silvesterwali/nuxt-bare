@@ -195,6 +195,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   tokens: many(userTokens),
   posts: many(posts),
   media: many(media),
+  permissions: many(userPermissions),
 }));
 
 export const userProfilesRelations = relations(userProfiles, ({ one }) => ({
@@ -283,3 +284,28 @@ export const mediaUsageRelations = relations(mediaUsage, ({ one }) => ({
     references: [media.id],
   }),
 }));
+
+// User permissions (feature-level access control)
+export const userPermissions = sqliteTable("user_permissions", {
+  id: integer("id").primaryKey(),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  feature: text("feature").notNull(), // e.g., "users", "blog", "media", "category"
+  permissions: text("permissions", { mode: "json" })
+    .$type<string[]>()
+    .notNull()
+    .default([]),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+});
+
+export const userPermissionsRelations = relations(
+  userPermissions,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [userPermissions.userId],
+      references: [users.id],
+    }),
+  }),
+);

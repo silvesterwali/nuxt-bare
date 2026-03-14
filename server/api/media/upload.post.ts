@@ -1,5 +1,4 @@
 import type { MediaType, MediaPrivacy } from "~/types/db";
-import { uploadSchema } from "~~/server/utils/media/schema";
 import { uploadFile } from "~~/server/utils/media/service";
 import { z } from "zod";
 

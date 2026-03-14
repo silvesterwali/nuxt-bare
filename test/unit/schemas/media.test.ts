@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   uploadSchema,
   MediaQuerySchema,
-} from "../../../server/utils/media/schema";
+} from "../../../shared/utils/schema/media";
 
 describe("Media Schemas", () => {
   describe("uploadSchema", () => {

@@ -1,20 +1,14 @@
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { db, schema } from "../../../server/db";
 import { postRepository } from "../../../server/utils/post/repository";
+import { clearDb } from "../../helpers";
 
 describe("Blog Repository - Multi-language CRUD", () => {
   let testUserId: number;
 
-  beforeAll(async () => {
-    // Clean test data - tables already exist from globalSetup
-    try {
-      await db.delete(schema.posts);
-      await db.delete(schema.users);
-    } catch (e: any) {
-      console.log("[test] Cleanup note:", e.message);
-    }
+  beforeEach(async () => {
+    await clearDb();
 
-    // Create a test user for blog posts
     const user = await db
       .insert(schema.users)
       .values({

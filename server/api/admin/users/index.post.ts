@@ -1,4 +1,5 @@
 import type { UserRole } from "~/types/db";
+import type { FeatureName } from "~~/shared/utils/permissions";
 
 export default defineAuthHandler(
   async (event) => {
@@ -13,6 +14,18 @@ export default defineAuthHandler(
         lastName: body.lastName,
         role: body.role as UserRole,
       });
+
+      // Auto-assign default permissions based on role.
+      // "users" feature is only granted to admin role.
+      const all = AllPermissions();
+      const features = (Object.keys(all) as FeatureName[]).filter(
+        (f) => f !== "users" || body.role === "admin",
+      );
+      await Promise.all(
+        features.map((feature) =>
+          permissionRepository.upsert(result.user.id, feature, all[feature]),
+        ),
+      );
 
       // Send verification/welcome email
       if (result.token) {
@@ -44,5 +57,8 @@ export default defineAuthHandler(
     }
   },
 
-  ["admin"],
+  {
+    role: ["admin"],
+    permissions: ["users"],
+  },
 );

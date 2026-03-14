@@ -15,5 +15,8 @@ export default defineAuthHandler(
 
     return jsonResponse(deletedUser, "User deleted successfully");
   },
-  ["admin"],
+  {
+    role: ["admin"],
+    permissions: ["users"],
+  },
 );

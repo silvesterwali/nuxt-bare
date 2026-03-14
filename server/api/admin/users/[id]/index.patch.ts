@@ -1,14 +1,6 @@
-import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db, schema } from "../../../../db";
 import type { UserRole } from "~/types/db";
-
-const updateUserSchema = z.object({
-  firstName: z.string().min(1).optional(),
-  lastName: z.string().min(1).optional(),
-  role: z.enum(["admin", "user", "moderator"]).optional(),
-  name: z.string().optional(), // Allow name but ignore it
-});
 
 export default defineAuthHandler(
   async (event) => {
@@ -33,14 +25,14 @@ export default defineAuthHandler(
             updatedAt: new Date(),
           })
           .where(eq(schema.userProfiles.userId, id));
-      } else {
-        // Create profile if it doesn't exist? Or throw?
-        // For now, assume profile exists as per registration flow.
       }
     }
 
     const updatedUser = await getUserById(id);
     return jsonResponse(updatedUser, "User updated successfully");
   },
-  ["admin"],
+  {
+    role: ["admin"],
+    permissions: ["users"],
+  },
 );

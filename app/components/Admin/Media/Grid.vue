@@ -38,10 +38,7 @@ function handleCardClick(item: Media) {
 <template>
   <div>
     <!-- Loading skeleton -->
-    <div
-      v-if="loading"
-      class="grid grid-cols-2 md:grid-cols-3 gap-3"
-    >
+    <div v-if="loading" class="grid grid-cols-2 md:grid-cols-3 gap-3">
       <div
         v-for="i in 6"
         :key="i"
@@ -59,19 +56,22 @@ function handleCardClick(item: Media) {
     </div>
 
     <!-- Grid -->
-    <div
-      v-else
-      class="grid grid-cols-2 md:grid-cols-3 gap-3"
-    >
+    <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
       <div
         v-for="item in media"
         :key="item.id"
         class="group relative rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900"
-        :class="selectMode ? 'cursor-pointer hover:border-primary-500 hover:ring-2 hover:ring-primary-500/30 transition' : ''"
+        :class="
+          selectMode
+            ? 'cursor-pointer hover:border-primary-500 hover:ring-2 hover:ring-primary-500/30 transition'
+            : ''
+        "
         @click="handleCardClick(item)"
       >
         <!-- Image -->
-        <div class="aspect-square w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+        <div
+          class="aspect-square w-full overflow-hidden bg-gray-100 dark:bg-gray-800"
+        >
           <img
             v-if="item.type === 'image'"
             :src="item.thumbnail?.full_path || item.full_path || ''"
@@ -88,7 +88,9 @@ function handleCardClick(item: Media) {
 
         <!-- Info -->
         <div class="p-2">
-          <p class="text-xs font-medium truncate text-gray-700 dark:text-gray-200">
+          <p
+            class="text-xs font-medium truncate text-gray-700 dark:text-gray-200"
+          >
             {{ item.originalName }}
           </p>
           <p class="text-xs text-gray-400">{{ formatBytes(item.size) }}</p>

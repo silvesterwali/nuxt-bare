@@ -1,35 +1,24 @@
 <script setup lang="ts">
-import { z } from "zod";
 import type { FormSubmitEvent } from "@nuxt/ui";
+import type { Form } from "@nuxt/ui";
+import type { Ref } from "vue";
+import type { ChangePasswordInput } from "~~/shared/utils/schema/auth";
 
 const { changePassword, loading } = useAuth();
 const { transformToIssue } = useValidateHelper();
 const toast = useToast();
 
-const schema = z
-  .object({
-    currentPassword: z.string().min(1, "Required"),
-    newPassword: z.string().min(8, "Must be at least 8 characters"),
-    confirmPassword: z.string().min(8, "Must be at least 8 characters"),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
+// changePasswordSchema auto-imported from shared/utils/schema/auth.ts
+type Schema = ChangePasswordInput;
+
+type UFormInstance = Form<any>;
+const form: Ref<UFormInstance | null> = ref(null);
 
 const state = reactive({
   currentPassword: "",
   newPassword: "",
   confirmPassword: "",
 });
-
-type Schema = typeof state;
-
-import type { Form } from "@nuxt/ui";
-import type { Ref } from "vue";
-
-type UFormInstance = Form<any>;
-const form: Ref<UFormInstance | null> = ref(null);
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   // clear previous validation errors if the form API is available
@@ -79,7 +68,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     <UCard>
       <UForm
         ref="form"
-        :schema="schema"
+        :schema="changePasswordSchema"
         :state="state"
         class="space-y-4"
         @submit="onSubmit"

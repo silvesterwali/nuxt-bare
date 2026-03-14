@@ -1,25 +1,20 @@
 <script setup lang="ts">
-import { z } from "zod";
 import type { FormSubmitEvent } from "@nuxt/ui";
+import type { UpdateProfileInput } from "~~/shared/utils/schema/auth";
 
 const { updateProfile, loading: authLoading } = useAuth();
 const { transformToIssue } = useValidateHelper();
 const { user } = useUserSession();
 const toast = useToast();
 
-const schema = z.object({
-  firstName: z.string().min(1, "Required"),
-  lastName: z.string().min(1, "Required"),
-  bio: z.string().optional(),
-});
-
+// updateProfileSchema auto-imported from shared/utils/schema/auth.ts
 const state = reactive({
   firstName: "",
   lastName: "",
   bio: "",
 });
 
-type Schema = z.output<typeof schema>;
+type Schema = UpdateProfileInput;
 const form = ref<any>(null);
 
 // Fetch current profile data
@@ -61,10 +56,10 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
 <template>
   <div>
-    <h2 class="text-xl font-semibold mb-4">Profile</h2>
+    <h2 class="text-base font-display font-semibold text-highlighted mb-5">Profile Information</h2>
     <UForm
       ref="form"
-      :schema="schema"
+      :schema="updateProfileSchema"
       :state="state"
       class="space-y-4"
       @submit="onSubmit"
