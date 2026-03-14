@@ -12,8 +12,8 @@ export const authService = {
     const existingUser = await userRepository.findByEmail(data.email);
     if (existingUser) {
       throw createError({
-        statusCode: 400,
-        statusMessage: "Email already exists",
+        statusCode: 409,
+        statusMessage: "Unable to create account. Please try again.",
       });
     }
 

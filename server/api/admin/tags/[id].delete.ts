@@ -14,10 +14,10 @@ export default defineAuthHandler(
       await deleteTag(id);
       return jsonResponse({ success: true }, "Tag deleted successfully");
     } catch (error) {
+      if (error instanceof H3Error) throw error;
       throw createError({
-        statusCode: 400,
-        statusMessage:
-          error instanceof Error ? error.message : "Failed to delete tag",
+        statusCode: 500,
+        statusMessage: "Failed to delete tag",
       });
     }
   },
