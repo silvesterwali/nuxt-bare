@@ -97,4 +97,22 @@ export default defineNuxtConfig({
     // where translation files live
     langDir: "locales/",
   },
+
+  sitemap: {
+    // Dynamic URLs are provided by /server/api/__sitemap__/urls.ts
+    sources: ["/api/__sitemap__/urls"],
+    // Static pages already handled automatically by Nuxt module scanning
+    // Exclude admin and auth pages from sitemap
+    exclude: [
+      "/admin",
+      "/admin/**",
+      "/login",
+      "/register",
+      "/forgot-password",
+      "/reset-password",
+      "/verify-email",
+      "/profile",
+      "/profile/**",
+    ],
+  },
 });
