@@ -167,7 +167,9 @@ const items: EditorToolbarItem[][] = [
 </script>
 
 <template>
-  <div class="flex flex-col rounded-[calc(var(--ui-radius)+2px)] border border-default overflow-hidden transition-shadow focus-within:shadow-sm focus-within:ring-1 focus-within:ring-primary/40">
+  <div
+    class="flex flex-col rounded-[calc(var(--ui-radius)+2px)] border border-default overflow-hidden transition-shadow focus-within:shadow-sm focus-within:ring-1 focus-within:ring-primary/40"
+  >
     <!-- Editor area (toolbar lives inside v-slot to access the editor instance) -->
     <UEditor
       v-model="modelValue"
@@ -182,7 +184,7 @@ const items: EditorToolbarItem[][] = [
       }"
     >
       <UEditorToolbar
-        :editor="(editor as any)"
+        :editor="editor as any"
         :items="items"
         class="border-b border-default bg-muted px-2 py-1.5 flex-shrink-0"
       />

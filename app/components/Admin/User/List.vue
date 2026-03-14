@@ -13,7 +13,9 @@ const { mutate: deleteUser, isLoading: deleting } = useUserDeleteMutation();
 const limit = computed(() => users.value?.meta?.limit ?? 10);
 const total = computed(() => users.value?.meta?.total ?? 0);
 const paginationFrom = computed(() =>
-  total.value === 0 ? 0 : Math.min((page.value - 1) * limit.value + 1, total.value),
+  total.value === 0
+    ? 0
+    : Math.min((page.value - 1) * limit.value + 1, total.value),
 );
 const paginationTo = computed(() =>
   Math.min(page.value * limit.value, total.value),

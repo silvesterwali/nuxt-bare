@@ -170,9 +170,7 @@ const columns: TableColumn<BlogTag>[] = [
       <UTable :data="paginated" :columns="columns" :loading="pending" />
       <template #footer>
         <div class="flex items-center justify-between gap-3">
-          <p class="text-sm text-muted">
-            {{ (tags || []).length }} entries
-          </p>
+          <p class="text-sm text-muted">{{ (tags || []).length }} entries</p>
           <UPagination
             v-model:page="page"
             :total="(tags || []).length"

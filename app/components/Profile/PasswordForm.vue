@@ -54,7 +54,9 @@ async function onPasswordSubmit(event: FormSubmitEvent<any>) {
 
 <template>
   <div>
-    <h2 class="text-base font-display font-semibold text-highlighted mb-5">Change Password</h2>
+    <h2 class="text-base font-display font-semibold text-highlighted mb-5">
+      Change Password
+    </h2>
     <UForm
       ref="passwordForm"
       :schema="changePasswordSchema"

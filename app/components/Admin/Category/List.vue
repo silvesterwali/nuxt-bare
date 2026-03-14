@@ -163,7 +163,11 @@ const columnsData: TableColumn<BlogCategory>[] = [
         Manage blog categories. Currently editing in
         <span class="font-semibold uppercase">{{ locale }}</span> language.
       </template>
-      <UButton icon="i-lucide-plus" label="New Category" @click="openCreateModal" />
+      <UButton
+        icon="i-lucide-plus"
+        label="New Category"
+        @click="openCreateModal"
+      />
     </CommonPageHeader>
 
     <UCard :ui="{ body: 'p-0' }">

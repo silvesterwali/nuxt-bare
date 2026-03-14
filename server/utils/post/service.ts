@@ -465,7 +465,15 @@ export async function getPublicPosts(
         "";
       const categories = await getLocalizedCategories(p.id, language);
       const tags = await getLocalizedTags(p.id, language);
-      return { ...p, slug, title, shortDescription, language, categories, tags };
+      return {
+        ...p,
+        slug,
+        title,
+        shortDescription,
+        language,
+        categories,
+        tags,
+      };
     }),
   );
 
@@ -509,7 +517,13 @@ export async function getPublicPosts(
     }),
   );
 
-  return createPaginationResponse(data, totalCount, page, limit, "Posts retrieved");
+  return createPaginationResponse(
+    data,
+    totalCount,
+    page,
+    limit,
+    "Posts retrieved",
+  );
 }
 
 /**
@@ -526,10 +540,7 @@ export async function getPublicPostBySlug(
 
   const match = (allPosts as any[]).find((p) => {
     const localizedSlug =
-      p.slug?.[language] ||
-      p.slug?.en ||
-      Object.values(p.slug || {})[0] ||
-      "";
+      p.slug?.[language] || p.slug?.en || Object.values(p.slug || {})[0] || "";
     return localizedSlug === slug;
   });
 
@@ -537,4 +548,3 @@ export async function getPublicPostBySlug(
 
   return getPostById(match.id, language);
 }
-

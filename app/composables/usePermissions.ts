@@ -7,7 +7,6 @@ export const usePermissionsQuery = () => {
     key: () => ["permissions", "me"],
     query: () =>
       $fetch<APIResponseSuccess<PermissionEntry[]>>("/api/user/permissions"),
-    
   });
 };
 
@@ -15,7 +14,6 @@ export const useHasFeature = (feature: string) => {
   const { data } = usePermissionsQuery();
   return computed(
     () =>
-      !feature ||
-      (data.value?.data ?? []).some((p) => p.feature === feature),
+      !feature || (data.value?.data ?? []).some((p) => p.feature === feature),
   );
 };

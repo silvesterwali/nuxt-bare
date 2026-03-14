@@ -28,7 +28,7 @@ useSeoMeta({
   ogImage: () => {
     const path = post.value?.featuredImage?.full_path;
     if (!path) return undefined;
-    return path.startsWith('http') ? path : `${requestURL.origin}${path}`;
+    return path.startsWith("http") ? path : `${requestURL.origin}${path}`;
   },
   articlePublishedTime: () =>
     post.value ? new Date(post.value.createdAt).toISOString() : undefined,
@@ -63,9 +63,18 @@ useSeoMeta({
     <!-- Error state -->
     <div v-else-if="error || !post" class="py-24 text-center">
       <UIcon name="i-lucide-file-x" class="size-12 text-muted mx-auto mb-4" />
-      <h1 class="text-xl font-semibold text-highlighted mb-2">Article not found</h1>
-      <p class="text-muted text-sm">The article you're looking for doesn't exist or has been removed.</p>
-      <UButton class="mt-6" to="/blog" icon="i-lucide-arrow-left" label="Back to Blog" />
+      <h1 class="text-xl font-semibold text-highlighted mb-2">
+        Article not found
+      </h1>
+      <p class="text-muted text-sm">
+        The article you're looking for doesn't exist or has been removed.
+      </p>
+      <UButton
+        class="mt-6"
+        to="/blog"
+        icon="i-lucide-arrow-left"
+        label="Back to Blog"
+      />
     </div>
 
     <!-- Article -->
@@ -77,7 +86,12 @@ useSeoMeta({
           :key="cat.id"
           :to="`/blog?category=${cat.slug}`"
         >
-          <UBadge variant="subtle" color="primary" size="sm" class="hover:opacity-80 transition-opacity">
+          <UBadge
+            variant="subtle"
+            color="primary"
+            size="sm"
+            class="hover:opacity-80 transition-opacity"
+          >
             <UIcon name="i-lucide-folder" class="size-3 mr-1" />
             {{ cat.name }}
           </UBadge>
@@ -85,12 +99,16 @@ useSeoMeta({
       </div>
 
       <!-- Title -->
-      <h1 class="text-3xl sm:text-4xl font-display font-bold tracking-tight text-highlighted leading-tight mb-4">
+      <h1
+        class="text-3xl sm:text-4xl font-display font-bold tracking-tight text-highlighted leading-tight mb-4"
+      >
         {{ post.title }}
       </h1>
 
       <!-- Meta row -->
-      <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted mb-6 pb-6 border-b border-default">
+      <div
+        class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted mb-6 pb-6 border-b border-default"
+      >
         <span class="flex items-center gap-1.5">
           <UIcon name="i-lucide-user" class="size-4" />
           {{ post.author?.name }}
@@ -108,7 +126,10 @@ useSeoMeta({
             })
           }}
         </time>
-        <span v-if="post.updatedAt !== post.createdAt" class="flex items-center gap-1.5">
+        <span
+          v-if="post.updatedAt !== post.createdAt"
+          class="flex items-center gap-1.5"
+        >
           <UIcon name="i-lucide-pencil" class="size-4" />
           Updated
           {{
@@ -148,14 +169,22 @@ useSeoMeta({
       />
 
       <!-- Tags -->
-      <div v-if="post.tags?.length" class="flex flex-wrap gap-2 mt-10 pt-6 border-t border-default">
+      <div
+        v-if="post.tags?.length"
+        class="flex flex-wrap gap-2 mt-10 pt-6 border-t border-default"
+      >
         <span class="text-sm text-muted self-center mr-1">Tags:</span>
         <NuxtLink
           v-for="tag in post.tags"
           :key="tag.id"
           :to="`/blog?tag=${tag.slug}`"
         >
-          <UBadge variant="soft" color="neutral" size="sm" class="hover:opacity-80 transition-opacity">
+          <UBadge
+            variant="soft"
+            color="neutral"
+            size="sm"
+            class="hover:opacity-80 transition-opacity"
+          >
             #{{ tag.name }}
           </UBadge>
         </NuxtLink>

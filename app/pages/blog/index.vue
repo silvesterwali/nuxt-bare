@@ -7,7 +7,8 @@ const appConfig = useRuntimeConfig();
 // Sync query params from URL → reactive state
 const page = computed({
   get: () => Number(route.query.page) || 1,
-  set: (v) => router.push({ query: { ...route.query, page: v === 1 ? undefined : v } }),
+  set: (v) =>
+    router.push({ query: { ...route.query, page: v === 1 ? undefined : v } }),
 });
 
 const search = ref((route.query.search as string) || "");
@@ -15,7 +16,13 @@ const activeCategory = ref((route.query.category as string) || "");
 const activeTag = ref((route.query.tag as string) || "");
 
 watch(search, () => {
-  router.push({ query: { ...route.query, search: search.value || undefined, page: undefined } });
+  router.push({
+    query: {
+      ...route.query,
+      search: search.value || undefined,
+      page: undefined,
+    },
+  });
 });
 
 const params = computed(() => ({
@@ -32,18 +39,24 @@ const { data, status } = usePublicPostsQuery(params);
 const posts = computed(() => data.value?.data ?? []);
 const meta = computed(() => data.value?.meta);
 const total = computed(() => meta.value?.total ?? 0);
-const totalPages = computed(() => Math.ceil(total.value / (meta.value?.per_page ?? 9)));
+const totalPages = computed(() =>
+  Math.ceil(total.value / (meta.value?.per_page ?? 9)),
+);
 
 function setCategory(slug: string) {
   activeCategory.value = activeCategory.value === slug ? "" : slug;
   activeTag.value = "";
-  router.push({ query: { category: activeCategory.value || undefined, page: undefined } });
+  router.push({
+    query: { category: activeCategory.value || undefined, page: undefined },
+  });
 }
 
 function setTag(slug: string) {
   activeTag.value = activeTag.value === slug ? "" : slug;
   activeCategory.value = "";
-  router.push({ query: { tag: activeTag.value || undefined, page: undefined } });
+  router.push({
+    query: { tag: activeTag.value || undefined, page: undefined },
+  });
 }
 
 function clearFilters() {
@@ -75,7 +88,9 @@ useSeoMeta({
   <UContainer class="py-12">
     <!-- Page header -->
     <div class="mb-10 text-center">
-      <h1 class="text-4xl font-display font-bold tracking-tight text-highlighted mb-3">
+      <h1
+        class="text-4xl font-display font-bold tracking-tight text-highlighted mb-3"
+      >
         Blog
       </h1>
       <p class="text-muted max-w-xl mx-auto">
@@ -131,19 +146,29 @@ useSeoMeta({
     </div>
 
     <!-- Loading -->
-    <div v-if="status === 'pending'" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div
+      v-if="status === 'pending'"
+      class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
+    >
       <USkeleton v-for="n in 9" :key="n" class="h-72 rounded-lg" />
     </div>
 
     <!-- Empty -->
-    <div
-      v-else-if="posts.length === 0"
-      class="py-20 text-center"
-    >
-      <UIcon name="i-lucide-file-search" class="size-12 text-muted mx-auto mb-4" />
+    <div v-else-if="posts.length === 0" class="py-20 text-center">
+      <UIcon
+        name="i-lucide-file-search"
+        class="size-12 text-muted mx-auto mb-4"
+      />
       <p class="text-lg font-medium text-highlighted">No articles found</p>
-      <p class="text-muted text-sm mt-1">Try adjusting your search or filters.</p>
-      <UButton class="mt-4" variant="ghost" color="primary" @click="clearFilters">
+      <p class="text-muted text-sm mt-1">
+        Try adjusting your search or filters.
+      </p>
+      <UButton
+        class="mt-4"
+        variant="ghost"
+        color="primary"
+        @click="clearFilters"
+      >
         Clear filters
       </UButton>
     </div>
@@ -166,7 +191,10 @@ useSeoMeta({
             class="aspect-video overflow-hidden rounded-t-lg -mt-4 -mx-4 mb-0"
           >
             <img
-              :src="post.featuredImage.thumbnail?.full_path ?? post.featuredImage.full_path"
+              :src="
+                post.featuredImage.thumbnail?.full_path ??
+                post.featuredImage.full_path
+              "
               :alt="post.title"
               class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
@@ -195,16 +223,23 @@ useSeoMeta({
 
           <!-- Title + excerpt -->
           <div class="flex-1">
-            <h2 class="font-display font-semibold text-highlighted leading-snug mb-1 group-hover:text-primary transition-colors line-clamp-2">
+            <h2
+              class="font-display font-semibold text-highlighted leading-snug mb-1 group-hover:text-primary transition-colors line-clamp-2"
+            >
               {{ post.title }}
             </h2>
-            <p v-if="post.shortDescription" class="text-sm text-muted line-clamp-3">
+            <p
+              v-if="post.shortDescription"
+              class="text-sm text-muted line-clamp-3"
+            >
               {{ post.shortDescription }}
             </p>
           </div>
 
           <!-- Footer: tags + date -->
-          <div class="flex items-center justify-between pt-2 border-t border-default">
+          <div
+            class="flex items-center justify-between pt-2 border-t border-default"
+          >
             <div class="flex flex-wrap gap-1">
               <UBadge
                 v-for="tag in post.tags?.slice(0, 2)"
@@ -225,7 +260,13 @@ useSeoMeta({
               </span>
             </div>
             <time class="text-xs text-muted flex-shrink-0">
-              {{ new Date(post.createdAt).toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" }) }}
+              {{
+                new Date(post.createdAt).toLocaleDateString(locale, {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })
+              }}
             </time>
           </div>
         </UCard>

@@ -44,9 +44,7 @@ export default defineSitemapEventHandler(async () => {
     const alternates = LOCALES.flatMap((locale) => {
       const localizedSlug =
         (post.slug as Record<string, string>)?.[locale] || slugEn;
-      return [
-        { hreflang: locale, href: `/blog/${localizedSlug}` },
-      ];
+      return [{ hreflang: locale, href: `/blog/${localizedSlug}` }];
     });
 
     urls.push({

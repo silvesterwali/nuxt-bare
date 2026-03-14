@@ -17,9 +17,7 @@ const appName = computed(() => config.public.appName || "App");
   <div class="min-h-screen flex bg-default">
     <!-- Brand panel — desktop only -->
     <div
-      class="hidden lg:flex lg:w-5/12 xl:w-2/5 flex-col justify-between p-14
-             bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900
-             text-white relative overflow-hidden"
+      class="hidden lg:flex lg:w-5/12 xl:w-2/5 flex-col justify-between p-14 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 text-white relative overflow-hidden"
     >
       <!-- Decorative blobs -->
       <div
@@ -61,7 +59,9 @@ const appName = computed(() => config.public.appName || "App");
       <div class="flex items-center justify-between px-6 pt-5 lg:justify-end">
         <NuxtLink to="/" class="flex items-center gap-2 lg:hidden">
           <AppLogo class="h-7 w-auto" />
-          <span class="font-bold text-highlighted text-base">{{ appName }}</span>
+          <span class="font-bold text-highlighted text-base">{{
+            appName
+          }}</span>
         </NuxtLink>
         <UButton
           :icon="isDark ? 'i-lucide-moon' : 'i-lucide-sun'"

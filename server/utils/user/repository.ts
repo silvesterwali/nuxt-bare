@@ -94,6 +94,7 @@ export const userRepository = {
 
   async findAll(page: number, perPage: number) {
     return db.query.users.findMany({
+      columns: { password: false },
       limit: perPage,
       offset: (page - 1) * perPage,
       orderBy: (users, { desc }) => [desc(users.createdAt)],

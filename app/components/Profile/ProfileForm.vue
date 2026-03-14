@@ -56,7 +56,9 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
 <template>
   <div>
-    <h2 class="text-base font-display font-semibold text-highlighted mb-5">Profile Information</h2>
+    <h2 class="text-base font-display font-semibold text-highlighted mb-5">
+      Profile Information
+    </h2>
     <UForm
       ref="form"
       :schema="updateProfileSchema"
