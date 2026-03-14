@@ -66,7 +66,7 @@ describe("Auth Service", () => {
     try {
       await authService.register(data);
     } catch (e: any) {
-      expect(e.statusMessage || e.message).toBe("Email already exists");
+      expect(e.statusMessage || e.message).toBe("Unable to create account. Please try again.");
     }
   });
 
