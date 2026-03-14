@@ -68,7 +68,7 @@ describe("Permission Repository", () => {
       testUserId,
       "media",
     );
-    expect(found).not.toBeNull();
+    expect(found).toBeDefined();
     expect(found!.feature).toBe("media");
 
     const notFound = await permissionRepository.findByUserIdAndFeature(
