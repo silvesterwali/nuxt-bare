@@ -2,6 +2,7 @@ import { db, schema } from "./index";
 import { faker } from "@faker-js/faker";
 import { Hash } from "@adonisjs/hash";
 import { Scrypt } from "@adonisjs/hash/drivers/scrypt";
+import { AllPermissions } from "../../shared/utils/permissions";
 
 const scrypt = new Scrypt({
   cost: 16384,
