@@ -15,6 +15,13 @@
       "when": 1773447370181,
       "tag": "0001_worthless_reptil",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1774252938127,
+      "tag": "0002_silent_mister_sinister",
+      "breakpoints": true
     }
   ]
 }

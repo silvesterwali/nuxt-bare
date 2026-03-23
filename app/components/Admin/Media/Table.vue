@@ -66,7 +66,16 @@ const columns: TableColumn<Media>[] = [
               },
               [h("span", { class: "text-sm" }, "📄")],
             ),
-        h("span", { class: "truncate" }, item.originalName),
+        h("div", { class: "min-w-0" }, [
+          h("span", { class: "block truncate font-medium" }, item.originalName),
+          item.folderName
+            ? h(
+                "span",
+                { class: "block truncate text-xs text-muted" },
+                item.folderName,
+              )
+            : null,
+        ]),
       ]);
     },
   },
@@ -78,6 +87,24 @@ const columns: TableColumn<Media>[] = [
     accessorKey: "size",
     header: "Size",
     cell: ({ row }) => formatBytes(row.getValue("size") as number),
+  },
+  {
+    accessorKey: "folderName",
+    header: "Folder",
+    cell: ({ row }) => {
+      const folderName = row.original.folderName;
+      const UBadge = resolveComponent("UBadge");
+
+      return h(
+        UBadge,
+        {
+          color: folderName ? "primary" : "neutral",
+          variant: folderName ? "soft" : "outline",
+          size: "sm",
+        },
+        () => folderName || "Unsorted",
+      );
+    },
   },
   {
     accessorKey: "createdAt",

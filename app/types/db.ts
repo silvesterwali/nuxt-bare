@@ -14,8 +14,13 @@ export type UserWithProfile = User & {
 export type Post = typeof schema.posts.$inferSelect;
 export type NewPost = typeof schema.posts.$inferInsert;
 
+export type MediaFolder = typeof schema.mediaFolders.$inferSelect;
+export type NewMediaFolder = typeof schema.mediaFolders.$inferInsert;
+
 export type Media = typeof schema.media.$inferSelect & {
   thumbnail?: typeof schema.media.$inferSelect | null;
+  folder?: MediaFolder | null;
+  folderName?: string | null;
 };
 export type NewMedia = typeof schema.media.$inferInsert;
 

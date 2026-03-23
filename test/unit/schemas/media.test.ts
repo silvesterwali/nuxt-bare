@@ -32,6 +32,24 @@ describe("Media Schemas", () => {
       expect(result.success).toBe(true);
     });
 
+    it("should treat empty description as undefined", () => {
+      const result = uploadSchema.safeParse({
+        ...validUpload,
+        description: "   ",
+      });
+      expect(result.success).toBe(true);
+      expect(result.data?.description).toBeUndefined();
+    });
+
+    it("should accept optional folder name", () => {
+      const result = uploadSchema.safeParse({
+        ...validUpload,
+        folderName: "Campaign Assets",
+      });
+      expect(result.success).toBe(true);
+      expect(result.data?.folderName).toBe("Campaign Assets");
+    });
+
     it("should reject invalid type", () => {
       const result = uploadSchema.safeParse({
         type: "video",
@@ -85,8 +103,17 @@ describe("Media Schemas", () => {
         privacy: "public",
         page: "2",
         limit: "10",
+        folderName: "campaign",
       });
       expect(result.success).toBe(true);
+    });
+
+    it("should accept folder name filter", () => {
+      const result = MediaQuerySchema.safeParse({
+        folderName: "product photos",
+      });
+      expect(result.success).toBe(true);
+      expect(result.data?.folderName).toBe("product photos");
     });
 
     it("should reject invalid type", () => {

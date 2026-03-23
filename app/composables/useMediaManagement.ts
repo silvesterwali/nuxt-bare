@@ -6,16 +6,19 @@ export function useMediaManagement(options?: {
   initialType?: string;
   initialPage?: number;
   limit?: number;
+  initialFolderName?: string;
 }) {
   const page = ref(options?.initialPage ?? 1);
   const limit = ref(options?.limit ?? 12);
   const type = ref(options?.initialType ?? "image");
+  const folderName = ref(options?.initialFolderName ?? "");
 
   const params = computed(() => ({
     page: page.value,
     limit: limit.value,
     type: type.value || undefined,
     privacy: "public",
+    folderName: folderName.value || undefined,
   }));
 
   const {
@@ -27,7 +30,7 @@ export function useMediaManagement(options?: {
   const mediaItems = computed(() => mediaResponse.value?.data || []);
   const pagination = computed(() => mediaResponse.value?.pagination || null);
 
-  watch(type, () => {
+  watch([type, folderName], () => {
     page.value = 1;
   });
 
@@ -35,6 +38,7 @@ export function useMediaManagement(options?: {
     page,
     limit,
     type,
+    folderName,
     mediaItems,
     pagination,
     isLoading,

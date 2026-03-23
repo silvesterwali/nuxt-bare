@@ -1,8 +1,10 @@
 export default defineAuthHandler(async (event) => {
-  const { type, privacy, page, limit } = await getValidatedQuery(
+  const { type, privacy, page, limit, folderName } = await getValidatedQuery(
     event,
     MediaQuerySchema.parse,
   );
+
+  const { user } = await requireUserSession(event);
 
   const { page: validPage, limit: validLimit } = validatePaginationParams({
     page,
@@ -10,11 +12,15 @@ export default defineAuthHandler(async (event) => {
   });
 
   // Get user media
-  const media = await getUserMedia(type, privacy, validPage, validLimit);
-
-  // In a real implementation we'd also compute totalCount; for now assume returned length
-  const totalCount = media.length;
+  const { data, totalCount } = await getUserMedia(
+    type,
+    privacy,
+    validPage,
+    validLimit,
+    user.id,
+    folderName,
+  );
 
   // Standard pagination response (message can be customized if needed)
-  return createPaginationResponse(media, totalCount, validPage, validLimit);
+  return createPaginationResponse(data, totalCount, validPage, validLimit);
 });

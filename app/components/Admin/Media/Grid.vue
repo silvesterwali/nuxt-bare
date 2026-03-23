@@ -93,6 +93,12 @@ function handleCardClick(item: Media) {
           >
             {{ item.originalName }}
           </p>
+          <p
+            v-if="item.folderName"
+            class="text-[11px] truncate text-primary-600 dark:text-primary-400"
+          >
+            {{ item.folderName }}
+          </p>
           <p class="text-xs text-gray-400">{{ formatBytes(item.size) }}</p>
         </div>
 

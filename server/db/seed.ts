@@ -2,7 +2,10 @@ import { db, schema } from "./index";
 import { faker } from "@faker-js/faker";
 import { Hash } from "@adonisjs/hash";
 import { Scrypt } from "@adonisjs/hash/drivers/scrypt";
-import { AllPermissions } from "../../shared/utils/permissions";
+import {
+  AllPermissions,
+  type FeatureName,
+} from "../../shared/utils/permissions";
 
 const scrypt = new Scrypt({
   cost: 16384,
@@ -173,8 +176,8 @@ async function seed() {
     console.log(`✅ Associated categories/tags with posts`);
 
     // Seed permissions:
-    // - superadmin gets full "users" permissions
-    // - all other users get full "blog", "media", "category" permissions
+    // - superadmin gets all features
+    // - all other users get all features except "users"
     const superAdmin = sampleUsers.find(
       (u) => u.email === "superadmin@gmail.com",
     )!;
@@ -184,16 +187,20 @@ async function seed() {
     const now = new Date();
 
     const allPermissions = AllPermissions();
+    const allFeatures = Object.keys(allPermissions) as FeatureName[];
+    const nonUserFeatures = allFeatures.filter(
+      (feature) => feature !== "users",
+    );
     const permissionsData: (typeof schema.userPermissions.$inferInsert)[] = [
-      {
+      ...allFeatures.map((feature) => ({
         userId: superAdmin.id,
-        feature: "users",
-        permissions: allPermissions.users,
+        feature,
+        permissions: allPermissions[feature],
         createdAt: now,
         updatedAt: now,
-      },
+      })),
       ...otherUsers.flatMap((user) =>
-        (["blog", "media", "category"] as const).map((feature) => ({
+        nonUserFeatures.map((feature) => ({
           userId: user.id,
           feature,
           permissions: allPermissions[feature],
@@ -205,7 +212,7 @@ async function seed() {
 
     await db.insert(schema.userPermissions).values(permissionsData);
     console.log(
-      `✅ Inserted permissions (superadmin: users | others: blog, media, category)`,
+      `✅ Inserted permissions (superadmin: all features | others: all except users)`,
     );
 
     console.log("🎉 Database seeded successfully!");

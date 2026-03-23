@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { page, type, params } = useMediaListState();
+const { page, type, folderName, params } = useMediaListState();
 const { data: mediaResponse, isLoading: pending } =
   useMediaManagementQuery(params);
 
@@ -57,7 +57,11 @@ function confirmDelete() {
       />
     </div>
 
-    <AdminMediaFilterBar v-model:page="page" v-model:type="type" />
+    <AdminMediaFilterBar
+      v-model:page="page"
+      v-model:type="type"
+      v-model:folder-name="folderName"
+    />
 
     <AdminMediaTable
       :media="media"

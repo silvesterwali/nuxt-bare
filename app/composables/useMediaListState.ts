@@ -7,10 +7,15 @@ export const useMediaListState = () => {
 
   const page = ref(Number(route.query.page) || 1);
   const type = ref(route.query.type?.toString() || "");
+  const folderName = ref(route.query.folderName?.toString() || "");
+
+  watch([type, folderName], () => {
+    page.value = 1;
+  });
 
   // Sync URL with state
   watch(
-    [page, type],
+    [page, type, folderName],
     async () => {
       const query = { ...route.query };
 
@@ -24,6 +29,12 @@ export const useMediaListState = () => {
         query.type = type.value;
       } else {
         delete query.type;
+      }
+
+      if (folderName.value) {
+        query.folderName = folderName.value;
+      } else {
+        delete query.folderName;
       }
 
       await router.replace({ query });
@@ -41,6 +52,9 @@ export const useMediaListState = () => {
       if ((newQuery.type?.toString() || "") !== type.value) {
         type.value = newQuery.type?.toString() || "";
       }
+      if ((newQuery.folderName?.toString() || "") !== folderName.value) {
+        folderName.value = newQuery.folderName?.toString() || "";
+      }
     },
   );
 
@@ -49,11 +63,13 @@ export const useMediaListState = () => {
     limit: 10,
     type: type.value || undefined,
     privacy: "public",
+    folderName: folderName.value || undefined,
   }));
 
   return {
     page,
     type,
+    folderName,
     params,
   };
 };

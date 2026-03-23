@@ -7,11 +7,21 @@ const emit = defineEmits<{
   (e: "select", id: number): void;
 }>();
 
-const { mediaItems, pagination, page, isLoading, refetch, type } =
+const { mediaItems, pagination, page, isLoading, refetch, type, folderName } =
   useMediaManagement({
     limit: 20,
     initialType: "image",
   });
+
+const { data: folderResponse, isLoading: foldersLoading } =
+  useMediaFoldersQuery();
+
+const folderItems = computed(() =>
+  (folderResponse.value?.data ?? []).map((folder) => ({
+    label: folder.name,
+    value: folder.name,
+  })),
+);
 
 function close() {
   open.value = false;
@@ -26,6 +36,12 @@ function select(id: number) {
 function goToPage(newPage: number) {
   page.value = newPage;
   refetch();
+}
+
+function resetFilters() {
+  type.value = "image";
+  folderName.value = "";
+  page.value = 1;
 }
 </script>
 
@@ -49,6 +65,32 @@ function goToPage(newPage: number) {
             ]"
             size="sm"
             class="w-full sm:w-auto"
+          />
+          <USelectMenu
+            v-model="folderName"
+            :items="folderItems"
+            :loading="foldersLoading"
+            size="sm"
+            class="w-full sm:w-60"
+            icon="i-lucide-folder-search"
+            value-key="value"
+            label-key="label"
+            placeholder="Folder"
+            searchable
+            clear
+          >
+            <template #empty>
+              <span class="text-sm text-muted">No folders available yet</span>
+            </template>
+          </USelectMenu>
+          <UButton
+            v-if="type !== 'image' || folderName"
+            size="sm"
+            color="neutral"
+            variant="ghost"
+            icon="i-lucide-x"
+            label="Reset"
+            @click="resetFilters"
           />
         </div>
         <UButton

@@ -19,6 +19,7 @@ interface Schema {
   file: File | null;
   alt: string;
   description: string;
+  folderName: string;
 }
 
 const form = ref<Form<Schema>>();
@@ -27,7 +28,31 @@ const state = ref<Schema>({
   file: null,
   alt: "",
   description: "",
+  folderName: "",
 });
+
+const { data: folderResponse, isLoading: foldersLoading } =
+  useMediaFoldersQuery();
+
+const createdFolderItems = ref<string[]>([]);
+
+const availableFolders = computed(() => {
+  const existingFolders = (folderResponse.value?.data ?? []).map(
+    (folder) => folder.name,
+  );
+
+  return [...existingFolders, ...createdFolderItems.value].filter(
+    (folder, index, folders) => folders.indexOf(folder) === index,
+  );
+});
+
+const folderItems = computed(() =>
+  availableFolders.value.map((folder) => ({
+    label: folder,
+    value: folder,
+    description: "Existing folder",
+  })),
+);
 
 const uploadMutation = useMediaUploadMutation();
 const loading = computed(() => uploadMutation.isLoading.value);
@@ -74,6 +99,7 @@ async function submit(event: FormSubmitEvent<Schema>) {
     privacy: "public",
     description: event.data.description,
     alt: event.data.alt,
+    folderName: event.data.folderName,
   };
 
   try {
@@ -101,11 +127,25 @@ function reset() {
   state.value.file = null;
   state.value.alt = "";
   state.value.description = "";
+  state.value.folderName = "";
 }
 
 function close() {
   reset();
   open.value = false;
+}
+
+function onCreateFolder(item: string) {
+  const folderName = item.trim();
+  if (!folderName) {
+    return;
+  }
+
+  if (!availableFolders.value.includes(folderName)) {
+    createdFolderItems.value.push(folderName);
+  }
+
+  state.value.folderName = folderName;
 }
 </script>
 
@@ -140,6 +180,37 @@ function close() {
             placeholder="Optional description"
             class="w-full"
           />
+        </UFormField>
+
+        <UFormField
+          label="Folder"
+          name="folderName"
+          description="Optional. Type a new folder name or pick one that already exists."
+        >
+          <UInputMenu
+            v-model="state.folderName"
+            :items="folderItems"
+            :loading="foldersLoading"
+            placeholder="Campaign Assets / Product Photos / Team Docs"
+            class="w-full"
+            icon="i-lucide-folder-plus"
+            value-key="value"
+            label-key="label"
+            description-key="description"
+            searchable
+            clear
+            create-item="always"
+            @create="onCreateFolder"
+          >
+            <template #create-item-label="{ item }">
+              Create new folder: {{ item }}
+            </template>
+            <template #empty>
+              <span class="text-sm text-muted">
+                No matching folder. Create a new one from your input.
+              </span>
+            </template>
+          </UInputMenu>
         </UFormField>
 
         <div class="flex justify-end gap-2">

@@ -1,12 +1,13 @@
 import { useMutation, useQuery, useQueryCache } from "@pinia/colada";
 import type { Ref } from "vue";
-import type { Media } from "~/types/db";
+import type { Media, MediaFolder } from "~/types/db";
 
 export interface MediaListParams {
   page?: number;
   limit?: number;
   type?: string;
   privacy?: string;
+  folderName?: string;
 }
 
 export function useMediaManagementQuery(params: Ref<MediaListParams>) {
@@ -30,9 +31,18 @@ export function useMediaManagementQuery(params: Ref<MediaListParams>) {
           limit: p.limit,
           type: p.type,
           privacy: p.privacy,
+          folderName: p.folderName,
         },
       });
     },
+  });
+}
+
+export function useMediaFoldersQuery() {
+  return useQuery({
+    key: () => ["admin", "media", "folders"],
+    query: () =>
+      $fetch<{ message: string; data: MediaFolder[] }>("/api/media/folders"),
   });
 }
 
@@ -46,6 +56,7 @@ export function useMediaUploadMutation() {
       privacy: string;
       description?: string;
       alt?: string;
+      folderName?: string;
     }) => {
       const formData = new FormData();
       formData.append("file", payload.file);
@@ -57,6 +68,9 @@ export function useMediaUploadMutation() {
       if (payload.alt) {
         formData.append("alt", payload.alt);
       }
+      if (payload.folderName) {
+        formData.append("folderName", payload.folderName);
+      }
 
       return $fetch<{ message: string; data: Media }>("/api/media/upload", {
         method: "POST",
@@ -65,6 +79,7 @@ export function useMediaUploadMutation() {
     },
     onSuccess: async () => {
       await cache.invalidateQueries({ key: ["admin", "media"] });
+      await cache.invalidateQueries({ key: ["admin", "media", "folders"] });
       useToast().add({
         title: "Success",
         description: "Media uploaded successfully",

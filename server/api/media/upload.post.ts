@@ -14,6 +14,10 @@ export default defineAuthHandler(async (event, { user }) => {
     type: form.get("type") as string as MediaType,
     privacy: form.get("privacy") as string as MediaPrivacy,
     description: (form.get("description") as string | null) ?? "",
+    folderName:
+      (form.get("folderName") as string) ||
+      (form.get("folder") as string) ||
+      "",
     alt:
       (form.get("alt") as string) ||
       (form.get("altText") as string) ||
@@ -22,9 +26,17 @@ export default defineAuthHandler(async (event, { user }) => {
   };
 
   try {
-    const { type, privacy, description } = uploadSchema.parse(payload);
+    const { type, privacy, description, folderName } =
+      uploadSchema.parse(payload);
 
-    const media = await uploadFile(file, user.id, type, privacy, description);
+    const media = await uploadFile(
+      file,
+      user.id,
+      type,
+      privacy,
+      description,
+      folderName,
+    );
 
     if (!media) {
       throw createError({

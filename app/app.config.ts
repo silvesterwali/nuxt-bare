@@ -29,7 +29,7 @@ export default defineAppConfig({
     },
     button: {
       defaultVariants: {
-        size: "xl",
+        size: "md",
       },
     },
     toaster: {

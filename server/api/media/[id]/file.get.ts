@@ -41,12 +41,12 @@ export default defineEventHandler(async (event) => {
   }
 
   // Set appropriate headers
-  setHeader(event, "Content-Type", media.mime_type);
+  setHeader(event, "Content-Type", media.mimeType);
   setHeader(event, "Content-Length", fileBuffer.length);
   setHeader(
     event,
     "Content-Disposition",
-    `inline; filename="${media.original_name}"`,
+    `inline; filename="${media.originalName}"`,
   );
 
   // Cache headers for public media

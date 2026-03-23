@@ -1,4 +1,9 @@
-import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
+import {
+  sqliteTable,
+  integer,
+  text,
+  uniqueIndex,
+} from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
 
 // Users table with authentication fields
@@ -69,11 +74,34 @@ export const passwordResets = sqliteTable("password_resets", {
 });
 
 // Media management
+export const mediaFolders = sqliteTable(
+  "media_folders",
+  {
+    id: integer("id").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    normalizedName: text("normalized_name").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  },
+  (table) => ({
+    userNormalizedNameIdx: uniqueIndex("media_folders_user_name_unique").on(
+      table.userId,
+      table.normalizedName,
+    ),
+  }),
+);
+
 export const media = sqliteTable("media", {
   id: integer("id").primaryKey(),
   userId: integer("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
+  folderId: integer("folder_id").references(() => mediaFolders.id, {
+    onDelete: "set null",
+  }),
   parentId: integer("parent_id").references(() => media.id, {
     onDelete: "cascade",
   }),
@@ -194,6 +222,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   }),
   tokens: many(userTokens),
   posts: many(posts),
+  mediaFolders: many(mediaFolders),
   media: many(media),
   permissions: many(userPermissions),
 }));
@@ -270,6 +299,10 @@ export const mediaRelations = relations(media, ({ one, many }) => ({
     fields: [media.userId],
     references: [users.id],
   }),
+  folder: one(mediaFolders, {
+    fields: [media.folderId],
+    references: [mediaFolders.id],
+  }),
   parent: one(media, {
     fields: [media.parentId],
     references: [media.id],
@@ -277,6 +310,17 @@ export const mediaRelations = relations(media, ({ one, many }) => ({
   thumbnails: many(media, { relationName: "thumbnails" }),
   usage: many(mediaUsage),
 }));
+
+export const mediaFoldersRelations = relations(
+  mediaFolders,
+  ({ one, many }) => ({
+    owner: one(users, {
+      fields: [mediaFolders.userId],
+      references: [users.id],
+    }),
+    media: many(media),
+  }),
+);
 
 export const mediaUsageRelations = relations(mediaUsage, ({ one }) => ({
   media: one(media, {
