@@ -1,12 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import sharp from "sharp";
 
-// The media service imports the DB at module load; stub it since these tests
-// only exercise pure image processing (sharp).
-vi.mock("../../../server/db", () => ({
-  db: {},
-  schema: {},
-}));
+// The media service references useDb/schema via auto-imports;
+// stub them so the module loads without a real DB connection.
+vi.stubGlobal("useDb", {});
+vi.stubGlobal("schema", {});
 
 import {
   processImage,

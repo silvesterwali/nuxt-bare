@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, beforeEach } from "vitest";
 import { eq } from "drizzle-orm";
-import { db, schema } from "../../../server/db";
+import { useDb, schema } from "../../../server/utils/db";
 import { permissionRepository } from "../../../server/utils/permission/service";
 import { clearDb } from "../../helpers";
 
@@ -10,7 +10,7 @@ describe("Permission Repository", () => {
   beforeEach(async () => {
     await clearDb();
 
-    const [user] = await db
+    const [user] = await useDb
       .insert(schema.users)
       .values({
         name: "Perm User",
@@ -114,7 +114,7 @@ describe("Permission Repository", () => {
 
     // Delete permissions first (respects FK), then user
     await permissionRepository.deleteAllByUserId(testUserId);
-    await db.delete(schema.users).where(eq(schema.users.id, testUserId));
+    await useDb.delete(schema.users).where(eq(schema.users.id, testUserId));
 
     const all = await permissionRepository.findByUserId(testUserId);
     expect(all).toHaveLength(0);

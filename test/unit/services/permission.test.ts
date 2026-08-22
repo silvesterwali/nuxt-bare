@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, beforeEach, vi } from "vitest";
 import { eq } from "drizzle-orm";
-import { db, schema } from "../../../server/db";
+import { useDb, schema } from "../../../server/utils/db";
 import { AllPermissions } from "../../../shared/utils/permissions";
 import {
   grantPermissionByEmail,

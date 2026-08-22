@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { db, schema } from "../../../server/db";
+import { useDb, schema } from "../../../server/utils/db";
 import { postRepository } from "../../../server/utils/post/repository";
 import { clearDb } from "../../helpers";
 
@@ -9,7 +9,7 @@ describe("Blog Repository - Multi-language CRUD", () => {
   beforeEach(async () => {
     await clearDb();
 
-    const user = await db
+    const user = await useDb
       .insert(schema.users)
       .values({
         name: "Test Admin",

@@ -22,6 +22,7 @@ export default defineConfig({
           isolate: false,
           fileParallelism: false,
           sequence: { groupOrder: 1 },
+          setupFiles: ["./test/setup-globals.ts"],
         },
       },
       await defineVitestProject({
@@ -60,6 +61,7 @@ export default defineConfig({
           name: "nuxt",
           include: ["test/nuxt/**/*.{test,spec}.ts"],
           environment: "nuxt",
+          setupFiles: ["./test/setup-globals.ts"],
           // All nuxt tests share the same SQLite file — run files sequentially
           fileParallelism: false,
           sequence: { groupOrder: 2 },

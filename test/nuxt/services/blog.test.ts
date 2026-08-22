@@ -1,10 +1,10 @@
 import { expect, it, describe, beforeAll, beforeEach } from "vitest";
-import { db, schema } from "../../../server/db";
+import { useDb, schema } from "../../../server/utils/db";
 import { setupTestDb, clearDb } from "../../helpers";
 
 async function insertUser(email: string) {
   const now = new Date();
-  const [user] = await db
+  const [user] = await useDb
     .insert(schema.users)
     .values({
       name: "Test User",
@@ -24,7 +24,7 @@ async function insertPost(
   status: "draft" | "published" = "published",
 ) {
   const now = new Date();
-  const [post] = await db
+  const [post] = await useDb
     .insert(schema.posts)
     .values({
       userId,
@@ -131,7 +131,7 @@ describe("Post service — localized slug lookup (JSON1)", () => {
     });
 
     const now = new Date();
-    const [category] = await db
+    const [category] = await useDb
       .insert(schema.categories)
       .values({
         name: { en: "News", id: "Berita" },
@@ -142,7 +142,7 @@ describe("Post service — localized slug lookup (JSON1)", () => {
       .returning();
     if (!category) throw new Error("Failed to insert test category");
 
-    await db.insert(schema.postCategories).values({
+    await useDb.insert(schema.postCategories).values({
       postId: post.id,
       categoryId: category.id,
       createdAt: now,
