@@ -1,6 +1,5 @@
 import { eq, and } from "drizzle-orm";
 import { createError } from "h3";
-import { db, schema } from "../../db";
 import { userRepository } from "../user/repository";
 import {
   AllPermissions,
@@ -9,14 +8,14 @@ import {
 
 export const permissionRepository = {
   async findByUserId(userId: number) {
-    return db
+    return useDb
       .select()
       .from(schema.userPermissions)
       .where(eq(schema.userPermissions.userId, userId));
   },
 
   async findByUserIdAndFeature(userId: number, feature: string) {
-    const rows = await db
+    const rows = await useDb
       .select()
       .from(schema.userPermissions)
       .where(
@@ -37,7 +36,7 @@ export const permissionRepository = {
     if (existing) {
       await permissionRepository.deleteByUserIdAndFeature(userId, feature);
     }
-    const [created] = await db
+    const [created] = await useDb
       .insert(schema.userPermissions)
       .values({
         userId,
@@ -51,7 +50,7 @@ export const permissionRepository = {
   },
 
   async deleteByUserIdAndFeature(userId: number, feature: string) {
-    return db
+    return useDb
       .delete(schema.userPermissions)
       .where(
         and(
@@ -62,7 +61,7 @@ export const permissionRepository = {
   },
 
   async deleteAllByUserId(userId: number) {
-    return db
+    return useDb
       .delete(schema.userPermissions)
       .where(eq(schema.userPermissions.userId, userId));
   },

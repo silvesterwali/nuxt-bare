@@ -1,8 +1,6 @@
 import { randomBytes } from "crypto";
 import sharp from "sharp";
 import { and, asc, count, desc, eq, inArray, isNull, like } from "drizzle-orm";
-import { db, schema } from "../../db";
-import type { MediaType, MediaPrivacy } from "~/types/db";
 
 export interface UploadConfig {
   maxSize: number; // in bytes
@@ -270,7 +268,7 @@ export async function createMediaRecord(data: {
   parentId?: number;
 }) {
   const path = `/assets/${data.filename}`;
-  const result = await db
+  const result = await useDb
     .insert(schema.media)
     .values({
       ...data,
@@ -304,7 +302,7 @@ export async function resolveMediaFolder(userId: number, folderName?: string) {
 
   const normalizedName = normalizeMediaFolderName(trimmedFolderName);
   const existingFolder = (
-    await db
+    await useDb
       .select()
       .from(schema.mediaFolders)
       .where(
@@ -322,7 +320,7 @@ export async function resolveMediaFolder(userId: number, folderName?: string) {
       updatedAt: new Date(),
     };
 
-    await db
+    await useDb
       .update(schema.mediaFolders)
       .set(updates)
       .where(eq(schema.mediaFolders.id, existingFolder.id));
@@ -333,7 +331,7 @@ export async function resolveMediaFolder(userId: number, folderName?: string) {
     };
   }
 
-  const [createdFolder] = await db
+  const [createdFolder] = await useDb
     .insert(schema.mediaFolders)
     .values({
       userId,
@@ -473,7 +471,7 @@ export async function uploadFile(
 }
 
 export async function getMediaById(id: number, userId?: number) {
-  const mediaQuery = db
+  const mediaQuery = useDb
     .select({
       media: schema.media,
       folder: schema.mediaFolders,
@@ -506,7 +504,7 @@ export async function getMediaById(id: number, userId?: number) {
   // If this is a thumbnail, include the original media record too
   if (mediaRecord.parentId) {
     const original = (
-      await db
+      await useDb
         .select()
         .from(schema.media)
         .where(eq(schema.media.id, mediaRecord.parentId))
@@ -521,7 +519,7 @@ export async function getMediaById(id: number, userId?: number) {
 
   // Otherwise, include the thumbnail (if any)
   const thumbnail = (
-    await db
+    await useDb
       .select()
       .from(schema.media)
       .where(eq(schema.media.parentId, mediaRecord.id))
@@ -544,7 +542,7 @@ export async function deleteMedia(id: number, userId: number) {
   const thumbnailFilenames =
     media.parentId == null
       ? (
-          await db
+          await useDb
             .select({ filename: schema.media.filename })
             .from(schema.media)
             .where(eq(schema.media.parentId, id))
@@ -552,7 +550,7 @@ export async function deleteMedia(id: number, userId: number) {
       : [];
 
   // Delete from database
-  await db.delete(schema.media).where(eq(schema.media.id, id));
+  await useDb.delete(schema.media).where(eq(schema.media.id, id));
 
   // Delete file from storage
   try {
@@ -607,7 +605,7 @@ export async function getUserMedia(
   }
 
   const whereClause = and(...conditions);
-  const media = await db
+  const media = await useDb
     .select({
       media: schema.media,
       folder: schema.mediaFolders,
@@ -622,7 +620,7 @@ export async function getUserMedia(
     .limit(limit)
     .offset(offset);
 
-  const countResult = await db
+  const countResult = await useDb
     .select({ totalCount: count() })
     .from(schema.media)
     .leftJoin(
@@ -641,7 +639,7 @@ export async function getUserMedia(
     };
   }
 
-  const thumbnails = await db
+  const thumbnails = await useDb
     .select()
     .from(schema.media)
     .where(inArray(schema.media.parentId, mediaIds));
@@ -666,7 +664,7 @@ export async function getUserMedia(
 }
 
 export async function getUserMediaFolders(userId: number) {
-  return db
+  return useDb
     .select()
     .from(schema.mediaFolders)
     .where(eq(schema.mediaFolders.userId, userId))

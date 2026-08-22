@@ -1,6 +1,4 @@
 import { eq, sql } from "drizzle-orm";
-import { db, schema } from "../../db";
-import type { UserTokenType } from "~/types/db";
 
 export const tokenRepository = {
   async create(userId: number, type: UserTokenType, expiresInHours = 24) {
@@ -8,7 +6,7 @@ export const tokenRepository = {
     expiresAt.setHours(expiresAt.getHours() + expiresInHours);
     const token = crypto.randomUUID();
 
-    const createdToken = await db
+    const createdToken = await useDb
       .insert(schema.userTokens)
       .values({
         userId,
@@ -30,7 +28,7 @@ export const tokenRepository = {
   },
 
   async findByToken(token: string, type: UserTokenType) {
-    return db.query.userTokens.findFirst({
+    return useDb.query.userTokens.findFirst({
       where: (userTokens, { eq, and, gt }) =>
         and(
           eq(userTokens.token, token),
@@ -44,6 +42,6 @@ export const tokenRepository = {
   },
 
   async delete(id: number) {
-    return db.delete(schema.userTokens).where(eq(schema.userTokens.id, id));
+    return useDb.delete(schema.userTokens).where(eq(schema.userTokens.id, id));
   },
 };

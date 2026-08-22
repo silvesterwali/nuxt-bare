@@ -1,10 +1,7 @@
 import { eq, and, or, like, desc, sql, count, type SQL } from "drizzle-orm";
-import { db, schema } from "../../db";
-import type { UserRole, User, UserProfile, PaginationParams } from "~/types/db";
 import {
   validatePaginationParams,
   createPaginationResponse,
-  buildCountQuery,
 } from "../common/pagination";
 import { sendAccountDeactivationEmail } from "../common/email";
 
@@ -13,10 +10,6 @@ export interface UserFilters {
   role?: UserRole;
   isActive?: boolean;
   emailVerified?: boolean;
-}
-
-export interface UserWithProfile extends User {
-  profile?: UserProfile;
 }
 
 export async function getUsers(
@@ -53,7 +46,7 @@ export async function getUsers(
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-  const query = db
+  const query = useDb
     .select({
       id: schema.users.id,
       name: schema.users.name,
@@ -83,7 +76,7 @@ export async function getUsers(
     .orderBy(desc(schema.users.createdAt));
 
   // Build count query with join to support search on profile fields
-  const countQuery = db
+  const countQuery = useDb
     .select({ count: count() })
     .from(schema.users)
     .leftJoin(
@@ -105,7 +98,7 @@ export async function getUsers(
 }
 
 export async function getUserById(id: number): Promise<UserWithProfile | null> {
-  const users = await db
+  const users = await useDb
     .select({
       id: schema.users.id,
       name: schema.users.name,
@@ -149,7 +142,7 @@ export async function getUserById(id: number): Promise<UserWithProfile | null> {
 }
 
 export async function updateUserRole(id: number, role: UserRole) {
-  const result = await db
+  const result = await useDb
     .update(schema.users)
     .set({
       role,
@@ -175,7 +168,7 @@ export async function toggleUserActive(id: number) {
 
   const newActiveStatus = !user.isActive;
 
-  const result = await db
+  const result = await useDb
     .update(schema.users)
     .set({
       isActive: newActiveStatus,
@@ -218,7 +211,7 @@ export async function deleteUser(id: number) {
   }
 
   // Delete user (cascade will handle profile and other related records)
-  await db.delete(schema.users).where(eq(schema.users.id, id));
+  await useDb.delete(schema.users).where(eq(schema.users.id, id));
 
   return user;
 }
@@ -227,16 +220,16 @@ export async function getUserStats() {
   // Get total counts
   const [totalUsers, activeUsers, verifiedUsers, adminUsers] =
     await Promise.all([
-      db.select({ count: count() }).from(schema.users),
-      db
+      useDb.select({ count: count() }).from(schema.users),
+      useDb
         .select({ count: count() })
         .from(schema.users)
         .where(eq(schema.users.isActive, true)),
-      db
+      useDb
         .select({ count: count() })
         .from(schema.users)
         .where(eq(schema.users.emailVerified, true)),
-      db
+      useDb
         .select({ count: count() })
         .from(schema.users)
         .where(eq(schema.users.role, "admin")),
@@ -246,7 +239,7 @@ export async function getUserStats() {
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-  const recentRegistrations = await db
+  const recentRegistrations = await useDb
     .select({ count: count() })
     .from(schema.users)
     .where(

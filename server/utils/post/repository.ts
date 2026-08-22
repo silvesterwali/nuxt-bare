@@ -1,9 +1,8 @@
 import { eq, desc } from "drizzle-orm";
-import { db, schema } from "../../db";
 
 export const postRepository = {
   async findAll() {
-    const posts = await db
+    const posts = await useDb
       .select({
         id: schema.posts.id,
         slug: schema.posts.slug,
@@ -26,7 +25,7 @@ export const postRepository = {
   },
 
   async findById(id: number) {
-    const post = await db.query.posts.findFirst({
+    const post = await useDb.query.posts.findFirst({
       where: eq(schema.posts.id, id),
     });
     return post;
@@ -41,7 +40,7 @@ export const postRepository = {
     status?: "draft" | "published" | "archived";
     featuredImageId?: number | null;
   }) {
-    const result = await db
+    const result = await useDb
       .insert(schema.posts)
       .values({
         slug: data.slug,
@@ -70,7 +69,7 @@ export const postRepository = {
       featuredImageId?: number | null;
     },
   ) {
-    const result = await db
+    const result = await useDb
       .update(schema.posts)
       .set({
         ...data,
@@ -83,7 +82,7 @@ export const postRepository = {
   },
 
   async destroy(id: number) {
-    const result = await db
+    const result = await useDb
       .delete(schema.posts)
       .where(eq(schema.posts.id, id))
       .returning();

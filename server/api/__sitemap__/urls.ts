@@ -1,6 +1,5 @@
 import type { SitemapUrlInput } from "#sitemap/types";
 import { desc, eq } from "drizzle-orm";
-import { db, schema } from "../../db";
 
 const LOCALES = ["en", "id"] as const;
 
@@ -12,7 +11,7 @@ const LOCALES = ["en", "id"] as const;
  */
 export default defineSitemapEventHandler(async () => {
   // ── Posts (published only) ─────────────────────────────────────────────────
-  const posts = await db
+  const posts = await useDb
     .select({
       id: schema.posts.id,
       slug: schema.posts.slug,
@@ -21,16 +20,6 @@ export default defineSitemapEventHandler(async () => {
     .from(schema.posts)
     .where(eq(schema.posts.status, "published"))
     .orderBy(desc(schema.posts.updatedAt));
-
-  // ── Categories ─────────────────────────────────────────────────────────────
-  const categories = await db
-    .select({ id: schema.categories.id, slug: schema.categories.slug })
-    .from(schema.categories);
-
-  // ── Tags ───────────────────────────────────────────────────────────────────
-  const tags = await db
-    .select({ id: schema.tags.id, slug: schema.tags.slug })
-    .from(schema.tags);
 
   const urls: SitemapUrlInput[] = [];
 
@@ -54,36 +43,6 @@ export default defineSitemapEventHandler(async () => {
       changefreq: "weekly",
       priority: 0.8,
       alternatives: alternates,
-    });
-  }
-
-  // Category filter pages
-  for (const cat of categories) {
-    const slugEn =
-      (cat.slug as Record<string, string>)?.en ||
-      Object.values(cat.slug as Record<string, string>)[0];
-
-    if (!slugEn) continue;
-
-    urls.push({
-      loc: `/blog?category=${slugEn}`,
-      changefreq: "weekly",
-      priority: 0.5,
-    });
-  }
-
-  // Tag filter pages
-  for (const tag of tags) {
-    const slugEn =
-      (tag.slug as Record<string, string>)?.en ||
-      Object.values(tag.slug as Record<string, string>)[0];
-
-    if (!slugEn) continue;
-
-    urls.push({
-      loc: `/blog?tag=${slugEn}`,
-      changefreq: "weekly",
-      priority: 0.4,
     });
   }
 
