@@ -35,9 +35,7 @@ export function useAdminCrudMutations<
   TItem,
   TCreate extends Record<string, any>,
   TUpdate extends Record<string, any>,
->(
-  config: AdminCrudConfig,
-) {
+>(config: AdminCrudConfig) {
   const cache = useQueryCache();
   const toast = useToast();
 
@@ -52,7 +50,10 @@ export function useAdminCrudMutations<
   const errorToast = (action: string, error: unknown) =>
     toast.add({
       title: "Error",
-      description: getErrorMessage(error, `Failed to ${action} ${config.label.toLowerCase()}`),
+      description: getErrorMessage(
+        error,
+        `Failed to ${action} ${config.label.toLowerCase()}`,
+      ),
       color: "error",
     });
 

@@ -9,7 +9,8 @@
 </template>
 
 <script setup lang="ts">
-const { siteName, absoluteUrl, defaultDescription, breadcrumbSchema } = useSeo();
+const { siteName, absoluteUrl, defaultDescription, breadcrumbSchema } =
+  useSeo();
 const route = useRoute();
 
 const title = "Home";

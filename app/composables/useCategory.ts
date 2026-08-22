@@ -1,11 +1,10 @@
-import type { BlogCategory } from "@/types/blog";
 import { useAdminCrudList, useAdminCrudMutations } from "./useAdminCrud";
 
 export type CreateCategoryInput = {
   name: Record<string, string> | string;
   slug?: Record<string, string> | string;
-  description?: Record<string, string> | string;
-  color?: string;
+  description?: Record<string, string> | string | null;
+  color?: string | null;
 };
 
 const categoryConfig: AdminCrudConfig = {

@@ -26,13 +26,14 @@ export default defineAuthHandler(
       const merged: any = {};
       if (name) {
         merged.name = { ...existing.name, ...normalize(name, language) };
+        // only regenerate the slug when the name actually changes —
+        // otherwise a color-only update would reset the slug to "-"
+        const slug = generateSlugFromInput(name);
+        merged.slug = { ...existing.slug, ...normalize(slug, language) };
       }
 
-      const slug = generateSlugFromInput(name ?? "-");
-
-      merged.slug = { ...existing.slug, ...normalize(slug, language) };
-
       if (color !== undefined) {
+        // `null` explicitly clears the field
         merged.color = color;
       }
 

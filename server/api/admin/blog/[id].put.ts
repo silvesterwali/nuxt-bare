@@ -12,37 +12,39 @@ export default defineAuthHandler(
         throw createError({ statusCode: 404, statusMessage: "Post not found" });
       }
 
-      // Merge with existing translations rather than overwrite entire object
+      // Merge with existing translations rather than overwrite entire object.
+      // Use `!== undefined` so empty strings explicitly clear a field.
       const merged: any = {};
-      if (postData.slug) {
+      if (postData.slug !== undefined) {
         merged.slug = {
           ...existing.slug,
           ...normalize(postData.slug, language),
         };
       }
-      if (postData.title) {
+      if (postData.title !== undefined) {
         merged.title = {
           ...existing.title,
           ...normalize(postData.title, language),
         };
       }
-      if (postData.shortDescription) {
+      if (postData.shortDescription !== undefined) {
         merged.shortDescription = {
           ...existing.shortDescription,
           ...normalize(postData.shortDescription, language),
         };
       }
-      if (postData.content) {
+      if (postData.content !== undefined) {
         merged.content = {
           ...existing.content,
           ...normalize(postData.content, language),
         };
       }
-      if (postData.status) {
+      if (postData.status !== undefined) {
         merged.status = postData.status;
       }
 
       if (featuredImageId !== undefined) {
+        // `null` explicitly removes the featured image
         merged.featuredImageId = featuredImageId;
       }
 

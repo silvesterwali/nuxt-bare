@@ -1,7 +1,8 @@
 <script setup lang="ts">
 const route = useRoute();
 const { locale } = useI18n();
-const { siteName, absoluteUrl, defaultOgImage, mediaUrl, breadcrumbSchema } = useSeo();
+const { siteName, absoluteUrl, defaultOgImage, mediaUrl, breadcrumbSchema } =
+  useSeo();
 
 const slug = computed(() => route.params.slug as string);
 const lang = computed(() => locale.value);
@@ -51,9 +52,7 @@ const articleSchemaGraph = computed(() => {
       image: ogImageUrl.value ? [ogImageUrl.value] : undefined,
       datePublished: new Date(p.createdAt).toISOString(),
       dateModified: new Date(p.updatedAt).toISOString(),
-      author: p.author
-        ? { "@type": "Person", name: p.author.name }
-        : undefined,
+      author: p.author ? { "@type": "Person", name: p.author.name } : undefined,
       articleSection: p.categories?.map((c) => c.name),
       keywords: p.tags?.map((t) => t.name).join(", "),
       inLanguage: p.language || "en",

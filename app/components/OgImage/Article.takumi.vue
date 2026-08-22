@@ -49,7 +49,12 @@ withDefaults(
       <div class="flex flex-col justify-between gap-6 py-4">
         <h1
           class="m-0 text-[42px] leading-[1.1] font-bold"
-          style="display: block; line-clamp: 3; text-overflow: ellipsis; text-wrap: balance"
+          style="
+            display: block;
+            line-clamp: 3;
+            text-overflow: ellipsis;
+            text-wrap: balance;
+          "
         >
           {{ title }}
         </h1>
@@ -92,7 +97,9 @@ withDefaults(
       </div>
     </div>
 
-    <p class="relative m-0 text-[18px] font-bold tracking-[0.3em] uppercase opacity-40">
+    <p
+      class="relative m-0 text-[18px] font-bold tracking-[0.3em] uppercase opacity-40"
+    >
       {{ siteName }}
     </p>
   </div>
