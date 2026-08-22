@@ -1,4 +1,4 @@
-import { db, schema } from "./index";
+import { useDb, schema } from "../utils/db";
 import { faker } from "@faker-js/faker";
 import { Hash } from "@adonisjs/hash";
 import { Scrypt } from "@adonisjs/hash/drivers/scrypt";
@@ -26,14 +26,14 @@ async function seed() {
 
   try {
     // Clear existing data (order matters due to foreign keys)
-    await db.delete(schema.postTags);
-    await db.delete(schema.postCategories);
-    await db.delete(schema.posts);
-    await db.delete(schema.categories);
-    await db.delete(schema.tags);
-    await db.delete(schema.userPermissions);
-    await db.delete(schema.userProfiles);
-    await db.delete(schema.users);
+    await useDb.delete(schema.postTags);
+    await useDb.delete(schema.postCategories);
+    await useDb.delete(schema.posts);
+    await useDb.delete(schema.categories);
+    await useDb.delete(schema.tags);
+    await useDb.delete(schema.userPermissions);
+    await useDb.delete(schema.userProfiles);
+    await useDb.delete(schema.users);
 
     // Generate 10 fake users
     const usersData = await Promise.all(
@@ -62,7 +62,7 @@ async function seed() {
     });
 
     // Insert users
-    const sampleUsers = await db
+    const sampleUsers = await useDb
       .insert(schema.users)
       .values(usersData)
       .returning();
@@ -86,7 +86,7 @@ async function seed() {
       };
     });
 
-    await db.insert(schema.userProfiles).values(profilesData);
+    await useDb.insert(schema.userProfiles).values(profilesData);
     console.log(`✅ Inserted ${profilesData.length} profiles`);
 
     // Insert sample categories
@@ -105,7 +105,7 @@ async function seed() {
       updatedAt: new Date(),
     }));
 
-    const insertedCats = await db
+    const insertedCats = await useDb
       .insert(schema.categories)
       .values(categoriesData)
       .returning();
@@ -126,7 +126,7 @@ async function seed() {
       updatedAt: new Date(),
     }));
 
-    const insertedTags = await db
+    const insertedTags = await useDb
       .insert(schema.tags)
       .values(tagsData)
       .returning();
@@ -147,7 +147,7 @@ async function seed() {
       };
     });
 
-    const insertedPosts = await db
+    const insertedPosts = await useDb
       .insert(schema.posts)
       .values(postsData)
       .returning();
@@ -159,7 +159,7 @@ async function seed() {
       for (let i = 0; i < catCount; i++) {
         // pick random category from insertedCats
         const category = faker.helpers.arrayElement(insertedCats);
-        await db.insert(schema.postCategories).values({
+        await useDb.insert(schema.postCategories).values({
           postId: post.id,
           categoryId: category.id,
           createdAt: new Date(),
@@ -168,7 +168,7 @@ async function seed() {
       const tagCount = faker.number.int({ min: 0, max: 5 });
       for (let i = 0; i < tagCount; i++) {
         const tag = faker.helpers.arrayElement(insertedTags);
-        await db
+        await useDb
           .insert(schema.postTags)
           .values({ postId: post.id, tagId: tag.id, createdAt: new Date() });
       }
@@ -210,7 +210,7 @@ async function seed() {
       ),
     ];
 
-    await db.insert(schema.userPermissions).values(permissionsData);
+    await useDb.insert(schema.userPermissions).values(permissionsData);
     console.log(
       `✅ Inserted permissions (superadmin: all features | others: all except users)`,
     );

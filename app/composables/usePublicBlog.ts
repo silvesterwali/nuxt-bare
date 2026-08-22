@@ -1,9 +1,3 @@
-import type { BlogPost } from "@/types/blog";
-import type {
-  StandardListResponse,
-  StandardSingleResponse,
-} from "@/types/response";
-
 export interface PublicBlogParams {
   page?: number;
   limit?: number;

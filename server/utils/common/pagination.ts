@@ -1,6 +1,5 @@
 import { count, SQL } from "drizzle-orm";
 import { PAGINATION_CONFIG } from "../../../shared/config/pagination";
-import type { StandardListResponse } from "~~/shared/types/response";
 
 export function validatePaginationParams(query: Record<string, any>): {
   page: number;

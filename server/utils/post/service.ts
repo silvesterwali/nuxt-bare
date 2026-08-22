@@ -1,6 +1,5 @@
 import { desc, eq, and, inArray, sql } from "drizzle-orm";
 import type { AnySQLiteColumn } from "drizzle-orm/sqlite-core";
-import { db, schema } from "../../db";
 import { localizeField } from "../common/localization";
 import {
   createPaginationResponse,
@@ -17,11 +16,6 @@ export interface PublicPostFilters {
   language?: string;
   categorySlug?: string;
   tagSlug?: string;
-}
-
-export interface PaginationParams {
-  page?: number;
-  limit?: number;
 }
 
 /** Localize a translation record with the standard fallback chain. */
@@ -83,7 +77,7 @@ function localizedSlugMatches(
  * regardless of the media's privacy setting.
  */
 async function getMediaForPost(mediaId: number) {
-  const [media] = await db
+  const [media] = await useDb
     .select({
       id: schema.media.id,
       filename: schema.media.filename,
@@ -99,7 +93,7 @@ async function getMediaForPost(mediaId: number) {
 
   if (!media) return null;
 
-  const [thumbnail] = await db
+  const [thumbnail] = await useDb
     .select({ id: schema.media.id, full_path: schema.media.full_path })
     .from(schema.media)
     .where(eq(schema.media.parentId, mediaId))
@@ -113,7 +107,7 @@ async function getMediaForPosts(mediaIds: number[]) {
   if (mediaIds.length === 0)
     return new Map<number, Awaited<ReturnType<typeof getMediaForPost>>>();
 
-  const media = await db
+  const media = await useDb
     .select({
       id: schema.media.id,
       filename: schema.media.filename,
@@ -128,7 +122,7 @@ async function getMediaForPosts(mediaIds: number[]) {
 
   if (media.length === 0) return new Map();
 
-  const thumbnails = await db
+  const thumbnails = await useDb
     .select({
       id: schema.media.id,
       parentId: schema.media.parentId,
@@ -160,7 +154,7 @@ async function getLocalizedCategoriesForPosts(
   const result = new Map<number, any[]>();
   if (postIds.length === 0) return result;
 
-  const rows = await db
+  const rows = await useDb
     .select({
       postId: schema.postCategories.postId,
       id: schema.categories.id,
@@ -202,7 +196,7 @@ async function getLocalizedTagsForPosts(
   const result = new Map<number, any[]>();
   if (postIds.length === 0) return result;
 
-  const rows = await db
+  const rows = await useDb
     .select({
       postId: schema.postTags.postId,
       id: schema.tags.id,
@@ -244,7 +238,7 @@ export async function getLocalizedTags(postId: number, language: string) {
  */
 export async function addCategoryToPost(postId: number, categoryId: number) {
   // Check if already exists to avoid duplicates
-  const existing = await db
+  const existing = await useDb
     .select()
     .from(schema.postCategories)
     .where(
@@ -255,7 +249,7 @@ export async function addCategoryToPost(postId: number, categoryId: number) {
     );
 
   if (existing.length === 0) {
-    return db
+    return useDb
       .insert(schema.postCategories)
       .values({
         postId,
@@ -274,7 +268,7 @@ export async function removeCategoryFromPost(
   postId: number,
   categoryId: number,
 ) {
-  return db
+  return useDb
     .delete(schema.postCategories)
     .where(
       and(
@@ -293,13 +287,13 @@ export async function updatePostCategories(
   categoryIds: number[],
 ) {
   // Delete existing categories
-  await db
+  await useDb
     .delete(schema.postCategories)
     .where(eq(schema.postCategories.postId, postId));
 
   // Add new categories
   if (categoryIds.length > 0) {
-    return db
+    return useDb
       .insert(schema.postCategories)
       .values(
         categoryIds.map((categoryId) => ({
@@ -317,7 +311,7 @@ export async function updatePostCategories(
  */
 export async function addTagToPost(postId: number, tagId: number) {
   // Check if already exists to avoid duplicates
-  const existing = await db
+  const existing = await useDb
     .select()
     .from(schema.postTags)
     .where(
@@ -325,7 +319,7 @@ export async function addTagToPost(postId: number, tagId: number) {
     );
 
   if (existing.length === 0) {
-    return db
+    return useDb
       .insert(schema.postTags)
       .values({
         postId,
@@ -341,7 +335,7 @@ export async function addTagToPost(postId: number, tagId: number) {
  * Remove a tag from a post
  */
 export async function removeTagFromPost(postId: number, tagId: number) {
-  return db
+  return useDb
     .delete(schema.postTags)
     .where(
       and(eq(schema.postTags.postId, postId), eq(schema.postTags.tagId, tagId)),
@@ -354,11 +348,11 @@ export async function removeTagFromPost(postId: number, tagId: number) {
  */
 export async function updatePostTags(postId: number, tagIds: number[]) {
   // Delete existing tags
-  await db.delete(schema.postTags).where(eq(schema.postTags.postId, postId));
+  await useDb.delete(schema.postTags).where(eq(schema.postTags.postId, postId));
 
   // Add new tags
   if (tagIds.length > 0) {
-    return db
+    return useDb
       .insert(schema.postTags)
       .values(
         tagIds.map((tagId) => ({
@@ -379,7 +373,7 @@ export async function getPosts(
   const language = filters.language || "en";
 
   // Fetch all posts (localization happens before filtering/paginating)
-  const allPosts = await db
+  const allPosts = await useDb
     .select({
       id: schema.posts.id,
       slug: schema.posts.slug,
@@ -456,7 +450,7 @@ export async function getPosts(
 }
 
 export async function getPostById(postId: number, language: string = "en") {
-  const post = await db
+  const post = await useDb
     .select({
       id: schema.posts.id,
       slug: schema.posts.slug,
@@ -520,7 +514,7 @@ export async function getPublicPosts(
   const { page, limit } = validatePaginationParams(paginationParams || {});
   const language = filters.language || "en";
 
-  const scan = await db
+  const scan = await useDb
     .select({
       id: schema.posts.id,
       slug: schema.posts.slug,
@@ -581,7 +575,7 @@ export async function getPublicPosts(
   }
 
   // Fetch only the requested page with the author join
-  const pagePosts = await db
+  const pagePosts = await useDb
     .select({
       id: schema.posts.id,
       slug: schema.posts.slug,
@@ -637,7 +631,7 @@ async function getPostIdsForCategorySlug(
   categorySlug: string,
   language: string,
 ): Promise<Set<number>> {
-  const [match] = await db
+  const [match] = await useDb
     .select({ id: schema.categories.id })
     .from(schema.categories)
     .where(
@@ -650,7 +644,7 @@ async function getPostIdsForCategorySlug(
 
   if (!match) return new Set();
 
-  const rows = await db
+  const rows = await useDb
     .select({ postId: schema.postCategories.postId })
     .from(schema.postCategories)
     .where(eq(schema.postCategories.categoryId, match.id));
@@ -663,7 +657,7 @@ async function getPostIdsForTagSlug(
   tagSlug: string,
   language: string,
 ): Promise<Set<number>> {
-  const [match] = await db
+  const [match] = await useDb
     .select({ id: schema.tags.id })
     .from(schema.tags)
     .where(
@@ -676,7 +670,7 @@ async function getPostIdsForTagSlug(
 
   if (!match) return new Set();
 
-  const rows = await db
+  const rows = await useDb
     .select({ postId: schema.postTags.postId })
     .from(schema.postTags)
     .where(eq(schema.postTags.tagId, match.id));
@@ -694,7 +688,7 @@ export async function getPublicPostBySlug(
   slug: string,
   language: string = "en",
 ) {
-  const [match] = await db
+  const [match] = await useDb
     .select({ id: schema.posts.id })
     .from(schema.posts)
     .where(

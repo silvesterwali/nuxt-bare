@@ -1,5 +1,3 @@
-import type { UserRole } from "~/types/db";
-import type { FeatureName } from "~~/shared/utils/permissions";
 
 export default defineAuthHandler(
   async (event) => {

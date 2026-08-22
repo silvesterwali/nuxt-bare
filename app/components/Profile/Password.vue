@@ -12,6 +12,9 @@ type Schema = ChangePasswordInput;
 
 type UFormInstance = Form<any>;
 const form: Ref<UFormInstance | null> = ref(null);
+const showCurrentPassword = ref(false);
+const showNewPassword = ref(false);
+const showConfirmPassword = ref(false);
 
 const state = reactive({
   currentPassword: "",
@@ -65,21 +68,61 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         <UFormField label="Current Password" name="currentPassword">
           <UInput
             v-model="state.currentPassword"
-            type="password"
+            :type="showCurrentPassword ? 'text' : 'password'"
+            placeholder="Enter current password"
             class="w-full"
-          />
+          >
+            <template #trailing>
+              <UButton
+                color="neutral"
+                variant="ghost"
+                :icon="showCurrentPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                size="sm"
+                aria-label="Toggle password visibility"
+                @click="showCurrentPassword = !showCurrentPassword"
+              />
+            </template>
+          </UInput>
         </UFormField>
 
         <UFormField label="New Password" name="newPassword">
-          <UInput v-model="state.newPassword" type="password" class="w-full" />
+          <UInput
+            v-model="state.newPassword"
+            :type="showNewPassword ? 'text' : 'password'"
+            placeholder="Enter new password"
+            class="w-full"
+          >
+            <template #trailing>
+              <UButton
+                color="neutral"
+                variant="ghost"
+                :icon="showNewPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                size="sm"
+                aria-label="Toggle password visibility"
+                @click="showNewPassword = !showNewPassword"
+              />
+            </template>
+          </UInput>
         </UFormField>
 
         <UFormField label="Confirm New Password" name="confirmPassword">
           <UInput
             v-model="state.confirmPassword"
-            type="password"
+            :type="showConfirmPassword ? 'text' : 'password'"
+            placeholder="Re-enter new password"
             class="w-full"
-          />
+          >
+            <template #trailing>
+              <UButton
+                color="neutral"
+                variant="ghost"
+                :icon="showConfirmPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                size="sm"
+                aria-label="Toggle password visibility"
+                @click="showConfirmPassword = !showConfirmPassword"
+              />
+            </template>
+          </UInput>
         </UFormField>
 
         <div class="flex justify-end">

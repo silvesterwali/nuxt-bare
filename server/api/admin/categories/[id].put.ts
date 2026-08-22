@@ -26,11 +26,15 @@ export default defineAuthHandler(
       if (data.slug) {
         merged.slug = { ...existing.slug, ...normalize(data.slug, language) };
       }
-      if (data.description) {
-        merged.description = {
-          ...existing.description,
-          ...normalize(data.description, language),
-        };
+      if (data.description !== undefined) {
+        // `null` explicitly clears the field
+        merged.description =
+          data.description === null
+            ? null
+            : {
+                ...existing.description,
+                ...normalize(data.description, language),
+              };
       }
       if (data.color !== undefined) {
         merged.color = data.color;

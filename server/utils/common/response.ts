@@ -1,8 +1,3 @@
-import type {
-  StandardSingleResponse,
-  StandardListResponse,
-} from "~~/shared/types/response";
-
 /**
  * Build a standardized single-object response
  */

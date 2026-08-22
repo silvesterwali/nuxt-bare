@@ -1,10 +1,8 @@
 import { eq, sql } from "drizzle-orm";
-import { db, schema } from "../../db";
-import type { UserRole } from "~/types/db";
 
 export const userRepository = {
   async findByEmail(email: string) {
-    const users = await db
+    const users = await useDb
       .select()
       .from(schema.users)
       .where(eq(schema.users.email, email))
@@ -13,7 +11,7 @@ export const userRepository = {
   },
 
   async findById(id: number) {
-    const users = await db
+    const users = await useDb
       .select()
       .from(schema.users)
       .where(eq(schema.users.id, id))
@@ -24,7 +22,7 @@ export const userRepository = {
   },
 
   async findProfileByUserId(userId: number) {
-    const profiles = await db
+    const profiles = await useDb
       .select()
       .from(schema.userProfiles)
       .where(eq(schema.userProfiles.userId, userId))
@@ -33,11 +31,11 @@ export const userRepository = {
   },
 
   async createProfile(data: typeof schema.userProfiles.$inferInsert) {
-    return db.insert(schema.userProfiles).values(data).returning();
+    return useDb.insert(schema.userProfiles).values(data).returning();
   },
 
   async findByIdWithProfile(id: number) {
-    const users = await db
+    const users = await useDb
       .select({
         id: schema.users.id,
         name: schema.users.name,
@@ -75,7 +73,7 @@ export const userRepository = {
     password?: string;
     role?: UserRole;
   }) {
-    const result = await db
+    const result = await useDb
       .insert(schema.users)
       .values({
         name: data.name,
@@ -92,7 +90,7 @@ export const userRepository = {
   },
 
   async findAll(page: number, perPage: number) {
-    return db.query.users.findMany({
+    return useDb.query.users.findMany({
       columns: { password: false },
       limit: perPage,
       offset: (page - 1) * perPage,
@@ -101,14 +99,14 @@ export const userRepository = {
   },
 
   async count() {
-    const result = await db
+    const result = await useDb
       .select({ count: sql<number>`count(*)` })
       .from(schema.users);
     return result[0]?.count;
   },
 
   async update(id: number, data: Partial<typeof schema.users.$inferInsert>) {
-    const result = await db
+    const result = await useDb
       .update(schema.users)
       .set({ ...data, updatedAt: new Date() })
       .where(eq(schema.users.id, id))
@@ -120,7 +118,7 @@ export const userRepository = {
     userId: number,
     data: Partial<typeof schema.userProfiles.$inferInsert>,
   ) {
-    const result = await db
+    const result = await useDb
       .update(schema.userProfiles)
       .set({ ...data, updatedAt: new Date() })
       .where(eq(schema.userProfiles.userId, userId))

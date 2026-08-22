@@ -1,22 +1,21 @@
 import { eq } from "drizzle-orm";
-import { db, schema } from "../../db";
 
 export interface CreateCategoryInput {
   name: Record<string, string>;
   slug: Record<string, string>;
-  description?: Record<string, string>;
-  color?: string;
+  description?: Record<string, string> | null;
+  color?: string | null;
 }
 
 export interface UpdateCategoryInput {
   name?: Record<string, string>;
   slug?: Record<string, string>;
-  description?: Record<string, string>;
-  color?: string;
+  description?: Record<string, string> | null;
+  color?: string | null;
 }
 
 export async function getAllCategories(language = "en") {
-  const allCategories = await db.query.categories.findMany({
+  const allCategories = await useDb.query.categories.findMany({
     orderBy: (categories, { asc }) => asc(categories.id),
   });
 
@@ -45,13 +44,13 @@ export async function getAllCategories(language = "en") {
  * Get raw category data with translation objects (for update operations)
  */
 export async function getCategoryByIdRaw(id: number) {
-  return db.query.categories.findFirst({
+  return useDb.query.categories.findFirst({
     where: eq(schema.categories.id, id),
   });
 }
 
 export async function getCategoryById(id: number, language = "en") {
-  const cat = await db.query.categories.findFirst({
+  const cat = await useDb.query.categories.findFirst({
     where: eq(schema.categories.id, id),
   });
 
@@ -81,7 +80,7 @@ export async function getCategoryById(id: number, language = "en") {
 
 export async function createCategory(data: CreateCategoryInput) {
   const now = new Date();
-  return db
+  return useDb
     .insert(schema.categories)
     .values({
       name: data.name,
@@ -96,7 +95,7 @@ export async function createCategory(data: CreateCategoryInput) {
 
 export async function updateCategory(id: number, data: UpdateCategoryInput) {
   const now = new Date();
-  return db
+  return useDb
     .update(schema.categories)
     .set({
       ...data,
@@ -107,7 +106,7 @@ export async function updateCategory(id: number, data: UpdateCategoryInput) {
 }
 
 export async function deleteCategory(id: number) {
-  return db
+  return useDb
     .delete(schema.categories)
     .where(eq(schema.categories.id, id))
     .returning();

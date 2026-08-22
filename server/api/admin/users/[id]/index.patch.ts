@@ -1,6 +1,4 @@
 import { eq } from "drizzle-orm";
-import { db, schema } from "../../../../db";
-import type { UserRole } from "~/types/db";
 
 export default defineAuthHandler(
   async (event) => {
@@ -17,7 +15,7 @@ export default defineAuthHandler(
       // Check if profile exists
       const userData = await getUserById(id);
       if (userData && userData.profile) {
-        await db
+        await useDb
           .update(schema.userProfiles)
           .set({
             ...(body.firstName ? { firstName: body.firstName } : {}),

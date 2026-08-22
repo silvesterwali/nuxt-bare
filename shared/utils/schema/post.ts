@@ -11,7 +11,7 @@ export const CreatePostBodySchema = z.object({
     .default("draft"),
   categoryIds: z.array(z.number().int().positive()).optional(),
   tagIds: z.array(z.number().int().positive()).optional(),
-  featuredImageId: z.number().int().positive().optional(),
+  featuredImageId: z.number().int().positive().nullable().optional(),
 });
 
 export const UpdatePostBodySchema = z.object({
@@ -22,7 +22,8 @@ export const UpdatePostBodySchema = z.object({
   status: z.enum(["draft", "published", "archived"]).optional(),
   categoryIds: z.array(z.number().int().positive()).optional(),
   tagIds: z.array(z.number().int().positive()).optional(),
-  featuredImageId: z.number().int().positive().optional(),
+  // `null` explicitly removes the featured image; a missing key leaves it unchanged
+  featuredImageId: z.number().int().positive().nullable().optional(),
 });
 
 export const PublicCreatePostBodySchema = z.object({

@@ -57,7 +57,7 @@ const {
       </UFormField>
 
       <!-- Short Description -->
-      <UFormField label="Short Description," name="shortDescription">
+      <UFormField label="Short Description" name="shortDescription">
         <UTextarea
           v-model="form.shortDescription"
           placeholder="Brief summary or excerpt for previews"
@@ -82,6 +82,10 @@ const {
       <!-- Featured Image -->
       <UFormField label="Featured Image" name="featuredImageId">
         <CommonMediaPicker v-model:media-id="form.featuredImageId" />
+        <template #description>
+          Recommended aspect ratio is <strong>16:9</strong> for optimal display in
+          blog listings and social media previews.
+        </template>
       </UFormField>
 
       <!-- Categories -->
@@ -136,7 +140,7 @@ const {
 
       <!-- Submit Button -->
       <div
-        class="flex justify-end gap-2 pt-6 border-t border-gray-200 dark:border-gray-700"
+        class="flex justify-between w-full pt-6 border-t border-gray-200 dark:border-gray-700"
       >
         <UButton
           type="button"

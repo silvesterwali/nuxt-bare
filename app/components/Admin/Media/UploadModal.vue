@@ -256,7 +256,7 @@ function onCreateFolder(item: string) {
           </UInputMenu>
         </UFormField>
 
-        <div class="flex justify-end gap-2">
+        <div class="flex justify-between w-full">
           <UButton
             color="neutral"
             variant="ghost"

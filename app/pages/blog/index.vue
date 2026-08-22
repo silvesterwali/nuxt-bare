@@ -116,7 +116,10 @@ useHead(() => ({
             { name: "Blog", path: "/blog" },
           ]),
           itemListSchema(
-            posts.value.map((post) => ({ name: post.title, path: `/blog/${post.slug}` })),
+            posts.value.map((post) => ({
+              name: post.title,
+              path: `/blog/${post.slug}`,
+            })),
             { name: "Recent articles" },
           ),
         ],

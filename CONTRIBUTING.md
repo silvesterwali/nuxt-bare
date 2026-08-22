@@ -68,7 +68,7 @@ If your project only needs one language, strip it in a few minutes:
    and the locale switcher in `Dashboard/Navbar.vue`, then drop the
    `useI18n()` calls from the admin list components.
 3. In `server/db/schema.ts`, change the JSON columns (`text(..., { mode:
-   "json" })` on category/tag `name`/`slug`/`description` and post
+"json" })` on category/tag `name`/`slug`/`description` and post
    `title`/`slug`/`short_description`/`content`) to plain `text(...)`, then
    run `pnpm db:generate && pnpm db:push`.
 4. Simplify the input types in `useCategory.ts` / `useTag.ts` and the blog

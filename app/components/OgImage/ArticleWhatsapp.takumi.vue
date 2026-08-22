@@ -46,7 +46,12 @@ withDefaults(
     <div class="relative space-y-5">
       <h1
         class="m-0 text-[40px] leading-[1.1] font-bold"
-        style="display: block; line-clamp: 3; text-overflow: ellipsis; text-wrap: balance"
+        style="
+          display: block;
+          line-clamp: 3;
+          text-overflow: ellipsis;
+          text-wrap: balance;
+        "
       >
         {{ title }}
       </h1>

@@ -1,6 +1,4 @@
 import { useQuery, useMutation, useQueryCache } from "@pinia/colada";
-import type { StandardListResponse } from "@/types/response";
-import type { BlogListParams, BlogPost } from "@/types/blog";
 
 export const usePostsQuery = (params: Ref<BlogListParams>) => {
   return useQuery({
@@ -70,6 +68,7 @@ export const useBlogForm = (
 ) => {
   const { transformToIssue } = useFormErrors();
   const toast = useToast();
+  const queryCache = useQueryCache();
 
   // Fetch categories and tags for form selectors
   const { data: categories } = useCategoriesQuery();
@@ -79,7 +78,9 @@ export const useBlogForm = (
   const createMutation = useMutation({
     mutation: (payload: BlogFormData) =>
       $fetch("/api/admin/blog", { method: "POST", body: payload }),
-    onSuccess: () => {
+    onSuccess: async () => {
+      // invalidate cached post queries so lists show the new post
+      await queryCache.invalidateQueries({ key: ["posts"] });
       toast.add({
         title: "Success",
         description: "Blog post created successfully",
@@ -92,7 +93,11 @@ export const useBlogForm = (
   const updateMutation = useMutation({
     mutation: ({ id, payload }: { id: number; payload: BlogFormData }) =>
       $fetch(`/api/admin/blog/${id}`, { method: "PUT", body: payload }),
-    onSuccess: () => {
+    onSuccess: async (_data, { id }) => {
+      // invalidate cached post queries (list + detail) so stale data
+      // isn't shown when navigating back or re-opening the edit page
+      await queryCache.invalidateQueries({ key: ["posts"] });
+      await queryCache.invalidateQueries({ key: ["posts", id] });
       toast.add({
         title: "Success",
         description: "Blog post updated successfully",

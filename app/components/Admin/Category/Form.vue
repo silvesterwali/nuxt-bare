@@ -57,10 +57,13 @@ async function onSubmit() {
   }
 
   try {
+    // send `null` (not `undefined`) for cleared optional fields so the
+    // backend treats them as an explicit clear instead of "not modified"
+    // (JSON.stringify drops undefined keys from the payload)
     const data = {
       name: state.name,
-      description: state.description || undefined,
-      color: state.color || undefined,
+      description: state.description || null,
+      color: state.color || null,
     };
 
     if (props.categoryId) {
@@ -144,7 +147,7 @@ function close() {
             </div>
           </UFormField>
 
-          <div class="flex justify-end gap-2 pt-4">
+          <div class="flex justify-between w-full pt-4">
             <UButton
               color="neutral"
               variant="ghost"

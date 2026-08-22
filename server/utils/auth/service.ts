@@ -1,5 +1,4 @@
 // server/utils/auth.service.ts
-import type { UserRole } from "~/types/db";
 
 export const authService = {
   async register(data: {

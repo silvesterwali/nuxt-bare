@@ -1,10 +1,5 @@
 import { useMutation, useQuery, useQueryCache } from "@pinia/colada";
 import type { Ref } from "vue";
-import type { Media, MediaFolder } from "~/types/db";
-import type {
-  StandardListResponse,
-  StandardSingleResponse,
-} from "~/types/response";
 
 export interface MediaListParams {
   page?: number;

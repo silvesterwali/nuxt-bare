@@ -1,10 +1,9 @@
-import type { BlogTag } from "@/types/blog";
 import { useAdminCrudList, useAdminCrudMutations } from "./useAdminCrud";
 
 export type CreateTagInput = {
   name: Record<string, string> | string;
   slug?: Record<string, string> | string;
-  color?: string;
+  color?: string | null;
 };
 
 const tagConfig: AdminCrudConfig = {
@@ -18,19 +17,25 @@ export function useTagsQuery() {
 }
 
 export function useTagCreateMutation() {
-  return useAdminCrudMutations<BlogTag, CreateTagInput, Partial<CreateTagInput>>(
-    tagConfig,
-  ).create;
+  return useAdminCrudMutations<
+    BlogTag,
+    CreateTagInput,
+    Partial<CreateTagInput>
+  >(tagConfig).create;
 }
 
 export function useTagUpdateMutation() {
-  return useAdminCrudMutations<BlogTag, CreateTagInput, Partial<CreateTagInput>>(
-    tagConfig,
-  ).update;
+  return useAdminCrudMutations<
+    BlogTag,
+    CreateTagInput,
+    Partial<CreateTagInput>
+  >(tagConfig).update;
 }
 
 export function useTagDeleteMutation() {
-  return useAdminCrudMutations<BlogTag, CreateTagInput, Partial<CreateTagInput>>(
-    tagConfig,
-  ).remove;
+  return useAdminCrudMutations<
+    BlogTag,
+    CreateTagInput,
+    Partial<CreateTagInput>
+  >(tagConfig).remove;
 }

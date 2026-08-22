@@ -254,18 +254,16 @@ vi.mock("drizzle-orm", () => ({
   like: (column: string, value: unknown) => ({ type: "eq", column, value }),
 }));
 
-vi.mock("../../../server/db", () => ({
-  db: dbMock,
-  schema: {
-    media: mediaColumns,
-    mediaFolders: mediaFoldersColumns,
-  },
-}));
-
 describe("Media Service", () => {
   beforeEach(() => {
     vi.resetModules();
     removeItemMock.mockReset();
+    // Stub the auto-imported globals so the media service uses our mock DB
+    vi.stubGlobal("useDb", dbMock);
+    vi.stubGlobal("schema", {
+      media: mediaColumns,
+      mediaFolders: mediaFoldersColumns,
+    });
     vi.stubGlobal("useStorage", () => ({
       removeItem: removeItemMock,
       setItemRaw: vi.fn(),

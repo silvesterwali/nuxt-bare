@@ -37,7 +37,10 @@ export default defineNuxtConfig({
   },
 
   site: {
-    url: process.env.NUXT_PUBLIC_SITE_URL || process.env.NUXT_APP_URL || "http://localhost:3000",
+    url:
+      process.env.NUXT_PUBLIC_SITE_URL ||
+      process.env.NUXT_APP_URL ||
+      "http://localhost:3000",
     name: process.env.NUXT_APP_NAME || "Nuxt Bare",
     defaultLocale: "en",
   },
@@ -91,7 +94,10 @@ export default defineNuxtConfig({
     // Public keys (available on both server and client-side)
     public: {
       appName: process.env.NUXT_APP_NAME || "Nuxt App",
-      appUrl: process.env.NUXT_PUBLIC_SITE_URL || process.env.NUXT_APP_URL || "http://localhost:3000",
+      appUrl:
+        process.env.NUXT_PUBLIC_SITE_URL ||
+        process.env.NUXT_APP_URL ||
+        "http://localhost:3000",
       defaultOgImage: "/og-default.png",
     },
   },
