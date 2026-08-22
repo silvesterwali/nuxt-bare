@@ -57,10 +57,10 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     >
       <div class="grid grid-cols-2 gap-4">
         <UFormField label="First Name" name="firstName">
-          <UInput v-model="state.firstName" class="w-full" />
+          <UInput v-model="state.firstName" placeholder="Enter first name" class="w-full" />
         </UFormField>
         <UFormField label="Last Name" name="lastName">
-          <UInput v-model="state.lastName" class="w-full" />
+          <UInput v-model="state.lastName" placeholder="Enter last name" class="w-full" />
         </UFormField>
       </div>
 
@@ -69,7 +69,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       </UFormField>
 
       <UFormField label="Bio" name="bio">
-        <UTextarea v-model="state.bio" class="w-full" />
+        <UTextarea v-model="state.bio" placeholder="Tell us about yourself" class="w-full" />
       </UFormField>
 
       <div class="flex justify-end">

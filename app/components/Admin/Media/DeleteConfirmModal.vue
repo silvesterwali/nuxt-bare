@@ -20,7 +20,7 @@ const emit = defineEmits<{
         Are you sure you want to delete this media item? This action cannot be
         undone.
       </p>
-      <div class="flex justify-end gap-2">
+      <div class="flex justify-between w-full">
         <UButton
           color="neutral"
           variant="ghost"

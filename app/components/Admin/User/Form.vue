@@ -5,7 +5,6 @@ import type {
   CreateUserInput,
   EditUserInput,
 } from "~~/shared/utils/schema/user";
-import type { UserRole } from "~/types/db";
 
 interface Props {
   userId?: string | null;
@@ -49,6 +48,7 @@ type Schema = CreateUserInput | EditUserInput;
 const roles = ["admin", "user", "moderator"];
 
 const form: Ref<Form<any> | null> = ref(null);
+const showPassword = ref(false);
 
 const state = reactive({
   email: "",
@@ -164,6 +164,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
               <UInput
                 v-model="state.email"
                 type="email"
+                placeholder="user@example.com"
                 :disabled="isEditMode"
                 class="w-full"
               />
@@ -171,10 +172,10 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
             <div class="grid grid-cols-2 gap-4">
               <UFormField label="First Name" name="firstName">
-                <UInput v-model="state.firstName" class="w-full" />
+                <UInput v-model="state.firstName" placeholder="Enter first name" class="w-full" />
               </UFormField>
               <UFormField label="Last Name" name="lastName">
-                <UInput v-model="state.lastName" class="w-full" />
+                <UInput v-model="state.lastName" placeholder="Enter last name" class="w-full" />
               </UFormField>
             </div>
 
@@ -210,24 +211,35 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         @submit="onSubmit"
       >
         <UFormField label="Email" name="email">
-          <UInput v-model="state.email" type="email" class="w-full" />
+          <UInput v-model="state.email" type="email" placeholder="user@example.com" class="w-full" />
         </UFormField>
 
         <UFormField label="Password" name="password">
           <UInput
             v-model="state.password"
-            type="password"
+            :type="showPassword ? 'text' : 'password'"
             placeholder="Minimum 8 characters"
             class="w-full"
-          />
+          >
+            <template #trailing>
+              <UButton
+                color="neutral"
+                variant="ghost"
+                :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                size="sm"
+                aria-label="Toggle password visibility"
+                @click="showPassword = !showPassword"
+              />
+            </template>
+          </UInput>
         </UFormField>
 
         <div class="grid grid-cols-2 gap-4">
           <UFormField label="First Name" name="firstName">
-            <UInput v-model="state.firstName" class="w-full" />
+            <UInput v-model="state.firstName" placeholder="Enter first name" class="w-full" />
           </UFormField>
           <UFormField label="Last Name" name="lastName">
-            <UInput v-model="state.lastName" class="w-full" />
+            <UInput v-model="state.lastName" placeholder="Enter last name" class="w-full" />
           </UFormField>
         </div>
 

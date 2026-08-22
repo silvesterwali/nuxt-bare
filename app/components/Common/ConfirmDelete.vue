@@ -46,6 +46,16 @@ function onConfirm() {
 function onCancel() {
   open.value = false;
 }
+
+// Auto-close modal after loading completes (success or error)
+watch(
+  () => props.loading,
+  (loading, prev) => {
+    if (prev && !loading) {
+      open.value = false;
+    }
+  },
+);
 </script>
 
 <template>
@@ -70,9 +80,10 @@ function onCancel() {
     </template>
 
     <template #footer>
-      <div class="flex justify-end gap-2">
+      <div class="flex justify-between w-full">
         <UButton
-          variant="ghost"
+          color="neutral"
+          variant="outline"
           label="Cancel"
           :disabled="loading"
           @click="onCancel"
