@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import type { Media } from "~/types/db";
-import type { StandardSingleResponse } from "~/types/response";
 import MediaManagementModal from "~/components/Common/MediaManagementModal.vue";
 import UploadModal from "~/components/Admin/Media/UploadModal.vue";
 

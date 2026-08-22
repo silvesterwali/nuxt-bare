@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useResetPasswordForm } from "~/composables/useResetPasswordForm";
 import type { AuthFormField } from "@nuxt/ui";
 
 const { schema, onSubmit, loading, token } = useResetPasswordForm();

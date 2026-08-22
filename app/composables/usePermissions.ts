@@ -1,6 +1,4 @@
 import { useQuery } from "@pinia/colada";
-import type { StandardSingleResponse } from "@/types/response";
-import type { PermissionEntry } from "~~/shared/types/permission";
 
 export const usePermissionsQuery = () => {
   // useRequestFetch forwards cookies/headers on SSR so authenticated pages

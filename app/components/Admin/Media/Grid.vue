@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { Media } from "@/types/db";
 
 const props = withDefaults(
   defineProps<{

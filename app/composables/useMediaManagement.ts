@@ -1,7 +1,5 @@
 import { computed, ref, watch } from "vue";
 
-import { useMediaManagementQuery } from "~/composables/useMediaManagementQuery";
-
 export function useMediaManagement(options?: {
   initialType?: string;
   initialPage?: number;
