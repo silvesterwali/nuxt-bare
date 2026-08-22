@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { h, resolveComponent } from "vue";
 import type { TableColumn } from "@nuxt/ui";
-import type { UserWithProfile } from "@/types/db";
 
 const UBadge = resolveComponent("UBadge");
 const UDropdownMenu = resolveComponent("UDropdownMenu");
@@ -18,6 +17,8 @@ const { search, page, params } = useUrlListState({
 });
 const { data: users, isLoading: pending } = useUsersQuery(params);
 const { mutate: deleteUser, isLoading: deleting } = useUserDeleteMutation();
+const { mutate: resendVerification, isLoading: resending } =
+  useResendVerificationMutation();
 
 const limit = computed(() => users.value?.meta?.per_page ?? 10);
 const total = computed(() => users.value?.meta?.total ?? 0);
@@ -30,6 +31,7 @@ const paginationTo = computed(() =>
   Math.min(page.value * limit.value, total.value),
 );
 
+// ── Delete confirmation ─────────────────────────────────────────────────
 const confirmDeleteOpen = ref(false);
 const userToDelete = ref<number | null>(null);
 const userToDeleteEmail = ref<string>("");
@@ -43,28 +45,63 @@ function handleDeleteUser(id: number, email: string) {
 function confirmDelete() {
   if (userToDelete.value) {
     deleteUser(userToDelete.value);
-    userToDelete.value = null;
-    userToDeleteEmail.value = "";
   }
 }
 
+// ── Resend verification confirmation ────────────────────────────────────
+const confirmResendOpen = ref(false);
+const userToResend = ref<{ id: number; email: string } | null>(null);
+
+function handleResendVerification(id: number, email: string) {
+  userToResend.value = { id, email };
+  confirmResendOpen.value = true;
+}
+
+function confirmResendVerification() {
+  if (userToResend.value) {
+    resendVerification(userToResend.value.id);
+  }
+}
+
+// Close modal after resend completes (success or error)
+watch(resending, (loading, prev) => {
+  if (prev && !loading) {
+    confirmResendOpen.value = false;
+    userToResend.value = null;
+  }
+});
+
+// ── Row actions ─────────────────────────────────────────────────────────
 function getRowActions(rowId: number) {
   const user = users.value?.data?.find((u) => u.id === rowId);
-  return [
+  const actions: any[] = [
     {
       label: "Edit User",
       icon: "i-lucide-pencil",
       to: `/admin/users/${rowId}`,
     },
-    {
-      label: "Delete User",
-      icon: "i-lucide-trash-2",
-      color: "error",
-      onSelect: () => handleDeleteUser(rowId, user?.email || ""),
-    },
   ];
+
+  // Show "Resend Verification" only for unverified users
+  if (user && !user.emailVerified) {
+    actions.push({
+      label: "Resend Verification",
+      icon: "i-lucide-mail-check",
+      onSelect: () => handleResendVerification(rowId, user.email),
+    });
+  }
+
+  actions.push({
+    label: "Delete User",
+    icon: "i-lucide-trash-2",
+    color: "error",
+    onSelect: () => handleDeleteUser(rowId, user?.email || ""),
+  });
+
+  return actions;
 }
 
+// ── Table columns ───────────────────────────────────────────────────────
 const roleColors: Record<string, string> = {
   admin: "error",
   user: "primary",
@@ -108,6 +145,28 @@ const columnsData: TableColumn<UserWithProfile>[] = [
         UBadge,
         { color, variant: "subtle", class: "capitalize", size: "sm" },
         () => role,
+      );
+    },
+  },
+  {
+    accessorKey: "emailVerified",
+    header: "Verified",
+    meta: {
+      class: {
+        th: "text-center",
+        td: "text-center",
+      },
+    },
+    cell: ({ row }) => {
+      const verified = row.getValue("emailVerified") as boolean;
+      return h(
+        UBadge,
+        {
+          color: verified ? "success" : "warning",
+          variant: "subtle",
+          size: "sm",
+        },
+        () => (verified ? "Verified" : "Pending"),
       );
     },
   },
@@ -198,13 +257,91 @@ const columnsData: TableColumn<UserWithProfile>[] = [
     </UCard>
 
     <!-- Confirm Delete Modal -->
-    <CommonConfirmDelete
+    <UModal
       v-model:open="confirmDeleteOpen"
       title="Delete User"
-      message="Are you sure you want to delete this user? This action cannot be undone."
-      :item-name="userToDeleteEmail"
-      :loading="deleting"
-      @confirm="confirmDelete"
-    />
+      icon="i-lucide-trash-2"
+    >
+      <template #body>
+        <div class="flex flex-col gap-3">
+          <p>
+            Are you sure you want to delete
+            <strong>{{ userToDeleteEmail }}</strong
+            >?
+          </p>
+
+          <UAlert
+            color="error"
+            variant="subtle"
+            icon="i-lucide-alert-triangle"
+            title="This action cannot be undone"
+            description="All data associated with this user will be permanently removed."
+          />
+        </div>
+      </template>
+
+      <template #footer>
+        <div class="flex justify-between w-full">
+          <UButton
+            color="neutral"
+            variant="outline"
+            @click="confirmDeleteOpen = false"
+          >
+            Cancel
+          </UButton>
+          <UButton
+            color="error"
+            :loading="deleting"
+            @click="confirmDelete"
+          >
+            Delete User
+          </UButton>
+        </div>
+      </template>
+    </UModal>
+
+    <!-- Confirm Resend Verification Modal -->
+    <UModal
+      v-model:open="confirmResendOpen"
+      title="Resend Verification Email"
+      icon="i-lucide-mail-check"
+    >
+      <template #body>
+        <div class="flex flex-col gap-3">
+          <p>
+            Send a new email verification link to
+            <strong>{{ userToResend?.email }}</strong
+            >?
+          </p>
+
+          <UAlert
+            color="warning"
+            variant="subtle"
+            icon="i-lucide-alert-triangle"
+            title="Please verify before sending"
+            description="Only resend if the user reports not receiving the original email. Sending repeated verification emails may be flagged as spam by email providers."
+          />
+        </div>
+      </template>
+
+      <template #footer>
+        <div class="flex justify-between w-full">
+          <UButton
+            color="neutral"
+            variant="outline"
+            @click="confirmResendOpen = false"
+          >
+            Cancel
+          </UButton>
+          <UButton
+            color="primary"
+            :loading="resending"
+            @click="confirmResendVerification"
+          >
+            Send Verification Email
+          </UButton>
+        </div>
+      </template>
+    </UModal>
   </div>
 </template>

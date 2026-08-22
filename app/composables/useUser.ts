@@ -1,11 +1,4 @@
 import { useQuery, useMutation, useQueryCache } from "@pinia/colada";
-import type { UserWithProfile } from "@/types/db";
-import type {
-  StandardSingleResponse,
-  StandardListResponse,
-} from "@/types/response";
-import type { UserListParams } from "@/types/user";
-import type { PermissionEntry } from "~~/shared/types/permission";
 
 export const useUsersQuery = (params: Ref<UserListParams>) => {
   return useQuery({
@@ -142,6 +135,33 @@ export const useUserPermissionsQuery = (id: Ref<number | string | null>) => {
       ),
     enabled: computed(() => !!id.value),
     staleTime: 5 * 60 * 1000,
+  });
+};
+
+export const useResendVerificationMutation = () => {
+  const queryCache = useQueryCache();
+  const toast = useToast();
+
+  return useMutation({
+    mutation: (id: number | string) =>
+      $fetch(`/api/admin/users/${id}/resend-verification`, {
+        method: "POST",
+      }),
+    onSuccess: () => {
+      queryCache.invalidateQueries({ key: ["users"] });
+      toast.add({
+        title: "Success",
+        description: "Verification email sent",
+        color: "success",
+      });
+    },
+    onError: (err: any) => {
+      toast.add({
+        title: "Error",
+        description: getErrorMessage(err, "Failed to send verification email"),
+        color: "error",
+      });
+    },
   });
 };
 
